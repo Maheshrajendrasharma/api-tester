@@ -1,6 +1,14 @@
+function formatResponseBody(responseBody) {
+  try {
+    return JSON.stringify(JSON.parse(responseBody), null, 2)
+  } catch {
+    return responseBody
+  }
+}
+
 function ResponsePanel({ response }) {
   const hasResponse = response && !response.error
-  const responseBody = response?.error || response?.responseBody || 'Send a request to view the response.'
+  const responseBody = response?.error ?? (hasResponse ? formatResponseBody(response.responseBody) : 'Send a request to view the response.')
 
   return (
     <section className="response-panel" aria-label="Response">
