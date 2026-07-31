@@ -1,19 +1,14 @@
-const responseBody = `{
-  "data": [
-    { "id": 1, "name": "Ada Lovelace", "role": "developer" },
-    { "id": 2, "name": "Grace Hopper", "role": "engineer" }
-  ],
-  "total": 2
-}`
+function ResponsePanel({ response }) {
+  const hasResponse = response && !response.error
+  const responseBody = response?.error || response?.responseBody || 'Send a request to view the response.'
 
-function ResponsePanel() {
   return (
     <section className="response-panel" aria-label="Response">
       <div className="response-header">
         <h2 className="response-heading">Response</h2>
-        <div className="response-meta"><span>Status <strong>200 OK</strong></span><span>Time 124 ms</span><span>Size 482 B</span></div>
+        {hasResponse && <div className="response-meta"><span>Status <strong>{response.status} {response.statusText}</strong></span><span>Time {response.responseTime} ms</span><span>Size {response.responseSize} B</span></div>}
       </div>
-      <pre className="response-body">{responseBody}</pre>
+      <pre className={`response-body${response?.error ? ' response-error' : ''}`}>{responseBody}</pre>
     </section>
   )
 }
