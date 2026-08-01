@@ -6,7 +6,7 @@ const dividerHeight = 6
 const minimumRequestHeight = 220
 const minimumResponseHeight = 180
 
-function Workspace({ isSending, onSend, response, request, onRequestChange }) {
+function Workspace({ environment, isSending, onSend, response, request, onRequestChange }) {
   const workspaceRef = useRef(null)
   const cleanupDragRef = useRef(null)
   const [requestHeight, setRequestHeight] = useState(null)
@@ -49,7 +49,7 @@ function Workspace({ isSending, onSend, response, request, onRequestChange }) {
 
   return (
     <section className={`workspace${requestHeight === null ? '' : ' custom-split'}`} ref={workspaceRef} style={splitStyle} aria-label="API request workspace">
-      <RequestPanel isSending={isSending} onSend={onSend} request={request} onRequestChange={onRequestChange} />
+      <RequestPanel environment={environment} isSending={isSending} onSend={onSend} request={request} onRequestChange={onRequestChange} />
       <div className="workspace-divider" role="separator" aria-orientation="horizontal" aria-label="Resize request and response panels" onMouseDown={startDragging} onDoubleClick={resetSplit} />
       <ResponsePanel response={response} />
     </section>

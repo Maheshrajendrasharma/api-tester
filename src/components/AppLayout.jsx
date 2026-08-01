@@ -1,9 +1,10 @@
-import { cloneElement, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const defaultSidebarWidth = 280
 const minimumSidebarWidth = 220
 const maximumSidebarWidth = 450
 const sidebarWidthStorageKey = 'api-tester-sidebar-width'
+const sidebarCollapsedStorageKey = 'api-tester-sidebar-collapsed'
 const defaultEnvironmentPanelWidth = 340
 const minimumEnvironmentPanelWidth = 250
 const maximumEnvironmentPanelWidth = 500
@@ -24,6 +25,7 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
   const layoutRef = useRef(null)
   const cleanupDragRef = useRef(null)
   const [sidebarWidth, setSidebarWidth] = useState(getSavedSidebarWidth)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.localStorage.getItem(sidebarCollapsedStorageKey) === 'true')
   const [environmentPanelWidth, setEnvironmentPanelWidth] = useState(getSavedEnvironmentPanelWidth)
   const [isEnvironmentPanelCollapsed, setIsEnvironmentPanelCollapsed] = useState(() => window.localStorage.getItem(environmentPanelCollapsedStorageKey) === 'true')
   const [isResizing, setIsResizing] = useState(false)
@@ -33,6 +35,10 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
   useEffect(() => {
     window.localStorage.setItem(sidebarWidthStorageKey, String(sidebarWidth))
   }, [sidebarWidth])
+
+  useEffect(() => {
+    window.localStorage.setItem(sidebarCollapsedStorageKey, String(isSidebarCollapsed))
+  }, [isSidebarCollapsed])
 
   useEffect(() => {
     window.localStorage.setItem(environmentPanelWidthStorageKey, String(environmentPanelWidth))
@@ -89,12 +95,14 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
   return (
     <main className="app-shell">
       {header}
-      <div className="app-layout" ref={layoutRef} style={{ '--sidebar-width': `${sidebarWidth}px`, '--environment-panel-width': isEnvironmentPanelCollapsed ? '0px' : `${environmentPanelWidth}px`, '--environment-divider-width': isEnvironmentPanelCollapsed ? '0px' : '6px', '--panel-transition-duration': isResizing ? '0ms' : '225ms' }}>
+      <div className="app-layout" ref={layoutRef} style={{ '--sidebar-width': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--sidebar-divider-width': isSidebarCollapsed ? '0px' : '6px', '--sidebar-handle-left': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--environment-panel-width': isEnvironmentPanelCollapsed ? '0px' : `${environmentPanelWidth}px`, '--environment-divider-width': isEnvironmentPanelCollapsed ? '0px' : '6px', '--panel-transition-duration': isResizing ? '0ms' : '225ms' }}>
         {sidebar}
-        <div className="sidebar-divider" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" onMouseDown={(event) => startDragging(event, resizeSidebar)} onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)} />
+        {!isSidebarCollapsed && <div className="sidebar-divider" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" onMouseDown={(event) => startDragging(event, resizeSidebar)} onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)} />}
         {children}
         {!isEnvironmentPanelCollapsed && <div className="environment-panel-divider" role="separator" aria-orientation="vertical" aria-label="Resize environment panel" onMouseDown={(event) => startDragging(event, resizeEnvironmentPanel)} onDoubleClick={() => setEnvironmentPanelWidth(defaultEnvironmentPanelWidth)} />}
-        {cloneElement(environmentPanel, { onCollapse: collapseEnvironmentPanel })}
+        {environmentPanel}
+        <button className="sidebar-collapse-handle" type="button" onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)} aria-label={isSidebarCollapsed ? 'Expand collections sidebar' : 'Collapse collections sidebar'}>{isSidebarCollapsed ? '›' : '‹'}</button>
+        {!isEnvironmentPanelCollapsed && <button className="environment-collapse-handle" type="button" onClick={collapseEnvironmentPanel} aria-label="Collapse environment panel">›</button>}
         {isEnvironmentPanelCollapsed && <button className="environment-panel-expand-handle" type="button" onClick={expandEnvironmentPanel} aria-label="Expand environment panel">‹</button>}
       </div>
     </main>

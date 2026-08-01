@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { executeRequest } from '../services/requestService'
 import { getActiveEnvironment } from '../services/environmentService'
-import { resolveRequest } from '../services/variableResolver'
+import { resolveRequest } from '../utils/variableResolver'
 import { getRequestHeaders } from '../utils/helpers'
 
 export function useRequest() {

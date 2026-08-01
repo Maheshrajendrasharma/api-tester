@@ -4,10 +4,11 @@ import HeadersEditor from './HeadersEditor'
 import ParamsEditor from './ParamsEditor'
 import { getActiveParameters, removeGeneratedParameters } from '../utils/helpers'
 import { HTTP_METHODS } from '../utils/constants'
+import VariableField from './VariableField'
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body']
 
-function RequestPanel({ isSending, onSend, request, onRequestChange }) {
+function RequestPanel({ environment, isSending, onSend, request, onRequestChange }) {
   const [activeTab, setActiveTab] = useState('Body')
   const [generatedParameters, setGeneratedParameters] = useState([])
 
@@ -51,7 +52,7 @@ function RequestPanel({ isSending, onSend, request, onRequestChange }) {
         <select aria-label="HTTP method" className="method-select" value={request.method} onChange={(event) => updateRequest({ method: event.target.value })} title={`${request.method} Request`}>
           {HTTP_METHODS.map((item) => <option key={item}>{item}</option>)}
         </select>
-        <input aria-label="Request URL" className="url-input" value={request.url} onChange={(event) => updateRequest({ url: event.target.value })} />
+        <VariableField environment={environment} aria-label="Request URL" className="url-input" value={request.url} onChange={(event) => updateRequest({ url: event.target.value })} />
         <button className="send-button" type="button" onClick={sendRequest} disabled={isSending}>{isSending ? 'Sending…' : 'Send'}</button>
       </div>
       <div className="tabs" role="tablist" aria-label="Request options">
@@ -60,16 +61,16 @@ function RequestPanel({ isSending, onSend, request, onRequestChange }) {
         ))}
       </div>
       {activeTab === 'Params' ? (
-        <ParamsEditor parameters={request.params} onChange={handleParametersChange} />
+        <ParamsEditor environment={environment} parameters={request.params} onChange={handleParametersChange} />
       ) : activeTab === 'Body' ? (
         <div className="body-editor-area">
           <label className="body-label" htmlFor="request-body">raw · JSON</label>
-          <textarea className="json-editor" id="request-body" value={request.body} onChange={(event) => updateRequest({ body: event.target.value })} spellCheck="false" />
+          <VariableField environment={environment} className="json-editor" id="request-body" multiline value={request.body} onChange={(event) => updateRequest({ body: event.target.value })} spellCheck="false" />
         </div>
       ) : activeTab === 'Headers' ? (
-        <HeadersEditor headers={request.headers} onChange={(headers) => updateRequest({ headers })} />
+        <HeadersEditor environment={environment} headers={request.headers} onChange={(headers) => updateRequest({ headers })} />
       ) : (
-        <AuthorizationEditor authorization={request.authorization} onChange={(authorization) => updateRequest({ authorization })} />
+        <AuthorizationEditor environment={environment} authorization={request.authorization} onChange={(authorization) => updateRequest({ authorization })} />
       )}
     </section>
   )

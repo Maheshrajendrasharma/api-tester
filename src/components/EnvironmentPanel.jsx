@@ -1,6 +1,6 @@
 import { createVariableDraft } from '../services/environmentService'
 
-function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange, onCollapse }) {
+function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange }) {
   const activeEnvironment = environments.find((environment) => environment.active) ?? environments[0]
 
   function updateVariable(variableId, field, value) {
@@ -35,7 +35,6 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
             <button className={`environment-tab${environment.active ? ' active' : ''}`} key={environment.id} type="button" role="tab" aria-selected={environment.active} onClick={() => onEnvironmentChange(environment.id)}>{environment.name}</button>
           ))}
         </div>
-        <button className="environment-panel-collapse-button" type="button" onClick={onCollapse} aria-label="Collapse environment panel" data-tooltip="Collapse environment panel">›</button>
       </div>
       <div className="environment-panel-body">
         <h2>Variables</h2>
