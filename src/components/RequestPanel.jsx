@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import AuthorizationEditor from './AuthorizationEditor'
+import HeadersEditor from './HeadersEditor'
 import ParamsEditor from './ParamsEditor'
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body']
@@ -7,12 +9,19 @@ const defaultBody = `{
   "email": "ada@example.com",
   "role": "developer"
 }`
-const defaultHeaders = `{
-  "Content-Type": "application/json"
-}`
+const defaultHeaders = [{ id: 1, enabled: true, key: 'Content-Type', value: 'application/json' }]
 
 function getActiveParameters(parameters) {
   return parameters.filter((parameter) => parameter.enabled && parameter.key.trim())
+}
+
+function getRequestHeaders(headers) {
+  return headers.reduce((result, header) => {
+    if (header.enabled && header.key.trim()) {
+      result[header.key.trim()] = header.value
+    }
+    return result
+  }, {})
 }
 
 function removeGeneratedParameters(searchParams, generatedParameters) {
@@ -36,7 +45,15 @@ function RequestPanel({ isSending, onSend }) {
   const [body, setBody] = useState(defaultBody)
   const [parameters, setParameters] = useState([{ id: 1, enabled: true, key: '', value: '' }])
   const [generatedParameters, setGeneratedParameters] = useState([])
-  const [inputError, setInputError] = useState('')
+  const [authorization, setAuthorization] = useState({
+    type: 'None',
+    bearerToken: '',
+    username: '',
+    password: '',
+    apiKey: '',
+    apiValue: '',
+    apiKeyLocation: 'Header',
+  })
 
   function handleParametersChange(nextParameters) {
     const nextGeneratedParameters = getActiveParameters(nextParameters)
@@ -55,23 +72,7 @@ function RequestPanel({ isSending, onSend }) {
   }
 
   function sendRequest() {
-    let parsedHeaders
-    try {
-      parsedHeaders = JSON.parse(headers)
-    } catch {
-      setInputError('Headers must be valid JSON.')
-      setActiveTab('Headers')
-      return
-    }
-
-    if (!parsedHeaders || Array.isArray(parsedHeaders) || typeof parsedHeaders !== 'object') {
-      setInputError('Headers must be a JSON object.')
-      setActiveTab('Headers')
-      return
-    }
-
-    setInputError('')
-    onSend({ method, url, headers: parsedHeaders, body })
+    onSend({ method, url, headers: getRequestHeaders(headers), body })
   }
 
   return (
@@ -97,11 +98,9 @@ function RequestPanel({ isSending, onSend }) {
           <textarea className="json-editor" id="request-body" value={body} onChange={(event) => setBody(event.target.value)} spellCheck="false" />
         </div>
       ) : activeTab === 'Headers' ? (
-        <div className="body-editor-area">
-          <label className="body-label" htmlFor="request-headers">JSON headers</label>
-          <textarea className="json-editor" id="request-headers" value={headers} onChange={(event) => setHeaders(event.target.value)} spellCheck="false" />
-          {inputError && <p className="input-error">{inputError}</p>}
-        </div>
+        <HeadersEditor headers={headers} onChange={setHeaders} />
+      ) : activeTab === 'Authorization' ? (
+        <AuthorizationEditor authorization={authorization} onChange={setAuthorization} />
       ) : <div className="tab-placeholder">{activeTab} options will be available in a future phase.</div>}
     </section>
   )

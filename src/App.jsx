@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import Sidebar from './components/Sidebar'
-import RequestPanel from './components/RequestPanel'
-import ResponsePanel from './components/ResponsePanel'
+import Workspace from './components/Workspace'
 
 function App() {
   const [response, setResponse] = useState(null)
@@ -29,10 +28,7 @@ const result = await window.apiTester.sendRequest(request);
   return (
     <main className="app-shell">
       <Sidebar />
-      <section className="workspace" aria-label="API request workspace">
-        <RequestPanel isSending={isSending} onSend={handleSend} />
-        <ResponsePanel response={response} />
-      </section>
+      <Workspace isSending={isSending} onSend={handleSend} response={response} />
     </main>
   )
 }
