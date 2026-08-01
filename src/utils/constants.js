@@ -19,3 +19,19 @@ export const DEFAULT_AUTHORIZATION = {
 }
 export const SIDEBAR_WIDTH = { default: 280, minimum: 220, maximum: 450 }
 export const PANE_HEIGHT = { requestMinimum: 220, responseMinimum: 180, requestMaximumRatio: 0.8 }
+
+export const DEFAULT_ENVIRONMENTS = [
+  {
+    id: 'env-default',
+    name: 'DEV',
+    active: true,
+    variables: [
+      {
+        id: 'var-base-url',
+        key: 'baseUrl',
+        value: 'https://jsonplaceholder.typicode.com',
+        enabled: true,
+      },
+    ],
+  },
+]
