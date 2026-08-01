@@ -34,4 +34,24 @@ export const DEFAULT_ENVIRONMENTS = [
       },
     ],
   },
+  {
+    id: 'env-sit',
+    name: 'SIT',
+    active: false,
+    variables: [],
+  },
+  {
+    id: 'env-uat',
+    name: 'UAT',
+    active: false,
+    variables: [],
+  },
+  {
+    id: 'env-prod',
+    name: 'PROD',
+    active: false,
+    variables: [],
+  },
 ]
+
+export const DEFAULT_ENVIRONMENT_IDS = DEFAULT_ENVIRONMENTS.map((environment) => environment.id)

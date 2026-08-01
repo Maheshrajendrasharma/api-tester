@@ -6,7 +6,6 @@ import SidebarRow from './SidebarRow'
 function Sidebar({ collections, selectedRequestId, onCreateCollection, onCreateRequest, onSelectRequest, onToggleCollection, onRenameCollection, onDuplicateCollection, onDeleteCollection, onRenameRequest, onDuplicateRequest, onDeleteRequest }) {
   return (
     <aside className="sidebar">
-      <div className="brand"><span className="brand-mark">A</span>API Tester</div>
       <div className="sidebar-section-header"><span>Collections</span></div>
       <button className="new-collection-button" type="button" onClick={onCreateCollection}>+ New Collection</button>
       <nav className="collection-list" aria-label="Collections">

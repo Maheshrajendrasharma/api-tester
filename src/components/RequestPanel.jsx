@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import AuthorizationEditor from './AuthorizationEditor'
 import HeadersEditor from './HeadersEditor'
 import ParamsEditor from './ParamsEditor'
-import { getActiveParameters, getRequestHeaders, removeGeneratedParameters } from '../utils/helpers'
+import { getActiveParameters, removeGeneratedParameters } from '../utils/helpers'
 import { HTTP_METHODS } from '../utils/constants'
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body']
@@ -41,7 +41,7 @@ function RequestPanel({ isSending, onSend, request, onRequestChange }) {
   }
 
   function sendRequest() {
-    onSend({ method: request.method, url: request.url, headers: getRequestHeaders(request.headers), body: request.body })
+    onSend(request)
   }
 
   return (

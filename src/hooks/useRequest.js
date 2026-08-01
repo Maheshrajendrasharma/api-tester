@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { executeRequest } from '../services/requestService'
+import { getActiveEnvironment } from '../services/environmentService'
+import { resolveRequest } from '../services/variableResolver'
+import { getRequestHeaders } from '../utils/helpers'
 
 export function useRequest() {
   const [response, setResponse] = useState(null)
@@ -8,7 +11,11 @@ export function useRequest() {
   async function sendRequest(request) {
     setIsSending(true)
     try {
-      const result = await executeRequest(request)
+      const resolvedRequest = resolveRequest(request, getActiveEnvironment())
+      const result = await executeRequest({
+        ...resolvedRequest,
+        headers: getRequestHeaders(resolvedRequest.headers ?? []),
+      })
       setResponse({ ...result, error: null })
     } catch (error) {
       setResponse({ error: error.message || 'The request could not be completed.' })

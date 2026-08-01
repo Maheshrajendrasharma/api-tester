@@ -1,19 +1,32 @@
-import { useEffect, useRef, useState } from 'react'
+import { cloneElement, useEffect, useRef, useState } from 'react'
 
 const defaultSidebarWidth = 280
 const minimumSidebarWidth = 220
 const maximumSidebarWidth = 450
 const sidebarWidthStorageKey = 'api-tester-sidebar-width'
+const defaultEnvironmentPanelWidth = 340
+const minimumEnvironmentPanelWidth = 250
+const maximumEnvironmentPanelWidth = 500
+const environmentPanelWidthStorageKey = 'api-tester-environment-panel-width'
+const environmentPanelCollapsedStorageKey = 'api-tester-environment-panel-collapsed'
 
 function getSavedSidebarWidth() {
   const savedWidth = Number(window.localStorage.getItem(sidebarWidthStorageKey))
   return savedWidth >= minimumSidebarWidth && savedWidth <= maximumSidebarWidth ? savedWidth : defaultSidebarWidth
 }
 
-function AppLayout({ sidebar, children }) {
+function getSavedEnvironmentPanelWidth() {
+  const savedWidth = Number(window.localStorage.getItem(environmentPanelWidthStorageKey))
+  return savedWidth >= minimumEnvironmentPanelWidth && savedWidth <= maximumEnvironmentPanelWidth ? savedWidth : defaultEnvironmentPanelWidth
+}
+
+function AppLayout({ header, sidebar, environmentPanel, children }) {
   const layoutRef = useRef(null)
   const cleanupDragRef = useRef(null)
   const [sidebarWidth, setSidebarWidth] = useState(getSavedSidebarWidth)
+  const [environmentPanelWidth, setEnvironmentPanelWidth] = useState(getSavedEnvironmentPanelWidth)
+  const [isEnvironmentPanelCollapsed, setIsEnvironmentPanelCollapsed] = useState(() => window.localStorage.getItem(environmentPanelCollapsedStorageKey) === 'true')
+  const [isResizing, setIsResizing] = useState(false)
 
   useEffect(() => () => cleanupDragRef.current?.(), [])
 
@@ -21,11 +34,32 @@ function AppLayout({ sidebar, children }) {
     window.localStorage.setItem(sidebarWidthStorageKey, String(sidebarWidth))
   }, [sidebarWidth])
 
-  function stopDragging() {
-    window.removeEventListener('mousemove', resizeSidebar)
-    window.removeEventListener('mouseup', stopDragging)
+  useEffect(() => {
+    window.localStorage.setItem(environmentPanelWidthStorageKey, String(environmentPanelWidth))
+  }, [environmentPanelWidth])
+
+  useEffect(() => {
+    window.localStorage.setItem(environmentPanelCollapsedStorageKey, String(isEnvironmentPanelCollapsed))
+  }, [isEnvironmentPanelCollapsed])
+
+  function startDragging(event, onDrag) {
+    event.preventDefault()
+    cleanupDragRef.current?.()
     document.body.classList.remove('is-resizing')
-    cleanupDragRef.current = null
+    document.body.classList.add('is-resizing')
+    setIsResizing(true)
+
+    function stopDragging() {
+      window.removeEventListener('mousemove', onDrag)
+      window.removeEventListener('mouseup', stopDragging)
+      document.body.classList.remove('is-resizing')
+      cleanupDragRef.current = null
+      setIsResizing(false)
+    }
+
+    window.addEventListener('mousemove', onDrag)
+    window.addEventListener('mouseup', stopDragging)
+    cleanupDragRef.current = stopDragging
   }
 
   function resizeSidebar(event) {
@@ -36,19 +70,33 @@ function AppLayout({ sidebar, children }) {
     setSidebarWidth(Math.min(Math.max(nextWidth, minimumSidebarWidth), maximumSidebarWidth))
   }
 
-  function startDragging(event) {
-    event.preventDefault()
-    document.body.classList.add('is-resizing')
-    window.addEventListener('mousemove', resizeSidebar)
-    window.addEventListener('mouseup', stopDragging)
-    cleanupDragRef.current = stopDragging
+  function resizeEnvironmentPanel(event) {
+    const layout = layoutRef.current
+    if (!layout) return
+    const layoutBounds = layout.getBoundingClientRect()
+    const nextWidth = layoutBounds.right - event.clientX
+    setEnvironmentPanelWidth(Math.min(Math.max(nextWidth, minimumEnvironmentPanelWidth), maximumEnvironmentPanelWidth))
+  }
+
+  function collapseEnvironmentPanel() {
+    setIsEnvironmentPanelCollapsed(true)
+  }
+
+  function expandEnvironmentPanel() {
+    setIsEnvironmentPanelCollapsed(false)
   }
 
   return (
-    <main className="app-shell" ref={layoutRef} style={{ '--sidebar-width': `${sidebarWidth}px` }}>
-      {sidebar}
-      <div className="sidebar-divider" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" onMouseDown={startDragging} onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)} />
-      {children}
+    <main className="app-shell">
+      {header}
+      <div className="app-layout" ref={layoutRef} style={{ '--sidebar-width': `${sidebarWidth}px`, '--environment-panel-width': isEnvironmentPanelCollapsed ? '0px' : `${environmentPanelWidth}px`, '--environment-divider-width': isEnvironmentPanelCollapsed ? '0px' : '6px', '--panel-transition-duration': isResizing ? '0ms' : '225ms' }}>
+        {sidebar}
+        <div className="sidebar-divider" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" onMouseDown={(event) => startDragging(event, resizeSidebar)} onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)} />
+        {children}
+        {!isEnvironmentPanelCollapsed && <div className="environment-panel-divider" role="separator" aria-orientation="vertical" aria-label="Resize environment panel" onMouseDown={(event) => startDragging(event, resizeEnvironmentPanel)} onDoubleClick={() => setEnvironmentPanelWidth(defaultEnvironmentPanelWidth)} />}
+        {cloneElement(environmentPanel, { onCollapse: collapseEnvironmentPanel })}
+        {isEnvironmentPanelCollapsed && <button className="environment-panel-expand-handle" type="button" onClick={expandEnvironmentPanel} aria-label="Expand environment panel">‹</button>}
+      </div>
     </main>
   )
 }
