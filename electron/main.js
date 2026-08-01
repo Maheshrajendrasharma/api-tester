@@ -1,11 +1,14 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import * as requestEngine from "../core/requestEngine.js";
+import * as requestService from "./services/requestService.js";
+import * as storageService from "./services/storageService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-ipcMain.handle("api-tester:send-request", (_event, request) => requestEngine.execute(request));
+ipcMain.handle("api-tester:send-request", (_event, request) => requestService.execute(request));
+ipcMain.handle("api-tester:load-collections", () => storageService.load());
+ipcMain.handle("api-tester:save-collections", (_event, collections) => storageService.save(collections));
 
 function createWindow() {
   const mainWindow = new BrowserWindow({

@@ -27,7 +27,7 @@ function HeadersEditor({ headers, onChange }) {
               <td><input aria-label={`Enable ${header.key || 'header'}`} checked={header.enabled} onChange={(event) => updateHeader(header.id, 'enabled', event.target.checked)} type="checkbox" /></td>
               <td><input aria-label="Header key" value={header.key} onChange={(event) => updateHeader(header.id, 'key', event.target.value)} placeholder="Key" /></td>
               <td><input aria-label="Header value" value={header.value} onChange={(event) => updateHeader(header.id, 'value', event.target.value)} placeholder="Value" /></td>
-              <td><button className="delete-header-button" type="button" onClick={() => deleteHeader(header.id)} aria-label="Delete header">×</button></td>
+              <td><button className="delete-header-button" type="button" onClick={() => deleteHeader(header.id)} aria-label="Delete header" data-tooltip="Delete Header">×</button></td>
             </tr>
           ))}
         </tbody>

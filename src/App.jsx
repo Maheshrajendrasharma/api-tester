@@ -1,35 +1,21 @@
-import { useState } from 'react'
-import './App.css'
+import './styles/variables.css'
+import './styles/theme.css'
+import './styles/scrollbars.css'
+import './styles/layout.css'
+import AppLayout from './components/AppLayout'
 import Sidebar from './components/Sidebar'
 import Workspace from './components/Workspace'
+import { useCollections } from './hooks/useCollections'
+import { useRequest } from './hooks/useRequest'
 
 function App() {
-  const [response, setResponse] = useState(null)
-  const [isSending, setIsSending] = useState(false)
-
-  async function handleSend(request) {
-    setIsSending(true)
-    try {
-      if (!window.apiTester?.sendRequest) {
-    throw new Error(
-        "Electron API bridge not available. Please run inside the Electron desktop application."
-    );
-}
-
-const result = await window.apiTester.sendRequest(request);
-      setResponse({ ...result, error: null })
-    } catch (error) {
-      setResponse({ error: error.message || 'The request could not be completed.' })
-    } finally {
-      setIsSending(false)
-    }
-  }
+  const collectionState = useCollections()
+  const { response, isSending, sendRequest } = useRequest()
 
   return (
-    <main className="app-shell">
-      <Sidebar />
-      <Workspace isSending={isSending} onSend={handleSend} response={response} />
-    </main>
+    <AppLayout sidebar={<Sidebar collections={collectionState.collections} selectedRequestId={collectionState.selectedRequestId} onCreateCollection={collectionState.createNewCollection} onCreateRequest={collectionState.createNewRequest} onSelectRequest={collectionState.selectRequest} onToggleCollection={collectionState.toggleCollection} onRenameCollection={collectionState.renameCollection} onDuplicateCollection={collectionState.duplicateCollection} onDeleteCollection={collectionState.deleteCollection} onRenameRequest={collectionState.renameRequest} onDuplicateRequest={collectionState.duplicateRequest} onDeleteRequest={collectionState.deleteRequest} />}>
+      <Workspace isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} />
+    </AppLayout>
   )
 }
 

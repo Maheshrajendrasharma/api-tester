@@ -1,0 +1,22 @@
+.sidebar,
+.request-panel,
+.response-body {
+  scrollbar-color: #3d4b5a #151b22;
+  scrollbar-width: thin;
+}
+
+.sidebar::-webkit-scrollbar,
+.request-panel::-webkit-scrollbar,
+.response-body::-webkit-scrollbar { width: 10px; height: 10px; }
+
+.sidebar::-webkit-scrollbar-track,
+.request-panel::-webkit-scrollbar-track,
+.response-body::-webkit-scrollbar-track { background: #151b22; border-radius: 10px; }
+
+.sidebar::-webkit-scrollbar-thumb,
+.request-panel::-webkit-scrollbar-thumb,
+.response-body::-webkit-scrollbar-thumb { background: #3d4b5a; border: 2px solid #151b22; border-radius: 10px; }
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.request-panel::-webkit-scrollbar-thumb:hover,
+.response-body::-webkit-scrollbar-thumb:hover { background: #69e2b0; }

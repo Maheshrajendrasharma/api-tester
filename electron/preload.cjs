@@ -5,4 +5,7 @@ contextBridge.exposeInMainWorld("apiTester", {
 
   sendRequest: (request) =>
     ipcRenderer.invoke("api-tester:send-request", request),
+  loadCollections: () => ipcRenderer.invoke("api-tester:load-collections"),
+  saveCollections: (collections) =>
+    ipcRenderer.invoke("api-tester:save-collections", collections),
 });

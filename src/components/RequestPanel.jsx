@@ -1,88 +1,57 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AuthorizationEditor from './AuthorizationEditor'
 import HeadersEditor from './HeadersEditor'
 import ParamsEditor from './ParamsEditor'
+import { getActiveParameters, getRequestHeaders, removeGeneratedParameters } from '../utils/helpers'
+import { HTTP_METHODS } from '../utils/constants'
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body']
-const defaultBody = `{
-  "name": "Ada Lovelace",
-  "email": "ada@example.com",
-  "role": "developer"
-}`
-const defaultHeaders = [{ id: 1, enabled: true, key: 'Content-Type', value: 'application/json' }]
 
-function getActiveParameters(parameters) {
-  return parameters.filter((parameter) => parameter.enabled && parameter.key.trim())
-}
-
-function getRequestHeaders(headers) {
-  return headers.reduce((result, header) => {
-    if (header.enabled && header.key.trim()) {
-      result[header.key.trim()] = header.value
-    }
-    return result
-  }, {})
-}
-
-function removeGeneratedParameters(searchParams, generatedParameters) {
-  for (const parameter of generatedParameters) {
-    const values = searchParams.getAll(parameter.key)
-    const generatedValue = parameter.value
-    const generatedValueIndex = values.indexOf(generatedValue)
-
-    if (generatedValueIndex !== -1) {
-      searchParams.delete(parameter.key)
-      values.filter((_, index) => index !== generatedValueIndex).forEach((value) => searchParams.append(parameter.key, value))
-    }
-  }
-}
-
-function RequestPanel({ isSending, onSend }) {
+function RequestPanel({ isSending, onSend, request, onRequestChange }) {
   const [activeTab, setActiveTab] = useState('Body')
-  const [method, setMethod] = useState('GET')
-  const [url, setUrl] = useState('https://jsonplaceholder.typicode.com/posts/1')
-  const [headers, setHeaders] = useState(defaultHeaders)
-  const [body, setBody] = useState(defaultBody)
-  const [parameters, setParameters] = useState([{ id: 1, enabled: true, key: '', value: '' }])
   const [generatedParameters, setGeneratedParameters] = useState([])
-  const [authorization, setAuthorization] = useState({
-    type: 'None',
-    bearerToken: '',
-    username: '',
-    password: '',
-    apiKey: '',
-    apiValue: '',
-    apiKeyLocation: 'Header',
-  })
+
+  useEffect(() => {
+    setGeneratedParameters([])
+  }, [request?.id])
+
+  if (!request) {
+    return <section className="request-panel"><div className="empty-request-state">Create a collection and request to start testing an API.</div></section>
+  }
+
+  function updateRequest(changes) {
+    onRequestChange({ ...request, ...changes })
+  }
 
   function handleParametersChange(nextParameters) {
     const nextGeneratedParameters = getActiveParameters(nextParameters)
+    let nextUrl = request.url
 
     try {
-      const parsedUrl = new URL(url)
+      const parsedUrl = new URL(request.url)
       removeGeneratedParameters(parsedUrl.searchParams, generatedParameters)
       nextGeneratedParameters.forEach((parameter) => parsedUrl.searchParams.append(parameter.key, parameter.value))
-      setUrl(parsedUrl.toString())
+      nextUrl = parsedUrl.toString()
       setGeneratedParameters(nextGeneratedParameters)
     } catch {
       // Keep incomplete or invalid URLs editable; request validation happens in the request engine.
     }
 
-    setParameters(nextParameters)
+    updateRequest({ params: nextParameters, url: nextUrl })
   }
 
   function sendRequest() {
-    onSend({ method, url, headers: getRequestHeaders(headers), body })
+    onSend({ method: request.method, url: request.url, headers: getRequestHeaders(request.headers), body: request.body })
   }
 
   return (
     <section className="request-panel">
-      <div className="request-title-row"><span className="request-dot" /><h1 className="request-title">Get users</h1></div>
+      <div className="request-title-row"><span className="request-dot" /><h1 className="request-title">{request.name}</h1></div>
       <div className="request-bar">
-        <select aria-label="HTTP method" className="method-select" value={method} onChange={(event) => setMethod(event.target.value)}>
-          {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map((item) => <option key={item}>{item}</option>)}
+        <select aria-label="HTTP method" className="method-select" value={request.method} onChange={(event) => updateRequest({ method: event.target.value })} title={`${request.method} Request`}>
+          {HTTP_METHODS.map((item) => <option key={item}>{item}</option>)}
         </select>
-        <input aria-label="Request URL" className="url-input" value={url} onChange={(event) => setUrl(event.target.value)} />
+        <input aria-label="Request URL" className="url-input" value={request.url} onChange={(event) => updateRequest({ url: event.target.value })} />
         <button className="send-button" type="button" onClick={sendRequest} disabled={isSending}>{isSending ? 'Sending…' : 'Send'}</button>
       </div>
       <div className="tabs" role="tablist" aria-label="Request options">
@@ -91,17 +60,17 @@ function RequestPanel({ isSending, onSend }) {
         ))}
       </div>
       {activeTab === 'Params' ? (
-        <ParamsEditor parameters={parameters} onChange={handleParametersChange} />
+        <ParamsEditor parameters={request.params} onChange={handleParametersChange} />
       ) : activeTab === 'Body' ? (
         <div className="body-editor-area">
           <label className="body-label" htmlFor="request-body">raw · JSON</label>
-          <textarea className="json-editor" id="request-body" value={body} onChange={(event) => setBody(event.target.value)} spellCheck="false" />
+          <textarea className="json-editor" id="request-body" value={request.body} onChange={(event) => updateRequest({ body: event.target.value })} spellCheck="false" />
         </div>
       ) : activeTab === 'Headers' ? (
-        <HeadersEditor headers={headers} onChange={setHeaders} />
-      ) : activeTab === 'Authorization' ? (
-        <AuthorizationEditor authorization={authorization} onChange={setAuthorization} />
-      ) : <div className="tab-placeholder">{activeTab} options will be available in a future phase.</div>}
+        <HeadersEditor headers={request.headers} onChange={(headers) => updateRequest({ headers })} />
+      ) : (
+        <AuthorizationEditor authorization={request.authorization} onChange={(authorization) => updateRequest({ authorization })} />
+      )}
     </section>
   )
 }

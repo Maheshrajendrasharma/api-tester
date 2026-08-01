@@ -1,10 +1,4 @@
-function formatResponseBody(responseBody) {
-  try {
-    return JSON.stringify(JSON.parse(responseBody), null, 2)
-  } catch {
-    return responseBody
-  }
-}
+import { formatResponseBody } from '../utils/formatters'
 
 function ResponsePanel({ response }) {
   const hasResponse = response && !response.error

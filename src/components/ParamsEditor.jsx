@@ -27,7 +27,7 @@ function ParamsEditor({ parameters, onChange }) {
               <td><input aria-label={`Enable ${parameter.key || 'parameter'}`} checked={parameter.enabled} onChange={(event) => updateParameter(parameter.id, 'enabled', event.target.checked)} type="checkbox" /></td>
               <td><input aria-label="Parameter key" value={parameter.key} onChange={(event) => updateParameter(parameter.id, 'key', event.target.value)} placeholder="Key" /></td>
               <td><input aria-label="Parameter value" value={parameter.value} onChange={(event) => updateParameter(parameter.id, 'value', event.target.value)} placeholder="Value" /></td>
-              <td><button className="delete-parameter-button" type="button" onClick={() => deleteParameter(parameter.id)} aria-label="Delete parameter">×</button></td>
+              <td><button className="delete-parameter-button" type="button" onClick={() => deleteParameter(parameter.id)} aria-label="Delete parameter" data-tooltip="Delete Parameter">×</button></td>
             </tr>
           ))}
         </tbody>

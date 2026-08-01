@@ -1,0 +1,10 @@
+:root {
+  --app-background: #101418;
+  --panel-background: #12171d;
+  --sidebar-background: #171c22;
+  --control-background: #151b21;
+  --border-color: #2c3640;
+  --accent-color: #6ee7b7;
+  --scrollbar-track: #151b22;
+  --scrollbar-thumb: #3d4b5a;
+}

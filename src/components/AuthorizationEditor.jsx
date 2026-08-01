@@ -1,3 +1,5 @@
+import { API_KEY_LOCATIONS, AUTH_TYPES } from '../utils/constants'
+
 function AuthorizationEditor({ authorization, onChange }) {
   function updateAuthorization(field, value) {
     onChange({ ...authorization, [field]: value })
@@ -7,10 +9,7 @@ function AuthorizationEditor({ authorization, onChange }) {
     <div className="authorization-editor">
       <label className="authorization-label" htmlFor="authorization-type">Authorization Type</label>
       <select className="authorization-select" id="authorization-type" value={authorization.type} onChange={(event) => updateAuthorization('type', event.target.value)}>
-        <option>None</option>
-        <option>Bearer Token</option>
-        <option>Basic Auth</option>
-        <option>API Key</option>
+        {AUTH_TYPES.map((type) => <option key={type}>{type}</option>)}
       </select>
 
       {authorization.type === 'None' && <p className="authorization-note">No authorization will be added to this request.</p>}
@@ -40,8 +39,7 @@ function AuthorizationEditor({ authorization, onChange }) {
           <input className="authorization-input" id="api-key-value" value={authorization.apiValue} onChange={(event) => updateAuthorization('apiValue', event.target.value)} placeholder="Enter value" />
           <label className="authorization-label" htmlFor="api-key-location">Add To</label>
           <select className="authorization-select" id="api-key-location" value={authorization.apiKeyLocation} onChange={(event) => updateAuthorization('apiKeyLocation', event.target.value)}>
-            <option>Header</option>
-            <option>Query Parameter</option>
+            {API_KEY_LOCATIONS.map((location) => <option key={location}>{location}</option>)}
           </select>
         </div>
       )}
