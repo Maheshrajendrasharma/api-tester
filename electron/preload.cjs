@@ -8,4 +8,14 @@ contextBridge.exposeInMainWorld("apiTester", {
   loadCollections: () => ipcRenderer.invoke("api-tester:load-collections"),
   saveCollections: (collections) =>
     ipcRenderer.invoke("api-tester:save-collections", collections),
+  showOpenDialog: (options) => ipcRenderer.invoke("api-tester:show-open-dialog", options),
+  showSaveDialog: (options) => ipcRenderer.invoke("api-tester:show-save-dialog", options),
+  readFile: (filePath) => ipcRenderer.invoke("api-tester:read-file", filePath),
+  writeFile: (filePath, content) => ipcRenderer.invoke("api-tester:write-file", filePath, content),
+  onMenuAction: (callback) => {
+    const channel = "api-tester:menu-action"
+    const listener = (_event, action) => callback(action)
+    ipcRenderer.on(channel, listener)
+    return () => ipcRenderer.removeListener(channel, listener)
+  },
 });

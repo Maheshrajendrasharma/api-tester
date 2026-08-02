@@ -4,7 +4,7 @@ import { getActiveEnvironment } from '../services/environmentService'
 import { resolveRequest } from '../utils/variableResolver'
 import { getRequestHeaders } from '../utils/helpers'
 
-export function useRequest() {
+export function useRequest(onRequestSuccess) {
   const [response, setResponse] = useState(null)
   const [isSending, setIsSending] = useState(false)
 
@@ -16,7 +16,9 @@ export function useRequest() {
         ...resolvedRequest,
         headers: getRequestHeaders(resolvedRequest.headers ?? []),
       })
-      setResponse({ ...result, error: null })
+      const nextResponse = { ...result, error: null }
+      setResponse(nextResponse)
+      onRequestSuccess?.({ request: resolvedRequest, response: result, resolvedUrl: resolvedRequest.url })
     } catch (error) {
       setResponse({ error: error.message || 'The request could not be completed.' })
     } finally {

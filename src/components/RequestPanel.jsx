@@ -16,9 +16,15 @@ function RequestPanel({ environment, isSending, onSend, request, onRequestChange
     setGeneratedParameters([])
   }, [request?.id])
 
-  if (!request) {
-    return <section className="request-panel"><div className="empty-request-state">Create a collection and request to start testing an API.</div></section>
-  }
+  console.log("Request =", request)
+
+if (!request) {
+  return (
+    <section className="request-panel">
+      <h1 style={{ color: "red" }}>REQUEST IS NULL</h1>
+    </section>
+  )
+}
 
   function updateRequest(changes) {
     onRequestChange({ ...request, ...changes })

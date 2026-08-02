@@ -1,6 +1,6 @@
 import { createVariableDraft } from '../services/environmentService'
 
-function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange }) {
+function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange, onImportEnvironment, onExportEnvironment }) {
   const activeEnvironment = environments.find((environment) => environment.active) ?? environments[0]
 
   function updateVariable(variableId, field, value) {
@@ -39,7 +39,7 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
       <div className="environment-panel-body">
         <h2>Variables</h2>
         <table className="environment-variables-table">
-          <thead><tr><th>Enabled</th><th>Key</th><th>Value</th></tr></thead>
+          <thead><tr><th></th><th>Key</th><th>Value</th></tr></thead>
           <tbody>
             {activeEnvironment?.variables.map((variable) => (
               <tr key={variable.id}>
@@ -50,7 +50,11 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
             ))}
           </tbody>
         </table>
-        <button className="add-variable-button" type="button" onClick={addVariable}>+ Add Variable</button>
+        <div className="environment-actions">
+          <button className="add-variable-button" type="button" onClick={addVariable}>+ Add Variable</button>
+          <button className="import-environment-button" type="button" onClick={onImportEnvironment}>Import Environment</button>
+          <button className="export-environment-button" type="button" onClick={onExportEnvironment}>Export Environment</button>
+        </div>
       </div>
     </aside>
   )

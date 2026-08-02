@@ -43,7 +43,7 @@ function ActionMenu({ label, actions }) {
       {isOpen && (
         <div className="action-menu-popover" role="menu" aria-label={label}>
           {actions.map((action) => (
-            <button className={action.destructive ? 'destructive' : ''} key={action.label} type="button" role="menuitem" onClick={() => { setIsOpen(false); action.onClick() }}>{action.label}</button>
+            <button className={action.destructive ? 'destructive' : ''} key={action.label} type="button" role="menuitem" disabled={action.disabled} title={action.disabled ? action.tooltip || 'Coming Soon' : undefined} onClick={() => { if (action.disabled) return; setIsOpen(false); action.onClick() }}>{action.label}</button>
           ))}
         </div>
       )}

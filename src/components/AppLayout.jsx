@@ -98,7 +98,23 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
       <div className="app-layout" ref={layoutRef} style={{ '--sidebar-width': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--sidebar-divider-width': isSidebarCollapsed ? '0px' : '6px', '--sidebar-handle-left': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--environment-panel-width': isEnvironmentPanelCollapsed ? '0px' : `${environmentPanelWidth}px`, '--environment-divider-width': isEnvironmentPanelCollapsed ? '0px' : '6px', '--panel-transition-duration': isResizing ? '0ms' : '225ms' }}>
         {sidebar}
         {!isSidebarCollapsed && <div className="sidebar-divider" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" onMouseDown={(event) => startDragging(event, resizeSidebar)} onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)} />}
-        {children}
+        
+
+        <div
+  className="app-layout-main"
+  style={{
+    minWidth: 0,
+    width: "100%",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+  }}
+>
+  {children}
+</div>
+
+
+
         {!isEnvironmentPanelCollapsed && <div className="environment-panel-divider" role="separator" aria-orientation="vertical" aria-label="Resize environment panel" onMouseDown={(event) => startDragging(event, resizeEnvironmentPanel)} onDoubleClick={() => setEnvironmentPanelWidth(defaultEnvironmentPanelWidth)} />}
         {environmentPanel}
         <button className="sidebar-collapse-handle" type="button" onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)} aria-label={isSidebarCollapsed ? 'Expand collections sidebar' : 'Collapse collections sidebar'}>{isSidebarCollapsed ? '›' : '‹'}</button>
