@@ -124,7 +124,19 @@
 .environment-variables-table input:not([type='checkbox']) { width: 100%; height: 32px; padding: 0 8px; color: #dbe5ee; background: #10161b; border: 1px solid #2c3640; border-radius: 5px; outline: none; }
 .environment-variables-table input:not([type='checkbox']):focus { border-color: #4e8f77; }
 .environment-variables-table input[type='checkbox'] { accent-color: #6ee7b7; cursor: pointer; }
-.environment-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+.environment-actions{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:8px;
+
+    margin-top:12px;
+
+}
+
 .add-variable-button,
 .import-environment-button,
 .export-environment-button { padding: 8px 10px; color: #9be8c5; background: #1d3029; border: 0; border-radius: 5px; cursor: pointer; font: inherit; font-size: 12px; }

@@ -1,4 +1,3 @@
-import { deleteEnvironment } from '../services/environmentService'
 import { createVariableDraft } from '../services/environmentService'
 
 function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange, onImportEnvironment, onExportEnvironment }) {
@@ -18,11 +17,7 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
   }
 
 
-  function handleDeleteEnvironment(id) {
-    const updated = deleteEnvironment(id)
-    onEnvironmentsChange(updated)
-}
-
+  
   function addVariable() {
     if (!activeEnvironment) return
 
@@ -33,6 +28,37 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
         : environment
     )))
   }
+
+function deleteCheckedVariables() {
+
+    if (!activeEnvironment) return
+
+    onEnvironmentsChange(
+
+        environments.map(environment =>
+
+            environment.id===activeEnvironment.id
+
+            ? {
+
+                ...environment,
+
+                variables:environment.variables.filter(
+
+                    variable=>!variable.enabled
+
+                )
+
+            }
+
+            : environment
+
+        )
+
+    )
+
+}
+
 
   return (
     <aside className="environment-panel" aria-label="Environment variables">
@@ -51,14 +77,7 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
       {environment.name}
     </button>
 
-    <button
-      className="environment-delete-button"
-      type="button"
-      onClick={() => handleDeleteEnvironment(environment.id)}
-      title="Delete Environment"
-    >
-      ×
-    </button>
+    
   </div>
 ))}
         </div>
@@ -78,10 +97,40 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
           </tbody>
         </table>
         <div className="environment-actions">
-          <button className="add-variable-button" type="button" onClick={addVariable}>+ Add Variable</button>
-          <button className="import-environment-button" type="button" onClick={onImportEnvironment}>Import Environment</button>
-          <button className="export-environment-button" type="button" onClick={onExportEnvironment}>Export Environment</button>
-        </div>
+
+    <button
+        className="add-variable-button"
+        type="button"
+        onClick={addVariable}
+    >
+        + Add Variable
+    </button>
+
+    <button
+        className="delete-variable-button"
+        type="button"
+        onClick={deleteCheckedVariables}
+    >
+        Delete Checked
+    </button>
+
+    <button
+        className="import-environment-button"
+        type="button"
+        onClick={onImportEnvironment}
+    >
+        Import
+    </button>
+
+    <button
+        className="export-environment-button"
+        type="button"
+        onClick={onExportEnvironment}
+    >
+        Export
+    </button>
+
+</div>
       </div>
     </aside>
   )
