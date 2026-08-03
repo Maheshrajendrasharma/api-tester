@@ -14,6 +14,10 @@ export function createRequest(name = 'New Request') {
     headers: DEFAULT_HEADERS.map((header) => ({ ...header, id: createId() })),
     authorization: { ...DEFAULT_AUTHORIZATION },
     body: DEFAULT_REQUEST_BODY,
+      scripts: {
+        preRequest: "",
+        postResponse: ""
+    }
   }
 }
 

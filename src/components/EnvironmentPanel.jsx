@@ -1,3 +1,4 @@
+import { deleteEnvironment } from '../services/environmentService'
 import { createVariableDraft } from '../services/environmentService'
 
 function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange, onImportEnvironment, onExportEnvironment }) {
@@ -16,6 +17,12 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
     )))
   }
 
+
+  function handleDeleteEnvironment(id) {
+    const updated = deleteEnvironment(id)
+    onEnvironmentsChange(updated)
+}
+
   function addVariable() {
     if (!activeEnvironment) return
 
@@ -32,8 +39,28 @@ function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsCha
       <div className="environment-panel-header">
         <div className="environment-tabs" role="tablist" aria-label="Environments">
           {environments.map((environment) => (
-            <button className={`environment-tab${environment.active ? ' active' : ''}`} key={environment.id} type="button" role="tab" aria-selected={environment.active} onClick={() => onEnvironmentChange(environment.id)}>{environment.name}</button>
-          ))}
+  <div
+    key={environment.id}
+    className="environment-tab-wrapper"
+  >
+    <button
+      className={`environment-tab${environment.active ? ' active' : ''}`}
+      type="button"
+      onClick={() => onEnvironmentChange(environment.id)}
+    >
+      {environment.name}
+    </button>
+
+    <button
+      className="environment-delete-button"
+      type="button"
+      onClick={() => handleDeleteEnvironment(environment.id)}
+      title="Delete Environment"
+    >
+      ×
+    </button>
+  </div>
+))}
         </div>
       </div>
       <div className="environment-panel-body">

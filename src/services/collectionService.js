@@ -146,6 +146,22 @@ function normalizePostmanRequest(item, fallbackName = 'New Request') {
 
   const auth = normalizeAuthorization(request.auth)
 
+  const events = Array.isArray(item?.event) ? item.event : []
+
+const preRequestEvent = events.find(
+  (event) => event.listen === 'prerequest'
+)
+
+const postResponseEvent = events.find(
+  (event) => event.listen === 'test'
+)
+
+const preRequestScript =
+  preRequestEvent?.script?.exec?.join('\n') ?? ''
+
+const postResponseScript =
+  postResponseEvent?.script?.exec?.join('\n') ?? ''
+
   return normalizeRequestData({
     name: item?.name || fallbackName,
     method: request.method || 'GET',
@@ -154,6 +170,10 @@ function normalizePostmanRequest(item, fallbackName = 'New Request') {
     headers,
     authorization: auth,
     body: normalizeBody(request.body),
+    scripts: {
+  preRequest: preRequestScript,
+  postResponse: postResponseScript,
+},
   }, fallbackName)
 }
 

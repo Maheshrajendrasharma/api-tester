@@ -1,5 +1,5 @@
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import path from "node:path";
+import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
 import * as requestService from "./services/requestService.js";
@@ -12,11 +12,11 @@ ipcMain.handle("api-tester:load-collections", () => storageService.load());
 ipcMain.handle("api-tester:save-collections", (_event, collections) => storageService.save(collections));
 ipcMain.handle("api-tester:show-open-dialog", (_event, options) => {
   const window = BrowserWindow.getFocusedWindow();
-  return window?.showOpenDialog(options);
+  return dialog?.showOpenDialog(window,options);
 });
 ipcMain.handle("api-tester:show-save-dialog", (_event, options) => {
   const window = BrowserWindow.getFocusedWindow();
-  return window?.showSaveDialog(options);
+  return dialog?.showSaveDialog(window,options);
 });
 ipcMain.handle("api-tester:read-file", async (_event, filePath) => readFile(filePath, "utf8"));
 ipcMain.handle("api-tester:write-file", async (_event, filePath, content) => writeFile(filePath, content, "utf8"));

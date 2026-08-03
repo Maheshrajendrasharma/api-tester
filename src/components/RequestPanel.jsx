@@ -1,3 +1,4 @@
+import ScriptEditor from "./ScriptEditor";
 import { useEffect, useState } from 'react'
 import AuthorizationEditor from './AuthorizationEditor'
 import HeadersEditor from './HeadersEditor'
@@ -6,10 +7,11 @@ import { getActiveParameters, removeGeneratedParameters } from '../utils/helpers
 import { HTTP_METHODS } from '../utils/constants'
 import VariableField from './VariableField'
 
-const tabs = ['Params', 'Headers', 'Authorization', 'Body']
+const tabs = ['Params', 'Headers', 'Authorization', 'Body','Scripts']
 
 function RequestPanel({ environment, isSending, onSend, request, onRequestChange }) {
   const [activeTab, setActiveTab] = useState('Body')
+  const [activeScriptTab, setActiveScriptTab] = useState("Pre-request")
   const [generatedParameters, setGeneratedParameters] = useState([])
 
   useEffect(() => {
@@ -66,19 +68,122 @@ if (!request) {
           <button className={`tab-button${activeTab === tab ? ' active' : ''}`} key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)}>{tab}</button>
         ))}
       </div>
-      {activeTab === 'Params' ? (
-        <ParamsEditor environment={environment} parameters={request.params} onChange={handleParametersChange} />
-      ) : activeTab === 'Body' ? (
-        <div className="body-editor-area">
-          <label className="body-label" htmlFor="request-body">raw · JSON</label>
-          <VariableField environment={environment} className="json-editor" id="request-body" multiline value={request.body} onChange={(event) => updateRequest({ body: event.target.value })} spellCheck="false" />
-        </div>
-      ) : activeTab === 'Headers' ? (
-        <HeadersEditor environment={environment} headers={request.headers} onChange={(headers) => updateRequest({ headers })} />
-      ) : (
-        <AuthorizationEditor environment={environment} authorization={request.authorization} onChange={(authorization) => updateRequest({ authorization })} />
-      )}
-    </section>
+       {activeTab === "Params" && (
+  <ParamsEditor
+    environment={environment}
+    parameters={request.params}
+    onChange={handleParametersChange}
+  />
+)}
+
+{activeTab === "Headers" && (
+  <HeadersEditor
+    environment={environment}
+    headers={request.headers}
+    onChange={(headers) => updateRequest({ headers })}
+  />
+)}
+
+{activeTab === "Authorization" && (
+  <AuthorizationEditor
+    environment={environment}
+    authorization={request.authorization}
+    onChange={(authorization) =>
+      updateRequest({ authorization })
+    }
+  />
+)}
+
+{activeTab === "Body" && (
+  <div className="body-editor-area">
+    <label className="body-label">raw · JSON</label>
+
+    <VariableField
+      environment={environment}
+      className="json-editor"
+      multiline
+      value={request.body}
+      onChange={(e) =>
+        updateRequest({ body: e.target.value })
+      }
+    />
+  </div>
+)}
+
+{activeTab === "Scripts" && (
+  <div className="scripts-editor">
+    {activeTab === "Scripts" && (
+
+<div className="script-container">
+
+    <div className="script-sidebar">
+
+        <button
+            className={
+                activeScriptTab==="Pre-request"
+                    ? "active"
+                    : ""
+            }
+            onClick={()=>
+                setActiveScriptTab("Pre-request")
+            }
+        >
+            Pre-request
+        </button>
+
+        <button
+            className={
+                activeScriptTab==="Post-response"
+                    ? "active"
+                    : ""
+            }
+            onClick={()=>
+                setActiveScriptTab("Post-response")
+            }
+        >
+            Post-response
+        </button>
+
+    </div>
+
+    <div className="script-main">
+
+        <ScriptEditor
+            value={
+                activeScriptTab==="Pre-request"
+                    ? request.scripts?.preRequest ?? ""
+                    : request.scripts?.postResponse ?? ""
+            }
+
+            placeholder="Write JavaScript here..."
+
+            onChange={(event)=>{
+
+                updateRequest({
+
+                    scripts:{
+                        ...(request.scripts ?? {}),
+
+                        [activeScriptTab==="Pre-request"
+                            ? "preRequest"
+                            : "postResponse"
+                        ]:event.target.value
+
+                    }
+
+                })
+
+            }}
+
+        />
+
+    </div>
+
+</div>
+
+)}
+  </div>
+)}   </section>
   )
 }
 
