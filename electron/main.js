@@ -1,10 +1,11 @@
+console.log("electron/main.js started");
 import path from "node:path";
 import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
 import * as requestService from "./services/requestService.js";
 import * as storageService from "./services/storageService.js";
-
+console.log("Registering IPC handlers...");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 ipcMain.handle("api-tester:send-request", (_event, request) => requestService.execute(request));
@@ -14,6 +15,8 @@ ipcMain.handle("api-tester:show-open-dialog", (_event, options) => {
   const window = BrowserWindow.getFocusedWindow();
   return dialog?.showOpenDialog(window,options);
 });
+
+console.log("IPC handlers registered");
 ipcMain.handle("api-tester:show-save-dialog", (_event, options) => {
   const window = BrowserWindow.getFocusedWindow();
   return dialog?.showSaveDialog(window,options);

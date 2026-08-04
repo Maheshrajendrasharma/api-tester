@@ -1,136 +1,95 @@
-import { createVariableDraft } from '../services/environmentService'
+
+import { useState } from "react"
+import {
+    createVariableDraft,
+    duplicateEnvironment,
+    deleteEnvironment,
+    loadEnvironments,
+} from '../services/environmentService'
 
 function EnvironmentPanel({ environments, onEnvironmentChange, onEnvironmentsChange, onImportEnvironment, onExportEnvironment }) {
   const activeEnvironment = environments.find((environment) => environment.active) ?? environments[0]
-
-  function updateVariable(variableId, field, value) {
-    onEnvironmentsChange(environments.map((environment) => (
-      environment.id === activeEnvironment?.id
-        ? {
-            ...environment,
-            variables: environment.variables.map((variable) => (
-              variable.id === variableId ? { ...variable, [field]: value } : variable
-            )),
-          }
-        : environment
-    )))
-  }
+  const [showMenu, setShowMenu] = useState(false)
 
 
-  
-  function addVariable() {
-    if (!activeEnvironment) return
 
-    const variable = createVariableDraft()
-    onEnvironmentsChange(environments.map((environment) => (
-      environment.id === activeEnvironment.id
-        ? { ...environment, variables: [...environment.variables, variable] }
-        : environment
-    )))
-  }
+function updateVariable(variableId, field, value) {
 
-function deleteCheckedVariables() {
+    const updated = environments.map(environment => {
 
-    if (!activeEnvironment) return
+        if (environment.id !== activeEnvironment.id)
+            return environment
 
-    onEnvironmentsChange(
-
-        environments.map(environment =>
-
-            environment.id===activeEnvironment.id
-
-            ? {
-
-                ...environment,
-
-                variables:environment.variables.filter(
-
-                    variable=>!variable.enabled
-
-                )
-
-            }
-
-            : environment
-
+        let variables = environment.variables.map(variable =>
+            variable.id === variableId
+                ? { ...variable, [field]: value }
+                : variable
         )
 
-    )
+        const last = variables[variables.length - 1]
+
+        const lastIsBlank =
+            last &&
+            last.key.trim() === "" &&
+            last.value.trim() === ""
+
+        if (!lastIsBlank) {
+            variables.push(createVariableDraft())
+        }
+
+        return {
+            ...environment,
+            variables
+        }
+
+    })
+
+    onEnvironmentsChange(updated)
 
 }
+  
+
+ 
+
 
 
   return (
     <aside className="environment-panel" aria-label="Environment variables">
-      <div className="environment-panel-header">
-        <div className="environment-tabs" role="tablist" aria-label="Environments">
-          {environments.map((environment) => (
-  <div
-    key={environment.id}
-    className="environment-tab-wrapper"
-  >
-    <button
-      className={`environment-tab${environment.active ? ' active' : ''}`}
-      type="button"
-      onClick={() => onEnvironmentChange(environment.id)}
-    >
-      {environment.name}
-    </button>
 
-    
-  </div>
-))}
-        </div>
-      </div>
-      <div className="environment-panel-body">
-        <h2>Variables</h2>
-        <table className="environment-variables-table">
-          <thead><tr><th></th><th>Key</th><th>Value</th></tr></thead>
+ <div className="sidebar-section-header">
+    <span>VARIABLES</span>
+</div>
+
+ <div className="environment-table-wrapper">
+
+<table className="environment-variables-table">
+          <thead><tr><th>Key</th><th>Value</th></tr></thead>
           <tbody>
             {activeEnvironment?.variables.map((variable) => (
               <tr key={variable.id}>
-                <td><input aria-label={`Enable ${variable.key || 'variable'}`} checked={variable.enabled !== false} type="checkbox" onChange={(event) => updateVariable(variable.id, 'enabled', event.target.checked)} /></td>
-                <td><input aria-label="Variable key" value={variable.key} onChange={(event) => updateVariable(variable.id, 'key', event.target.value)} placeholder="Key" /></td>
-                <td><input aria-label="Variable value" value={variable.value} onChange={(event) => updateVariable(variable.id, 'value', event.target.value)} placeholder="Value" /></td>
-              </tr>
+    <td>
+        <input
+            value={variable.key}
+            onChange={(e)=>updateVariable(variable.id,"key",e.target.value)}
+            placeholder="Key"
+        />
+    </td>
+
+    <td>
+        <input
+            value={variable.value}
+            onChange={(e)=>updateVariable(variable.id,"value",e.target.value)}
+            placeholder="Value"
+        />
+    </td>
+</tr>
             ))}
           </tbody>
         </table>
-        <div className="environment-actions">
-
-    <button
-        className="add-variable-button"
-        type="button"
-        onClick={addVariable}
-    >
-        + Add Variable
-    </button>
-
-    <button
-        className="delete-variable-button"
-        type="button"
-        onClick={deleteCheckedVariables}
-    >
-        Delete Checked
-    </button>
-
-    <button
-        className="import-environment-button"
-        type="button"
-        onClick={onImportEnvironment}
-    >
-        Import
-    </button>
-
-    <button
-        className="export-environment-button"
-        type="button"
-        onClick={onExportEnvironment}
-    >
-        Export
-    </button>
 
 </div>
+        <div>
+     
       </div>
     </aside>
   )

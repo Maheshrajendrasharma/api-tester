@@ -329,23 +329,35 @@ export function serializeCollectionForExport(collection) {
     },
   }, null, 2)
 }
-
 export function normalizeEnvironmentData(raw, fallbackName = 'Imported Environment') {
   if (!raw || typeof raw !== 'object') {
     throw new Error('Unsupported environment format.')
   }
 
   const name = sanitizeName(raw.name || fallbackName, fallbackName)
-  const variables = Array.isArray(raw.variables)
-    ? raw.variables
-        .filter((variable) => variable && typeof variable === 'object' && String(variable.key ?? '').trim())
-        .map((variable) => ({
-          id: createId(),
-          key: String(variable.key ?? '').trim(),
-          value: variable.value ?? '',
-          enabled: variable.enabled !== false,
-        }))
-    : []
+
+  // Supports both our own exported format and Postman format
+  const source =
+    Array.isArray(raw.variables)
+      ? raw.variables
+      : Array.isArray(raw.values)
+      ? raw.values
+      : []
+
+  let variables = source.map(variable => ({
+    id: createId(),
+    key: String(variable.key ?? ''),
+    value: String(variable.value ?? ''),
+    enabled: variable.enabled !== false,
+  }))
+
+  // Always keep one blank row
+  variables.push({
+    id: createId(),
+    key: '',
+    value: '',
+    enabled: true,
+  })
 
   return {
     id: createId(),

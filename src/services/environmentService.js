@@ -22,7 +22,11 @@ function normalizeEnvironments(environments) {
   return environmentsWithDefaults.map((environment, index) => ({
     ...environment,
     active: activeEnvironment ? environment.id === activeEnvironment.id : index === 0,
-    variables: Array.isArray(environment.variables) ? environment.variables : [],
+    variables:
+    Array.isArray(environment.variables) &&
+    environment.variables.length > 0
+        ? environment.variables
+        : [createVariableDraft()],
   }))
 }
 
@@ -50,7 +54,9 @@ export function createEnvironmentDraft(name) {
     id: generateId('env'),
     name: name.trim(),
     active: false,
-    variables: [],
+    variables: [
+    createVariableDraft(),
+],
   }
 }
 
@@ -93,48 +99,62 @@ export function createEnvironment(name) {
 }
 
 export function renameEnvironment(id, newName) {
-  const environments = loadEnvironments()
 
-  const updated = environments.map((environment) =>
-    environment.id === id
-      ? {
-          ...environment,
-          name: newName.trim(),
-        }
-      : environment,
-  )
+    const environments = loadEnvironments()
 
-  saveEnvironments(updated)
+    const updated = environments.map(environment =>
 
-  return updated
+        environment.id === id
+            ? {
+                ...environment,
+                name: newName.trim(),
+            }
+            : environment
+
+    )
+
+    saveEnvironments(updated)
+
+    return updated
+
 }
 
 
 export function deleteEnvironment(id) {
-  const environments = loadEnvironments()
 
-  if (environments.length === 1) {
-    return environments
-  }
+    const environments = loadEnvironments()
 
-  const deletingActive = environments.find(
-    (environment) => environment.id === id,
-  )?.active
+    const deletingIndex = environments.findIndex(
+        environment => environment.id === id
+    )
 
-  let updated = environments.filter(
-    (environment) => environment.id !== id,
-  )
+    if (deletingIndex === -1)
+        return environments
 
-  if (deletingActive && updated.length > 0) {
-    updated = updated.map((environment, index) => ({
-      ...environment,
-      active: index === 0,
+    if (environments.length === 1)
+        return environments
+
+    let updated = environments.filter(
+        environment => environment.id !== id
+    )
+
+    let nextIndex = deletingIndex - 1
+
+    if (nextIndex < 0)
+        nextIndex = 0
+
+    updated = updated.map((environment,index)=>({
+
+        ...environment,
+
+        active:index===nextIndex
+
     }))
-  }
 
-  saveEnvironments(updated)
+    saveEnvironments(updated)
 
-  return updated
+    return updated
+
 }
 
 export function duplicateEnvironment(id) {
@@ -159,9 +179,18 @@ export function duplicateEnvironment(id) {
     })),
   }
 
-  const updated = [...environments, duplicated]
+const updated = environments.map(environment => ({
+    ...environment,
+    active: false,
+}))
 
-  saveEnvironments(updated)
+duplicated.active = true
 
-  return duplicated
+updated.push(duplicated)
+
+saveEnvironments(updated)
+
+return updated
+
+
 }
