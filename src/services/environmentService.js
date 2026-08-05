@@ -157,6 +157,41 @@ export function deleteEnvironment(id) {
 
 }
 
+function generateUniqueName(baseName, existingNames) {
+
+    // Remove ALL trailing " Copy", " Copy 1", " Copy 2"... parts
+    let cleanBase = baseName
+
+    while (true) {
+
+        const next = cleanBase.replace(/\sCopy(?:\s\d+)?$/, "")
+
+        if (next === cleanBase)
+            break
+
+        cleanBase = next
+
+    }
+
+    const firstCopy = `${cleanBase} Copy`
+
+    if (!existingNames.includes(firstCopy))
+        return firstCopy
+
+    let counter = 1
+
+    while (
+        existingNames.includes(`${cleanBase} Copy ${counter}`)
+    ) {
+        counter++
+    }
+
+    return `${cleanBase} Copy ${counter}`
+
+}
+
+
+
 export function duplicateEnvironment(id) {
   const environments = loadEnvironments()
 
@@ -171,7 +206,10 @@ export function duplicateEnvironment(id) {
   const duplicated = {
     ...clone(source),
     id: generateId('env'),
-    name: `${source.name} Copy`,
+    name: generateUniqueName(
+    source.name,
+    environments.map(environment => environment.name)
+),
     active: false,
     variables: source.variables.map((variable) => ({
       ...clone(variable),

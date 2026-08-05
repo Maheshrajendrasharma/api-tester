@@ -140,7 +140,7 @@
 
 .environment-variables-table th:first-child,
 .environment-variables-table td:first-child{
-    width:110px;
+    width:80px;
 }
 
 .environment-variables-table th:last-child,
@@ -874,17 +874,11 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 .environment-table-wrapper{
-
-    width:100%;
-
     flex:1;
-
-    overflow-x:auto;
-    overflow-y:visible;
-
-    padding-bottom:8px;
+    overflow:auto;
+    min-width:0;
+    min-height:0;
 }
-
 
 
 

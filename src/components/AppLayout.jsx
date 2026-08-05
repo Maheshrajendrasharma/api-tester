@@ -97,8 +97,20 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
       {header}
       <div className="app-layout" ref={layoutRef} style={{ '--sidebar-width': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--sidebar-divider-width': isSidebarCollapsed ? '0px' : '6px', '--sidebar-handle-left': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--environment-panel-width': isEnvironmentPanelCollapsed ? '0px' : `${environmentPanelWidth}px`, '--environment-divider-width': isEnvironmentPanelCollapsed ? '0px' : '6px', '--panel-transition-duration': isResizing ? '0ms' : '225ms' }}>
         {sidebar}
-        {!isSidebarCollapsed && <div className="sidebar-divider" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" onMouseDown={(event) => startDragging(event, resizeSidebar)} onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)} />}
-        
+<div
+  className="sidebar-divider"
+  role="separator"
+  aria-orientation="vertical"
+  aria-label="Resize sidebar"
+  onMouseDown={(event) =>
+    !isSidebarCollapsed && startDragging(event, resizeSidebar)
+  }
+  onDoubleClick={() => setSidebarWidth(defaultSidebarWidth)}
+  style={{
+    opacity: isSidebarCollapsed ? 0 : 1,
+    pointerEvents: isSidebarCollapsed ? "none" : "auto",
+  }}
+/>
 
         <div
   className="app-layout-main"
@@ -115,7 +127,22 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
 
 
 
-        {!isEnvironmentPanelCollapsed && <div className="environment-panel-divider" role="separator" aria-orientation="vertical" aria-label="Resize environment panel" onMouseDown={(event) => startDragging(event, resizeEnvironmentPanel)} onDoubleClick={() => setEnvironmentPanelWidth(defaultEnvironmentPanelWidth)} />}
+<div
+  className="environment-panel-divider"
+  role="separator"
+  aria-orientation="vertical"
+  aria-label="Resize environment panel"
+  onMouseDown={(event) =>
+    !isEnvironmentPanelCollapsed &&
+    startDragging(event, resizeEnvironmentPanel)
+  }
+  onDoubleClick={() => setEnvironmentPanelWidth(defaultEnvironmentPanelWidth)}
+  style={{
+    opacity: isEnvironmentPanelCollapsed ? 0 : 1,
+    pointerEvents: isEnvironmentPanelCollapsed ? "none" : "auto",
+  }}
+/>
+
         {environmentPanel}
         <button className="sidebar-collapse-handle" type="button" onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)} aria-label={isSidebarCollapsed ? 'Expand collections sidebar' : 'Collapse collections sidebar'}>{isSidebarCollapsed ? '›' : '‹'}</button>
         {!isEnvironmentPanelCollapsed && <button className="environment-collapse-handle" type="button" onClick={collapseEnvironmentPanel} aria-label="Collapse environment panel">›</button>}

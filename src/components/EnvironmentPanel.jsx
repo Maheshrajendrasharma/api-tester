@@ -60,6 +60,7 @@ function updateVariable(variableId, field, value) {
     <span>VARIABLES</span>
 </div>
 
+
  <div className="environment-table-wrapper">
 
 <table className="environment-variables-table">
