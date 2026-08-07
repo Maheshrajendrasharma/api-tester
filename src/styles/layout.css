@@ -130,57 +130,88 @@
 
 .environment-panel-body h2 { margin: 0 4px 8px; color: #edf3f8; font-size: 15px; font-weight: 600; }
 
-.environment-variables-table{
-    width:100%;
-    table-layout:fixed;
+/* =========================================================
+   ENVIRONMENT VARIABLES - COMPACT PROFESSIONAL STYLE
+   ========================================================= */
+
+.environment-variables-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    border-collapse: collapse;
 }
 
-.environment-variables-table th { padding: 0 5px 7px; color: #8290a0; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; }
-.environment-variables-table th:first-child, .environment-variables-table td:first-child { width: 42px; text-align: center; }
-
-.environment-variables-table th:first-child,
-.environment-variables-table td:first-child{
-    width:80px;
+/* KEY / VALUE headings */
+.environment-variables-table th {
+    padding: 0 4px 5px;
+    color: #8290a0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
 }
 
-.environment-variables-table th:last-child,
-.environment-variables-table td:last-child{
-    width:150px;
+/* Key column */
+.environment-variables-table th:nth-child(2),
+.environment-variables-table td:nth-child(2) {
+    width: 10qh;
 }
 
-.environment-variables-table tr{
-    height:24px;
+/* Value column */
+.environment-variables-table th:nth-child(3),
+.environment-variables-table td:nth-child(3) {
+    width: 22%;
 }
 
-.environment-variables-table td { padding: 2px 4px; border-top: 1px solid #28323c; }
+/* Compact rows */
+.environment-variables-table tr {
+    height: 29px;
+}
 
+/* Reduce gap around each input */
+.environment-variables-table td {
+    padding: 2px 3px;
+    border-top: 1px solid #28323c;
+}
+
+/* KEY + VALUE input boxes */
 .environment-variables-table input:not([type='checkbox']) {
     width: 100%;
     min-width: 0;
-    height: 26px;
-    font-size: 14px;
+    height: 25px;
+
+    box-sizing: border-box;
+
+    padding: 0 6px;
+
+    font-size: 12px;
+    line-height: 1.2;
 
     background: #151b21;
     color: #dbe5ee;
 
     border: 1px solid #2c3640;
-    border-radius: 6px;
+    border-radius: 4px;
 
-    padding: 0 4px;
     outline: none;
 
     white-space: nowrap;
-    overflow-x: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-
+/* Focus */
 .environment-variables-table input:not([type='checkbox']):focus {
     border-color: #6ee7b7;
     background: #1a2129;
 }
 
-.environment-variables-table input[type='checkbox'] { accent-color: #6ee7b7; cursor: pointer; }
-
+/* Checkbox */
+.environment-variables-table input[type='checkbox'] {
+    accent-color: #6ee7b7;
+    cursor: pointer;
+}
 
 
 
@@ -312,19 +343,29 @@ margin:0;
 margin-bottom:0px;
 }
 .sidebar-row {
+  position: relative;
+
   display: flex;
   width: 100%;
   min-width: 0;
-  height: 28px;
+  height: 46px;
+
   align-items: center;
   gap: 8px;
+
   padding: 0 10px;
+
   color: #b6c1cd;
   border-radius: 0;
+
   cursor: pointer;
   font-size: 14px;
+
   outline: none;
-  transition: background 150ms ease, color 150ms ease;
+
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 .sidebar-row:hover, .sidebar-row:focus-visible { color: #edf3f8; background: #222b35; }
 .sidebar-row.selected { color: #f5f8fb; background: #2a3642; box-shadow: inset 2px 0 #6ee7b7; }
@@ -346,13 +387,12 @@ gap:8px;
 border-radius:0px;
 margin:0;
 }
-.sidebar-row-title{
-    flex:1;
-    font-size:13px;
-    font-weight:500;
-    overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
+.sidebar-row-title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .collection-folder { flex: 0 0 auto; color: #eabf72; font-size: 14px; }
@@ -382,16 +422,137 @@ padding:0 6px;
 .method-put { color: #f1bf71; }
 .method-patch { color: #c79bff; }
 .method-delete { color: #f38b91; }
-.action-menu { position: relative; flex: 0 0 auto; }
-.action-menu-trigger { display: grid; width: 28px; height: 28px; place-items: center; padding: 0; color: #98a6b5; background: transparent; border: 0; border-radius: 5px; cursor: pointer; font: inherit; font-size: 18px; line-height: 1; }
-.action-menu-trigger:hover, .action-menu-trigger[aria-expanded='true'] { color: #f0f5f9; background: #35414d; }
-.action-menu-popover { position: absolute; z-index: 30; top: calc(100% + 4px); right: 0; width: 174px; padding: 5px; background: #1a222b; border: 1px solid #384552; border-radius: 8px; box-shadow: 0 12px 26px rgb(0 0 0 / 34%); }
-.action-menu-popover button { display: block; width: 100%; height: 34px; padding: 0 10px; color: #d9e2eb; background: transparent; border: 0; border-radius: 5px; cursor: pointer; font: inherit; font-size: 14px; text-align: left; }
-.action-menu-popover button:hover, .action-menu-popover button:focus-visible { background: #303c48; outline: none; }
-.action-menu-popover button:disabled { color: #6b7786; cursor: not-allowed; opacity: 0.7; }
-.action-menu-popover button:disabled:hover, .action-menu-popover button:disabled:focus-visible { background: transparent; }
-.action-menu-popover button.destructive { color: #f09a9f; }
-.action-menu-popover button.destructive:hover, .action-menu-popover button.destructive:focus-visible { color: #ffc0c4; background: #422a30; }
+
+/* =========================================================
+   ACTION MENU
+   ========================================================= */
+
+
+
+.action-menu-trigger {
+  display: grid;
+
+  width: 30px;
+  height: 30px;
+
+  place-items: center;
+
+  padding: 0;
+
+  color: #98a6b5;
+  background: transparent;
+
+  border: 0;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  font: inherit;
+  line-height: 1;
+
+  opacity: 0;
+
+  transition:
+    opacity 120ms ease,
+    color 120ms ease,
+    background 120ms ease;
+}
+
+/* Horizontal three dots */
+.action-menu-dots {
+  display: block;
+
+  font-family: Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 18px;
+
+  letter-spacing: 1px;
+
+  color: currentColor;
+}
+
+/* Show menu when row is hovered */
+.sidebar-row:hover .action-menu-trigger,
+.sidebar-row:focus-within .action-menu-trigger,
+.action-menu-trigger[aria-expanded='true'] {
+  opacity: 1;
+}
+
+/* Hover / active state */
+.action-menu-trigger:hover,
+.action-menu-trigger[aria-expanded='true'] {
+  color: #f0f5f9;
+  background: #35414d;
+}
+
+/* =========================================================
+   ACTION MENU POPUP
+   ========================================================= */
+
+.action-menu-popover {
+  position: absolute;
+
+  top: calc(100% + 4px);
+  right: 0;
+
+  z-index: 50;
+
+  width: 174px;
+
+  padding: 5px;
+
+  background: #1a222b;
+
+  border: 1px solid #384552;
+  border-radius: 8px;
+
+  box-shadow: 0 12px 26px rgb(0 0 0 / 34%);
+}
+
+.action-menu-popover button {
+  display: block;
+
+  width: 100%;
+  height: 34px;
+
+  padding: 0 10px;
+
+  color: #d9e2eb;
+  background: transparent;
+
+  border: 0;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 14px;
+
+  text-align: left;
+}
+
+.action-menu-popover button:hover,
+.action-menu-popover button:focus-visible {
+  background: #303c48;
+  outline: none;
+}
+
+.action-menu-popover button:disabled {
+  color: #6b7786;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.action-menu-popover button.destructive {
+  color: #f09a9f;
+}
+
+.action-menu-popover button.destructive:hover,
+.action-menu-popover button.destructive:focus-visible {
+  color: #ffc0c4;
+  background: #422a30;
+}
 
 .history-section-header { margin-top: 12px; }
 .history-controls { display: flex; flex-direction: column; gap: 6px; margin: 0 6px 8px; }
@@ -910,4 +1071,523 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 .environment-table-wrapper::-webkit-scrollbar-corner{
     background:#171c22;
+}
+
+/* =========================================================
+   COLLECTION / FOLDER ROW
+   ========================================================= */
+
+.collection-row {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Show the horizontal dots when hovering a collection/folder */
+.collection-row:hover .action-menu-trigger,
+.collection-row:focus-within .action-menu-trigger,
+.collection-row .action-menu-trigger[aria-expanded='true'] {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   COLLECTION / FOLDER / REQUEST TREE
+   ========================================================= */
+
+.tree-node {
+  width: 100%;
+  min-width: 0;
+}
+
+.tree-node-row {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  color: #d8e0e9;
+  border-radius: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.tree-node-row:hover {
+  color: #edf3f8;
+  background: #222b35;
+}
+
+.tree-expand-icon {
+  display: grid;
+  width: 16px;
+  height: 22px;
+  flex: 0 0 16px;
+  place-items: center;
+  color: #8492a1;
+  font-size: 14px;
+}
+
+.tree-folder-icon {
+  display: inline-flex;
+  width: 20px;
+  flex: 0 0 20px;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.tree-folder-name {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 550;
+}
+
+/* =========================================================
+   REQUEST ROW
+   ========================================================= */
+
+.tree-request-row {
+  width: 100%;
+  height: 28px;
+  min-width: 0;
+  padding: 2px 8px;
+  box-sizing: border-box;
+}
+
+.tree-request-content {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  align-items: center;
+  gap: 7px;
+}
+
+.tree-request-name {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   THREE-DOT MENU
+   ========================================================= */
+
+.tree-row-actions {
+  display: flex;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+/*
+   IMPORTANT:
+   The ActionMenu itself must stay in normal flex flow.
+   Do NOT position it absolute.
+*/
+.tree-row-actions .action-menu {
+  position: relative;
+  top: auto;
+  right: auto;
+  display: flex;
+  width: 18px;
+  height: 20px;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  transform: none;
+}
+
+/* Three-dot button */
+.tree-row-actions .action-menu-trigger {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0;
+  color: #98a6b5;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  opacity: 0;
+}
+
+/* Show dots when hovering the complete row */
+.tree-node-row:hover .action-menu-trigger,
+.tree-request-row:hover .action-menu-trigger,
+.tree-row-actions:focus-within .action-menu-trigger,
+.action-menu-trigger[aria-expanded='true'] {
+  opacity: 1;
+}
+
+/* Horizontal dots */
+.tree-row-actions .action-menu-trigger {
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* Hover on dots */
+.tree-row-actions .action-menu-trigger:hover,
+.tree-row-actions .action-menu-trigger[aria-expanded='true'] {
+  color: #f0f5f9;
+  background: transparent;
+}
+
+/* =========================================================
+   ACTION MENU POPUP
+   ========================================================= */
+
+.tree-row-actions .action-menu-popover {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 174px;
+  padding: 5px;
+  background: #1a222b;
+  border: 1px solid #384552;
+  border-radius: 8px;
+  box-shadow: 0 12px 26px rgb(0 0 0 / 34%);
+}
+
+.tree-row-actions .action-menu-popover button {
+  display: block;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  color: #d9e2eb;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+}
+
+.tree-row-actions .action-menu-popover button:hover,
+.tree-row-actions .action-menu-popover button:focus-visible {
+  background: #303c48;
+  outline: none;
+}
+
+.tree-row-actions .action-menu-popover button.destructive {
+  color: #f09a9f;
+}
+
+.tree-row-actions .action-menu-popover button.destructive:hover,
+.tree-row-actions .action-menu-popover button.destructive:focus-visible {
+  color: #ffc0c4;
+  background: #422a30;
+}
+
+/* =========================================================
+   NESTED FOLDERS / REQUESTS
+   ========================================================= */
+
+.tree-node-children {
+  width: 100%;
+  min-width: 0;
+}
+
+.tree-folder-node > .tree-node-children {
+  padding-left: 18px;
+}
+
+.tree-collection-node > .tree-node-children {
+  padding-left: 0;
+}
+
+
+/* =========================================================
+   TREE HIERARCHY / FOLDER INDENTATION
+   ========================================================= */
+
+.tree-node {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Every level gets progressively indented */
+.tree-node-children {
+  width: 100%;
+  min-width: 0;
+  padding-left: 20px;
+  box-sizing: border-box;
+}
+
+/* Collection itself stays at level 0 */
+.tree-collection-node > .tree-node-children {
+  padding-left: 20px;
+}
+
+/* Folder children get another level */
+.tree-folder-node > .tree-node-children {
+  padding-left: 20px;
+}
+
+/* =========================================================
+   VERTICAL TREE GUIDE
+   ========================================================= */
+
+.tree-node-children {
+  position: relative;
+}
+
+/* Vertical line showing parent -> children relationship */
+.tree-node-children::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+
+  width: 1px;
+  background: #34404c;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   TREE ROW
+   ========================================================= */
+
+.tree-node-row,
+.tree-request-row {
+  position: relative;
+  z-index: 1;
+}
+
+/* Small horizontal connector from vertical guide to node */
+.tree-node-children > .tree-node::before {
+  content: '';
+  position: absolute;
+
+  left: -12px;
+  top: 14px;
+
+  width: 10px;
+  height: 1px;
+
+  background: #34404c;
+}
+
+/* =========================================================
+   DON'T DRAW GUIDE ON TOP-LEVEL COLLECTIONS
+   ========================================================= */
+
+.tree-collection-node > .tree-node-children::before {
+  display: none;
+}
+
+/* =========================================================
+   FOLDER / REQUEST ALIGNMENT
+   ========================================================= */
+
+.tree-folder-node,
+.tree-request-node {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Folder row */
+.tree-folder-node > .tree-node-row {
+  width: 100%;
+}
+
+/* Request row */
+.tree-request-node > .tree-request-row {
+  width: 100%;
+}
+
+/* =========================================================
+   COMPACT SIDEBAR — 70% SCALE
+   ========================================================= */
+
+.sidebar {
+  font-size: 70%;
+}
+
+/* Collection / folder rows */
+.sidebar .tree-node-row {
+  height: 24px;
+  min-height: 24px;
+  padding: 1px 6px;
+  gap: 4px;
+}
+
+/* Folder / collection names */
+.sidebar .tree-folder-name {
+  font-size: 12px;
+}
+
+/* Expand arrows */
+.sidebar .tree-expand-icon {
+  width: 13px;
+  height: 20px;
+  flex-basis: 13px;
+  font-size: 11px;
+}
+
+/* Folder icons */
+.sidebar .tree-folder-icon {
+  width: 16px;
+  flex-basis: 16px;
+  font-size: 13px;
+}
+
+/* Request rows */
+.sidebar .tree-request-row {
+  height: 24px;
+  min-height: 24px;
+  padding: 1px 6px;
+}
+
+.sidebar .tree-request-content {
+  gap: 5px;
+}
+
+.sidebar .tree-request-name {
+  font-size: 12px;
+}
+
+/* HTTP method */
+.sidebar .method-badge {
+  height: 14px;
+  min-width: 28px;
+  padding: 0 4px;
+  font-size: 8px;
+}
+
+/* Three dots */
+.sidebar .action-menu-trigger {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+}
+
+/* Nested tree indentation */
+.sidebar .tree-node-children {
+  padding-left: 16px;
+}
+
+/* Sidebar tabs */
+.sidebar .collection-tab {
+  font-size: 12px;
+  padding: 8px 12px;
+}
+
+/* History */
+.sidebar .history-search,
+.sidebar .history-filter {
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   COMPACT COLLECTION TREE SPACING
+   ========================================================= */
+
+/* Folder + collection rows */
+.tree-node-row {
+  min-height: 20px !important;
+  height: 20px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+}
+
+/* Request rows */
+.request-row {
+  min-height: 20px !important;
+  height: 20px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+}
+
+/* Reduce spacing around children */
+.tree-children {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Reduce vertical gap between every tree item */
+.tree-node {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Request text */
+.request-row .sidebar-row-title {
+  line-height: 27px !important;
+}
+
+/* Folder / collection text */
+.tree-node-row .sidebar-row-title {
+  line-height: 30px !important;
+}
+
+/* Method badge */
+.request-row .method-badge {
+  margin-right: 8px !important;
+}
+
+
+/* =========================================================
+   ENVIRONMENT VARIABLES - KEY / VALUE WIDTH
+   ========================================================= */
+
+.environment-variables-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+/* KEY column */
+.environment-variables-table th:first-child,
+.environment-variables-table td:first-child {
+    width: 33.333%;
+}
+
+/* VALUE column */
+.environment-variables-table th:nth-child(2),
+.environment-variables-table td:nth-child(2) {
+    width: 66.667%;
+}
+
+/* Smaller gap between KEY and VALUE */
+.environment-variables-table td {
+    padding: 3px 4px;
+}
+
+.environment-variables-table th {
+    padding: 0 4px 6px;
+}
+
+/* Inputs */
+.environment-variables-table input:not([type='checkbox']) {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }

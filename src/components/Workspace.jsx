@@ -49,7 +49,15 @@ function Workspace({ environment, isSending, onSend, response, request, onReques
 
   return (
     <section className={`workspace${requestHeight === null ? '' : ' custom-split'}`} ref={workspaceRef} style={splitStyle} aria-label="API request workspace">
-      <RequestPanel environment={environment} isSending={isSending} onSend={onSend} request={request} onRequestChange={onRequestChange} />
+      <RequestPanel
+    key={request?.id}
+    environment={environment}
+    isSending={isSending}
+    onSend={onSend}
+    request={request}
+    onRequestChange={onRequestChange}
+/>
+
       <div className="workspace-divider" role="separator" aria-orientation="horizontal" aria-label="Resize request and response panels" onMouseDown={startDragging} onDoubleClick={resetSplit} />
       <ResponsePanel response={response} />
     </section>

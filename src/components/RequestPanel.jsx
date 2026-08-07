@@ -14,11 +14,23 @@ function RequestPanel({ environment, isSending, onSend, request, onRequestChange
   const [activeScriptTab, setActiveScriptTab] = useState("Pre-request")
   const [generatedParameters, setGeneratedParameters] = useState([])
 
-  useEffect(() => {
-    setGeneratedParameters([])
-  }, [request?.id])
+useEffect(() => {
+  setGeneratedParameters([])
+}, [request?.id])
 
-  console.log("Request =", request)
+if (!request) {
+  return (
+    <section className="request-panel">
+      <h1 style={{ color: "red" }}>REQUEST IS NULL</h1>
+    </section>
+  )
+}
+
+console.log({
+    id: request.id,
+    name: request.name,
+    body: request.body
+})
 
 if (!request) {
   return (
@@ -94,19 +106,26 @@ if (!request) {
   />
 )}
 
+
+<div style={{ color: "#00ff99", fontSize: "12px" }}>
+  Current Request: {request.name}<br />
+  Body Length: {(request.body ?? "").length}
+</div>
+
 {activeTab === "Body" && (
   <div className="body-editor-area">
     <label className="body-label">raw · JSON</label>
 
     <VariableField
-      environment={environment}
-      className="json-editor"
-      multiline
-      value={request.body}
-      onChange={(e) =>
+    key={request.id}
+    environment={environment}
+    className="json-editor"
+    multiline
+    value={request.body ?? ""}
+    onChange={(e) =>
         updateRequest({ body: e.target.value })
-      }
-    />
+    }
+/>
   </div>
 )}
 

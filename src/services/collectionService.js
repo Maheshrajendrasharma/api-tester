@@ -1,4 +1,8 @@
 import { createCollection, createId, createRequest } from '../utils/requestModel'
+import { normalizeAuthorization } from "./importers/postmanAuth";
+import { normalizeScripts } from "./importers/postmanScripts";
+import { normalizeBody } from "./importers/postmanBody";
+  import { importPostmanRequest } from "./postmanRequestImporter";
 
 function cloneValue(value) {
   return JSON.parse(JSON.stringify(value))
@@ -9,74 +13,8 @@ function sanitizeName(value, fallback) {
   return normalized || fallback
 }
 
-function normalizeAuthorization(auth) {
-  if (!auth || typeof auth !== 'object') {
-    return {
-      type: 'None',
-      bearerToken: '',
-      username: '',
-      password: '',
-      apiKey: '',
-      apiValue: '',
-      apiKeyLocation: 'Header',
-    }
-  }
 
-  if (auth.type === 'bearer') {
-    return {
-      type: 'Bearer Token',
-      bearerToken: auth.token || auth.bearerToken || '',
-      username: '',
-      password: '',
-      apiKey: '',
-      apiValue: '',
-      apiKeyLocation: 'Header',
-    }
-  }
 
-  if (auth.type === 'basic') {
-    return {
-      type: 'Basic Auth',
-      bearerToken: '',
-      username: auth.username || '',
-      password: auth.password || '',
-      apiKey: '',
-      apiValue: '',
-      apiKeyLocation: 'Header',
-    }
-  }
-
-  if (auth.type === 'apikey') {
-    return {
-      type: 'API Key',
-      bearerToken: '',
-      username: '',
-      password: '',
-      apiKey: auth.key || '',
-      apiValue: auth.value || '',
-      apiKeyLocation: auth.in === 'query' ? 'Query Parameter' : 'Header',
-    }
-  }
-
-  return {
-    type: 'None',
-    bearerToken: '',
-    username: '',
-    password: '',
-    apiKey: '',
-    apiValue: '',
-    apiKeyLocation: 'Header',
-  }
-}
-
-function normalizeBody(body) {
-  if (typeof body === 'string') return body
-  if (body && typeof body === 'object') {
-    if (typeof body.raw === 'string') return body.raw
-    if (body.mode === 'raw' && typeof body.raw === 'string') return body.raw
-  }
-  return ''
-}
 
 function normalizeRequestData(value, fallbackName = 'New Request') {
   const baseRequest = createRequest(fallbackName)
@@ -102,79 +40,29 @@ function normalizeRequestData(value, fallbackName = 'New Request') {
       }))
     : baseRequest.headers.map((header) => ({ ...header, id: createId() }))
 
-  return {
-    ...baseRequest,
-    ...source,
-    id: createId(),
-    name: sanitizeName(source.name || fallbackName, fallbackName),
-    method: source.method || baseRequest.method,
-    url: source.url || baseRequest.url,
-    params,
-    headers,
-    authorization: source.authorization ? { ...baseRequest.authorization, ...source.authorization } : { ...baseRequest.authorization },
-    body: normalizeBody(source.body) || baseRequest.body,
+    return {
+      ...baseRequest,
+      ...source,
+      id: createId(),
+      name: sanitizeName(source.name || fallbackName, fallbackName),
+      method: source.method || baseRequest.method,
+      url: source.url || baseRequest.url,
+      params,
+      headers,
+      authorization: source.authorization ? { ...baseRequest.authorization, ...source.authorization } : { ...baseRequest.authorization },
+  body:
+    typeof source.body === "string"
+      ? source.body
+      : normalizeBody(source.body) || baseRequest.body,
   }
 }
+function normalizePostmanRequest(item, fallbackName = "New Request") {
 
-function normalizePostmanRequest(item, fallbackName = 'New Request') {
-  const request = item?.request || item || {}
-  const headers = Array.isArray(request.header)
-    ? request.header
-        .filter((header) => header && typeof header === 'object')
-        .map((header) => ({
-          id: createId(),
-          enabled: header.disabled !== true,
-          key: header.key ?? '',
-          value: header.value ?? '',
-        }))
-    : []
+    return normalizeRequestData(
+        importPostmanRequest(item),
+        fallbackName
+    );
 
-  const url = typeof request.url === 'string'
-    ? request.url
-    : request.url?.raw || ''
-
-  const params = Array.isArray(request.url?.query)
-    ? request.url.query
-        .filter((parameter) => parameter && typeof parameter === 'object')
-        .map((parameter) => ({
-          id: createId(),
-          enabled: true,
-          key: parameter.key ?? '',
-          value: parameter.value ?? '',
-        }))
-    : []
-
-  const auth = normalizeAuthorization(request.auth)
-
-  const events = Array.isArray(item?.event) ? item.event : []
-
-const preRequestEvent = events.find(
-  (event) => event.listen === 'prerequest'
-)
-
-const postResponseEvent = events.find(
-  (event) => event.listen === 'test'
-)
-
-const preRequestScript =
-  preRequestEvent?.script?.exec?.join('\n') ?? ''
-
-const postResponseScript =
-  postResponseEvent?.script?.exec?.join('\n') ?? ''
-
-  return normalizeRequestData({
-    name: item?.name || fallbackName,
-    method: request.method || 'GET',
-    url,
-    params,
-    headers,
-    authorization: auth,
-    body: normalizeBody(request.body),
-    scripts: {
-  preRequest: preRequestScript,
-  postResponse: postResponseScript,
-},
-  }, fallbackName)
 }
 
 function normalizePostmanCollection(raw, fallbackName = 'Imported Collection') {
@@ -377,4 +265,3 @@ export function serializeEnvironmentForExport(environment) {
     })),
   }, null, 2)
 }
-

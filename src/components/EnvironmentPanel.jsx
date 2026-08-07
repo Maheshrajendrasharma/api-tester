@@ -57,7 +57,7 @@ function updateVariable(variableId, field, value) {
     <aside className="environment-panel" aria-label="Environment variables">
 
  <div className="sidebar-section-header">
-    <span>VARIABLES</span>
+    <span>ENVIRONMENT VARIABLES</span>
 </div>
 
 

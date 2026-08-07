@@ -1,18 +1,49 @@
 import { useEffect, useMemo, useState } from 'react'
-import { loadCollections, saveCollections } from '../services/storageService'
-import { buildRequestFromTemplate, duplicateCollectionData, duplicateRequestData } from '../services/collectionService'
-import { exportCollection as exportCollectionData, importCollectionFromFile } from '../services/importExportService'
-import { isDuplicateName } from '../utils/validators'
-import { createCollection, createId, createRequest } from '../utils/requestModel'
 
-function duplicateRequest(request, name) {
-  return duplicateRequestData(request, name)
-}
+import {
+  loadCollections,
+  saveCollections,
+} from '../services/storageService'
+
+import {
+  buildRequestFromTemplate,
+  duplicateRequestData,
+} from '../services/collectionService'
+
+import {
+  exportCollection as exportCollectionData,
+  importCollectionFromFile,
+} from '../services/importExportService'
+
+import { isDuplicateName } from '../utils/validators'
+
+import {
+  createCollection,
+  createId,
+  createRequest,
+} from '../utils/requestModel'
+
+import {
+  createFolderNode,
+  createRequestNode,
+} from '../models/collectionNode'
+
+import {
+  findNode,
+  findParent,
+  removeNode,
+  insertNode,
+  moveNode,
+} from '../utils/treeHelpers'
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
 
 function generateUniqueName(baseName, existingNames) {
-
-  // Remove any previous Copy suffix
-  const cleanBase = baseName.replace(/\sCopy(?:\s\d+)?$/, '')
+  const cleanBase = String(baseName ?? 'New Request')
+    .replace(/\sCopy(?:\s\d+)?$/, '')
 
   if (!existingNames.includes(cleanBase)) {
     return cleanBase
@@ -29,337 +60,1527 @@ function generateUniqueName(baseName, existingNames) {
   while (
     existingNames.includes(`${cleanBase} Copy ${counter}`)
   ) {
-    counter++
+    counter += 1
   }
 
   return `${cleanBase} Copy ${counter}`
 }
 
+
+/*
+  Convert an old API Tester collection structure:
+
+  collection
+    requests[]
+    folders[]
+
+  into the new structure:
+
+  collection
+    children[]
+      request
+      folder
+        children[]
+*/
+function convertCollectionToTree(collection) {
+  if (!collection) {
+    return collection
+  }
+
+  // Already converted
+  if (Array.isArray(collection.children)) {
+    return collection
+  }
+
+  const children = []
+
+  /*
+    Top-level requests
+  */
+  if (Array.isArray(collection.requests)) {
+    collection.requests.forEach((request) => {
+      children.push(
+        createRequestNode(request)
+      )
+    })
+  }
+
+  /*
+    Convert folders recursively
+  */
+  function convertFolder(folder) {
+    const folderNode = {
+      id: folder.id ?? createId(),
+      type: 'folder',
+      name: folder.name ?? 'Folder',
+      expanded: folder.expanded ?? true,
+      children: [],
+    }
+
+    if (Array.isArray(folder.requests)) {
+      folder.requests.forEach((request) => {
+        folderNode.children.push(
+          createRequestNode(request)
+        )
+      })
+    }
+
+    if (Array.isArray(folder.folders)) {
+      folder.folders.forEach((nestedFolder) => {
+        folderNode.children.push(
+          convertFolder(nestedFolder)
+        )
+      })
+    }
+
+    return folderNode
+  }
+
+  if (Array.isArray(collection.folders)) {
+    collection.folders.forEach((folder) => {
+      children.push(
+        convertFolder(folder)
+      )
+    })
+  }
+
+  return {
+    ...collection,
+    type: 'collection',
+    children,
+    expanded: collection.expanded ?? true,
+  }
+}
+
+
+/*
+  Convert imported hierarchical Postman data.
+
+  If the importer already returns children[],
+  preserve it exactly.
+*/
+function normalizeImportedCollection(collection) {
+  if (!collection) {
+    return collection
+  }
+
+  if (Array.isArray(collection.children)) {
+    return {
+      ...collection,
+      type: 'collection',
+      expanded: true,
+    }
+  }
+
+  return convertCollectionToTree(collection)
+}
+
+
+/*
+  Get every request recursively.
+*/
+function getAllRequests(root) {
+  if (!root) {
+    return []
+  }
+
+  const requests = []
+
+  function walk(node) {
+    if (!node) return
+
+    if (node.type === 'request') {
+      requests.push(node)
+    }
+
+    if (Array.isArray(node.children)) {
+      node.children.forEach(walk)
+    }
+  }
+
+  walk(root)
+
+  return requests
+}
+
+
+/*
+  Get every node recursively.
+*/
+function getAllNodes(root) {
+  if (!root) {
+    return []
+  }
+
+  const nodes = []
+
+  function walk(node) {
+    if (!node) return
+
+    nodes.push(node)
+
+    if (Array.isArray(node.children)) {
+      node.children.forEach(walk)
+    }
+  }
+
+  walk(root)
+
+  return nodes
+}
+
+
+/*
+  Find a request across all collections.
+*/
+function findRequestInCollections(collections, requestId) {
+  for (const collection of collections) {
+    const found = findNode(collection, requestId)
+
+    if (found?.type === 'request') {
+      return found
+    }
+  }
+
+  return null
+}
+
+
+/*
+  Update a node recursively.
+*/
+function updateTreeNode(root, nodeId, changes) {
+  if (!root) {
+    return root
+  }
+
+  if (root.id === nodeId) {
+    return {
+      ...root,
+      ...changes,
+    }
+  }
+
+  if (!Array.isArray(root.children)) {
+    return root
+  }
+
+  let changed = false
+
+  const children = root.children.map((child) => {
+    const updated = updateTreeNode(
+      child,
+      nodeId,
+      changes
+    )
+
+    if (updated !== child) {
+      changed = true
+    }
+
+    return updated
+  })
+
+  if (!changed) {
+    return root
+  }
+
+  return {
+    ...root,
+    children,
+  }
+}
+
+
+/*
+  Delete node from a collection tree.
+*/
+function deleteNodeFromTree(root, nodeId) {
+  return removeNode(root, nodeId).tree
+}
+
+
+/*
+  Find the first request in a collection.
+*/
+function findFirstRequest(collection) {
+  const requests = getAllRequests(collection)
+
+  return requests[0] ?? null
+}
+
+
+/*
+  Find collection containing request.
+*/
+function findCollectionContainingRequest(
+  collections,
+  requestId
+) {
+  return collections.find((collection) => {
+    const node = findNode(
+      collection,
+      requestId
+    )
+
+    return node?.type === 'request'
+  })
+}
+
+
+/* =========================================================
+   MAIN HOOK
+   ========================================================= */
+
 export function useCollections({ onShowDialog } = {}) {
   const [collections, setCollections] = useState([])
-  const [selectedRequestId, setSelectedRequestId] = useState(null)
-  const [collectionsReady, setCollectionsReady] = useState(false)
+  const [selectedRequestId, setSelectedRequestId] =
+    useState(null)
+
+  const [collectionsReady, setCollectionsReady] =
+    useState(false)
+
+
+  /* =======================================================
+     LOAD
+     ======================================================= */
 
   useEffect(() => {
     let isMounted = true
 
     async function restoreCollections() {
       try {
-        const savedCollections = await loadCollections()
-        const initialCollections = savedCollections.length ? savedCollections : [createCollection()]
+        const savedCollections =
+          await loadCollections()
+
+        const initialCollections =
+          savedCollections.length
+            ? savedCollections.map(
+                convertCollectionToTree
+              )
+            : [
+                convertCollectionToTree(
+                  createCollection()
+                ),
+              ]
+
         if (isMounted) {
           setCollections(initialCollections)
-          setSelectedRequestId(initialCollections[0]?.requests[0]?.id ?? null)
+
+          const firstRequest =
+            findFirstRequest(
+              initialCollections[0]
+            )
+
+          setSelectedRequestId(
+            firstRequest?.id ?? null
+          )
         }
       } catch {
         if (isMounted) {
-          const initialCollection = createCollection()
-          setCollections([initialCollection])
-          setSelectedRequestId(initialCollection.requests[0].id)
+          const initialCollection =
+            convertCollectionToTree(
+              createCollection()
+            )
+
+          setCollections([
+            initialCollection,
+          ])
+
+          const firstRequest =
+            findFirstRequest(
+              initialCollection
+            )
+
+          setSelectedRequestId(
+            firstRequest?.id ?? null
+          )
         }
       } finally {
-        if (isMounted) setCollectionsReady(true)
+        if (isMounted) {
+          setCollectionsReady(true)
+        }
       }
     }
 
     restoreCollections()
-    return () => { isMounted = false }
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
+
+  /* =======================================================
+     SAVE
+     ======================================================= */
+
   useEffect(() => {
-    if (collectionsReady) saveCollections(collections).catch(() => {})
+    if (collectionsReady) {
+      saveCollections(collections)
+        .catch(() => {})
+    }
   }, [collections, collectionsReady])
 
-  const selectedRequest = useMemo(() => (
-    collections.flatMap((collection) => collection.requests).find((request) => request.id === selectedRequestId) ?? null
-  ), [collections, selectedRequestId])
 
-  function showValidationError(message) {
-    onShowDialog?.({ open: true, type: 'confirm', title: 'Notice', message, initialValue: '', options: [], confirmLabel: 'OK', cancelLabel: '', onConfirm: () => onShowDialog?.({ open: false, type: 'confirm', title: '', message: '', initialValue: '', options: [], confirmLabel: 'OK', cancelLabel: '', onConfirm: null, onCancel: null }), onCancel: () => onShowDialog?.({ open: false, type: 'confirm', title: '', message: '', initialValue: '', options: [], confirmLabel: 'OK', cancelLabel: '', onConfirm: null, onCancel: null }) })
-  }
+  /* =======================================================
+     SELECTED REQUEST
+     ======================================================= */
 
-  function promptForName(message, initialName, onComplete) {
-    onShowDialog?.({ open: true, type: 'input', title: message, message: '', initialValue: initialName, options: [], confirmLabel: 'Save', cancelLabel: 'Cancel', onConfirm: (value) => { onShowDialog?.({ open: false, type: 'input', title: '', message: '', initialValue: '', options: [], confirmLabel: 'Save', cancelLabel: 'Cancel', onConfirm: null, onCancel: null }); const trimmed = String(value ?? '').trim(); if (trimmed) onComplete(trimmed) }, onCancel: () => onShowDialog?.({ open: false, type: 'input', title: '', message: '', initialValue: '', options: [], confirmLabel: 'Save', cancelLabel: 'Cancel', onConfirm: null, onCancel: null }) })
-  }
-
-  function createNewCollection() {
-  const existingNames = collections.map(c => c.name)
-
-  const name = generateUniqueName(
-    'New Collection',
-    existingNames
-  )
-
-  const collection = createCollection(name)
-
-  setCollections(current => [...current, collection])
-
-  setSelectedRequestId(collection.requests[0].id)
-}
-
-  async function importCollection() {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.json,application/json'
-    input.onchange = async () => {
-      const file = input.files?.[0]
-      if (!file) return
-      try {
-        const importedCollection = await importCollectionFromFile(file)
-        const defaultName = importedCollection.name || file.name.replace(/\.json$/i, '')
-        promptForName('Import collection as', defaultName, (name) => {
-          if (isDuplicateName(collections, name)) return showValidationError('A collection with that name already exists.')
-          const collection = { ...importedCollection, id: createId(), name, expanded: true, requests: importedCollection.requests.map((request) => duplicateRequestData(request, request.name)) }
-          setCollections((currentCollections) => [...currentCollections, collection])
-          setSelectedRequestId(collection.requests[0]?.id ?? null)
-        })
-      } catch (error) {
-        showValidationError(error?.message || 'Import failed.')
-      }
+  const selectedRequest = useMemo(() => {
+    if (!selectedRequestId) {
+      return null
     }
-    input.click()
-  }
 
-  async function exportCollection(collectionId = null) {
-    const collection = collections.find((item) => item.id === collectionId) ?? collections.find((item) => item.requests.some((request) => request.id === selectedRequestId)) ?? collections[0]
-    if (!collection) return
-
-    try {
-      const content = await exportCollectionData(collection)
-      const dialog = await window.apiTester?.showSaveDialog?.({
-        filters: [{ name: 'JSON Files', extensions: ['json'] }],
-        defaultPath: `${collection.name}.json`,
-      })
-
-      if (!dialog || dialog.canceled || !dialog.filePath) return
-      await window.apiTester?.writeFile?.(dialog.filePath, content)
-    } catch (error) {
-      showValidationError(error?.message || 'Export failed.')
-    }
-  }
-
-  async function importCollectionIntoCollection(collectionId) {
-    const targetCollection = collections.find((item) => item.id === collectionId)
-    if (!targetCollection) return
-
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.json,application/json'
-    input.onchange = async () => {
-      const file = input.files?.[0]
-      if (!file) return
-      try {
-        const importedCollection = await importCollectionFromFile(file)
-        const importedRequests = importedCollection.requests.map((request) => {
-          const baseName = request.name || 'New Request'
-          const existingNames = targetCollection.requests.map((existingRequest) => existingRequest.name)
-          let uniqueName = baseName
-          let counter = 2
-          while (existingNames.includes(uniqueName)) {
-            uniqueName = `${baseName} ${counter}`
-            counter += 1
-          }
-          return duplicateRequestData(request, uniqueName)
-        })
-
-        setCollections((currentCollections) => currentCollections.map((collection) => (
-          collection.id === collectionId
-            ? {
-                ...collection,
-                expanded: true,
-                requests: [...collection.requests, ...importedRequests],
-              }
-            : collection
-        )))
-        setSelectedRequestId(importedRequests[0]?.id ?? null)
-      } catch (error) {
-        showValidationError(error?.message || 'Import failed.')
-      }
-    }
-    input.click()
-  }
-
-  function createNewRequest(collectionId) {
-
-  const collection = collections.find(
-    item => item.id === collectionId
-  )
-
-  if (!collection) return
-
-  const existingNames =
-    collection.requests.map(r => r.name)
-
-  const name =
-    generateUniqueName(
-      'New Request',
-      existingNames
+    return findRequestInCollections(
+      collections,
+      selectedRequestId
     )
-
-  const request = createRequest(name)
-
-  setCollections(current =>
-    current.map(item =>
-      item.id === collectionId
-        ? {
-            ...item,
-            expanded: true,
-            requests: [...item.requests, request]
-          }
-        : item
-    )
-  )
-
-  setSelectedRequestId(request.id)
-}
-
-  function toggleCollection(collectionId) {
-    setCollections((currentCollections) => currentCollections.map((collection) => (
-      collection.id === collectionId ? { ...collection, expanded: !collection.expanded } : collection
-    )))
-  }
-
-  function renameCollection(collectionId) {
-    const collection = collections.find((item) => item.id === collectionId)
-    if (!collection) return
-    promptForName('Collection name', collection.name, (name) => {
-      if (isDuplicateName(collections, name, collectionId)) return showValidationError('A collection with that name already exists.')
-      setCollections((currentCollections) => currentCollections.map((item) => (item.id === collectionId ? { ...item, name } : item)))
-    })
-  }
-
-  function duplicateCollection(collectionId) {
-
-  const collection = collections.find(
-    item => item.id === collectionId
-  )
-
-  if (!collection) return
-
-  const existingNames =
-    collections.map(c => c.name)
-
-  const name =
-    generateUniqueName(
-      collection.name,
-      existingNames
-    )
-
-  const duplicate =
-    duplicateCollectionData(collection, name)
-
-  setCollections(current => [
-    ...current,
-    duplicate
+  }, [
+    collections,
+    selectedRequestId,
   ])
 
-  setSelectedRequestId(
-    duplicate.requests[0]?.id ?? null
-  )
-}
 
-  function deleteCollection(collectionId) {
-    const collection = collections.find((item) => item.id === collectionId)
-    if (!collection) return
-    if (collections.length <= 1) {
-      showValidationError('You cannot delete the last collection.')
-      return
-    }
-    promptForName(`Delete collection "${collection.name}" and all of its requests? Type DELETE to confirm.`, '', (value) => {
-      if (String(value ?? '').trim().toLowerCase() !== 'delete') return
-      const remainingCollections = collections.filter((item) => item.id !== collectionId)
-      setCollections(remainingCollections)
-      if (collection.requests.some((request) => request.id === selectedRequestId)) setSelectedRequestId(remainingCollections[0]?.requests[0]?.id ?? null)
+  /* =======================================================
+     DIALOG HELPERS
+     ======================================================= */
+
+  function showValidationError(message) {
+    onShowDialog?.({
+      open: true,
+      type: 'confirm',
+      title: 'Notice',
+      message,
+      initialValue: '',
+      options: [],
+      confirmLabel: 'OK',
+      cancelLabel: '',
+      onConfirm: () =>
+        onShowDialog?.({
+          open: false,
+          type: 'confirm',
+          title: '',
+          message: '',
+          initialValue: '',
+          options: [],
+          confirmLabel: 'OK',
+          cancelLabel: '',
+          onConfirm: null,
+          onCancel: null,
+        }),
+      onCancel: () =>
+        onShowDialog?.({
+          open: false,
+          type: 'confirm',
+          title: '',
+          message: '',
+          initialValue: '',
+          options: [],
+          confirmLabel: 'OK',
+          cancelLabel: '',
+          onConfirm: null,
+          onCancel: null,
+        }),
     })
   }
 
-  function renameRequest(collectionId, requestId) {
-    const collection = collections.find((item) => item.id === collectionId)
-    const request = collection?.requests.find((item) => item.id === requestId)
-    if (!collection || !request) return
-    promptForName('Request name', request.name, (name) => {
-      if (isDuplicateName(collection.requests, name, requestId)) return showValidationError('A request with that name already exists in this collection.')
-      setCollections((currentCollections) => currentCollections.map((item) => (
-        item.id === collectionId ? { ...item, requests: item.requests.map((savedRequest) => (savedRequest.id === requestId ? { ...savedRequest, name } : savedRequest)) } : item
-      )))
+
+  function promptForName(
+    message,
+    initialName,
+    onComplete
+  ) {
+    onShowDialog?.({
+      open: true,
+      type: 'input',
+      title: message,
+      message: '',
+      initialValue: initialName,
+      options: [],
+      confirmLabel: 'Save',
+      cancelLabel: 'Cancel',
+
+      onConfirm: (value) => {
+        onShowDialog?.({
+          open: false,
+          type: 'input',
+          title: '',
+          message: '',
+          initialValue: '',
+          options: [],
+          confirmLabel: 'Save',
+          cancelLabel: '',
+          onConfirm: null,
+          onCancel: null,
+        })
+
+        const trimmed =
+          String(value ?? '').trim()
+
+        if (trimmed) {
+          onComplete(trimmed)
+        }
+      },
+
+      onCancel: () =>
+        onShowDialog?.({
+          open: false,
+          type: 'input',
+          title: '',
+          message: '',
+          initialValue: '',
+          options: [],
+          confirmLabel: 'Save',
+          cancelLabel: '',
+          onConfirm: null,
+          onCancel: null,
+        }),
     })
   }
 
-  function duplicateRequestInCollection(collectionId, requestId) {
 
-  const collection = collections.find(
-    item => item.id === collectionId
-  )
+  /* =======================================================
+     CREATE COLLECTION
+     ======================================================= */
 
-  const request = collection?.requests.find(
-    item => item.id === requestId
-  )
+  function createNewCollection() {
+    const existingNames =
+      collections.map(
+        (collection) => collection.name
+      )
 
-  if (!collection || !request) return
-
-  const existingNames =
-    collection.requests.map(r => r.name)
-
-  const name =
-    generateUniqueName(
-      request.name,
+    const name = generateUniqueName(
+      'New Collection',
       existingNames
     )
 
-  const duplicate =
-    duplicateRequest(request, name)
+    const collection =
+      convertCollectionToTree(
+        createCollection(name)
+      )
 
-  setCollections(current =>
-    current.map(item =>
-      item.id === collectionId
-        ? {
-            ...item,
-            requests: [
-              ...item.requests,
-              duplicate
-            ]
-          }
-        : item
+    setCollections(
+      (current) => [
+        ...current,
+        collection,
+      ]
     )
-  )
 
-  setSelectedRequestId(duplicate.id)
-}
+    const firstRequest =
+      findFirstRequest(collection)
 
-  function deleteRequest(collectionId, requestId) {
-    const collection = collections.find((item) => item.id === collectionId)
-    const request = collection?.requests.find((item) => item.id === requestId)
-    if (!collection || !request) return
-    promptForName(`Delete request "${request.name}"? Type DELETE to confirm.`, '', (value) => {
-      if (String(value ?? '').trim().toLowerCase() !== 'delete') return
-      const remainingRequests = collection.requests.filter((item) => item.id !== requestId)
-      setCollections((currentCollections) => currentCollections.map((item) => (
-        item.id === collectionId ? { ...item, requests: remainingRequests } : item
-      )))
-      if (selectedRequestId === requestId) setSelectedRequestId(remainingRequests[0]?.id ?? null)
-    })
+    setSelectedRequestId(
+      firstRequest?.id ?? null
+    )
   }
 
-  function updateRequest(updatedRequest) {
-    setCollections((currentCollections) => currentCollections.map((collection) => ({
-      ...collection,
-      requests: collection.requests.map((request) => (request.id === updatedRequest.id ? updatedRequest : request)),
-    })))
+
+  /* =======================================================
+     IMPORT COLLECTION
+     ======================================================= */
+
+  async function importCollection() {
+    const input =
+      document.createElement('input')
+
+    input.type = 'file'
+    input.accept =
+      '.json,application/json'
+
+    input.onchange = async () => {
+      const file =
+        input.files?.[0]
+
+      if (!file) return
+
+      try {
+        const importedCollection =
+          await importCollectionFromFile(file)
+
+        const treeCollection =
+          normalizeImportedCollection(
+            importedCollection
+          )
+
+        const defaultName =
+          treeCollection.name ||
+          file.name.replace(
+            /\.json$/i,
+            ''
+          )
+
+        promptForName(
+          'Import collection as',
+          defaultName,
+          (name) => {
+            const existingNames =
+              collections.map(
+                (collection) =>
+                  collection.name
+              )
+
+            if (
+              existingNames.includes(name)
+            ) {
+              showValidationError(
+                'A collection with that name already exists.'
+              )
+
+              return
+            }
+
+            const collection = {
+              ...treeCollection,
+              id: createId(),
+              type: 'collection',
+              name,
+              expanded: true,
+            }
+
+            setCollections(
+              (currentCollections) => [
+                ...currentCollections,
+                collection,
+              ]
+            )
+
+            const firstRequest =
+              findFirstRequest(collection)
+
+            setSelectedRequestId(
+              firstRequest?.id ?? null
+            )
+          }
+        )
+      } catch (error) {
+        showValidationError(
+          error?.message ||
+          'Import failed.'
+        )
+      }
+    }
+
+    input.click()
   }
 
-  function restoreRequest(template, preferredCollectionId = null) {
-    const targetCollectionId = preferredCollectionId ?? collections.find((collection) => collection.requests.some((request) => request.id === selectedRequestId))?.id ?? collections[0]?.id
-    const collection = collections.find((item) => item.id === targetCollectionId)
-    if (!collection) return null
 
-    const request = buildRequestFromTemplate(template, `Copy of ${template?.name ?? 'Request'}`)
+  /* =======================================================
+     EXPORT COLLECTION
+     ======================================================= */
 
-    setCollections((currentCollections) => currentCollections.map((item) => (
-      item.id === targetCollectionId ? { ...item, expanded: true, requests: [...item.requests, request] } : item
-    )))
-    setSelectedRequestId(request.id)
+  async function exportCollection(
+    collectionId = null
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      ) ??
+      findCollectionContainingRequest(
+        collections,
+        selectedRequestId
+      ) ??
+      collections[0]
+
+    if (!collection) {
+      return
+    }
+
+    try {
+      const content =
+        await exportCollectionData(
+          collection
+        )
+
+      const dialog =
+        await window.apiTester
+          ?.showSaveDialog?.({
+            filters: [
+              {
+                name: 'JSON Files',
+                extensions: ['json'],
+              },
+            ],
+            defaultPath:
+              `${collection.name}.json`,
+          })
+
+      if (
+        !dialog ||
+        dialog.canceled ||
+        !dialog.filePath
+      ) {
+        return
+      }
+
+      await window.apiTester
+        ?.writeFile?.(
+          dialog.filePath,
+          content
+        )
+    } catch (error) {
+      showValidationError(
+        error?.message ||
+        'Export failed.'
+      )
+    }
+  }
+
+
+  /* =======================================================
+     IMPORT INTO COLLECTION
+     ======================================================= */
+
+  async function importCollectionIntoCollection(
+    collectionId
+  ) {
+    const targetCollection =
+      collections.find(
+        (collection) =>
+          collection.id === collectionId
+      )
+
+    if (!targetCollection) {
+      return
+    }
+
+    const input =
+      document.createElement('input')
+
+    input.type = 'file'
+    input.accept =
+      '.json,application/json'
+
+    input.onchange = async () => {
+      const file =
+        input.files?.[0]
+
+      if (!file) return
+
+      try {
+        const importedCollection =
+          await importCollectionFromFile(file)
+
+        const importedTree =
+          normalizeImportedCollection(
+            importedCollection
+          )
+
+        /*
+          Import the entire hierarchy,
+          not only requests.
+        */
+
+        const importedChildren =
+          Array.isArray(
+            importedTree.children
+          )
+            ? importedTree.children
+            : []
+
+        setCollections(
+          (currentCollections) =>
+            currentCollections.map(
+              (collection) => {
+                if (
+                  collection.id !==
+                  collectionId
+                ) {
+                  return collection
+                }
+
+                return {
+                  ...collection,
+                  expanded: true,
+                  children: [
+                    ...(collection.children ?? []),
+                    ...importedChildren,
+                  ],
+                }
+              }
+            )
+        )
+
+        const firstRequest =
+          findFirstRequest(
+            importedTree
+          )
+
+        setSelectedRequestId(
+          firstRequest?.id ?? null
+        )
+      } catch (error) {
+        showValidationError(
+          error?.message ||
+          'Import failed.'
+        )
+      }
+    }
+
+    input.click()
+  }
+
+
+  /* =======================================================
+     CREATE REQUEST
+     ======================================================= */
+
+  function createNewRequest(
+    parentId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === parentId
+      )
+
+    if (!collection) {
+      return
+    }
+
+    const existingNames =
+      getAllRequests(
+        collection
+      ).map(
+        (request) =>
+          request.name
+      )
+
+    const name =
+      generateUniqueName(
+        'New Request',
+        existingNames
+      )
+
+    const request =
+      createRequestNode(
+        createRequest(name)
+      )
+
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (collectionItem) => {
+            if (
+              collectionItem.id !==
+              parentId
+            ) {
+              return collectionItem
+            }
+
+            return insertNode(
+              collectionItem,
+              parentId,
+              request
+            )
+          }
+        )
+    )
+
+    setSelectedRequestId(
+      request.id
+    )
+  }
+
+
+  /* =======================================================
+     SELECT REQUEST
+     ======================================================= */
+
+  function selectRequest(
+    _collectionId,
+    requestId
+  ) {
+    setSelectedRequestId(
+      requestId
+    )
+  }
+
+
+  /* =======================================================
+     TOGGLE COLLECTION / FOLDER
+     ======================================================= */
+
+  function toggleCollection(
+    nodeId
+  ) {
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (collection) =>
+            updateTreeNode(
+              collection,
+              nodeId,
+              {
+                expanded:
+                  !findNode(
+                    collection,
+                    nodeId
+                  )?.expanded,
+              }
+            )
+        )
+    )
+  }
+
+
+  /* =======================================================
+     RENAME COLLECTION
+     ======================================================= */
+
+  function renameCollection(
+    collectionId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      )
+
+    if (!collection) {
+      return
+    }
+
+    promptForName(
+      'Collection name',
+      collection.name,
+      (name) => {
+        if (
+          isDuplicateName(
+            collections,
+            name,
+            collectionId
+          )
+        ) {
+          showValidationError(
+            'A collection with that name already exists.'
+          )
+
+          return
+        }
+
+        setCollections(
+          (currentCollections) =>
+            currentCollections.map(
+              (item) =>
+                item.id ===
+                collectionId
+                  ? {
+                      ...item,
+                      name,
+                    }
+                  : item
+            )
+        )
+      }
+    )
+  }
+
+
+  /* =======================================================
+     DUPLICATE COLLECTION
+     ======================================================= */
+
+  function duplicateCollection(
+    collectionId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      )
+
+    if (!collection) {
+      return
+    }
+
+    const existingNames =
+      collections.map(
+        (item) => item.name
+      )
+
+    const name =
+      generateUniqueName(
+        collection.name,
+        existingNames
+      )
+
+    function cloneTree(node) {
+      if (!node) return null
+
+      const cloned = {
+        ...node,
+        id: createId(),
+      }
+
+      if (node.type === 'request') {
+        return {
+          ...cloned,
+          ...duplicateRequestData(
+            node,
+            node.name
+          ),
+          id: createId(),
+          type: 'request',
+        }
+      }
+
+      return {
+        ...cloned,
+        children:
+          Array.isArray(
+            node.children
+          )
+            ? node.children.map(
+                cloneTree
+              )
+            : [],
+      }
+    }
+
+    const duplicate = {
+      ...cloneTree(collection),
+      id: createId(),
+      name,
+      type: 'collection',
+      expanded: true,
+    }
+
+    setCollections(
+      (current) => [
+        ...current,
+        duplicate,
+      ]
+    )
+
+    const firstRequest =
+      findFirstRequest(
+        duplicate
+      )
+
+    setSelectedRequestId(
+      firstRequest?.id ?? null
+    )
+  }
+
+
+  /* =======================================================
+     DELETE COLLECTION
+     ======================================================= */
+
+  function deleteCollection(
+    collectionId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      )
+
+    if (!collection) {
+      return
+    }
+
+    if (collections.length <= 1) {
+      showValidationError(
+        'You cannot delete the last collection.'
+      )
+
+      return
+    }
+
+    promptForName(
+      `Delete collection "${collection.name}" and all of its requests? Type DELETE to confirm.`,
+      '',
+      (value) => {
+        if (
+          String(value ?? '')
+            .trim()
+            .toLowerCase() !==
+          'delete'
+        ) {
+          return
+        }
+
+        const remainingCollections =
+          collections.filter(
+            (item) =>
+              item.id !==
+              collectionId
+          )
+
+        setCollections(
+          remainingCollections
+        )
+
+        const selectedInsideDeleted =
+          findNode(
+            collection,
+            selectedRequestId
+          )
+
+        if (
+          selectedInsideDeleted
+        ) {
+          const firstRequest =
+            findFirstRequest(
+              remainingCollections[0]
+            )
+
+          setSelectedRequestId(
+            firstRequest?.id ??
+            null
+          )
+        }
+      }
+    )
+  }
+
+
+  /* =======================================================
+     RENAME REQUEST
+     ======================================================= */
+
+  function renameRequest(
+    collectionId,
+    requestId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      )
+
+    const request =
+      collection
+        ? findNode(
+            collection,
+            requestId
+          )
+        : null
+
+    if (
+      !collection ||
+      !request ||
+      request.type !== 'request'
+    ) {
+      return
+    }
+
+    const allRequests =
+      getAllRequests(
+        collection
+      )
+
+    promptForName(
+      'Request name',
+      request.name,
+      (name) => {
+        if (
+          isDuplicateName(
+            allRequests,
+            name,
+            requestId
+          )
+        ) {
+          showValidationError(
+            'A request with that name already exists in this collection.'
+          )
+
+          return
+        }
+
+        setCollections(
+          (currentCollections) =>
+            currentCollections.map(
+              (item) =>
+                item.id ===
+                collectionId
+                  ? updateTreeNode(
+                      item,
+                      requestId,
+                      {
+                        name,
+                      }
+                    )
+                  : item
+            )
+        )
+      }
+    )
+  }
+
+
+  /* =======================================================
+     DUPLICATE REQUEST
+     ======================================================= */
+
+  function duplicateRequestInCollection(
+    collectionId,
+    requestId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      )
+
+    const request =
+      collection
+        ? findNode(
+            collection,
+            requestId
+          )
+        : null
+
+    if (
+      !collection ||
+      !request ||
+      request.type !== 'request'
+    ) {
+      return
+    }
+
+    const existingNames =
+      getAllRequests(
+        collection
+      ).map(
+        (item) =>
+          item.name
+      )
+
+    const name =
+      generateUniqueName(
+        request.name,
+        existingNames
+      )
+
+    const duplicate =
+      createRequestNode(
+        duplicateRequestData(
+          request,
+          name
+        )
+      )
+
+    const parent =
+      findParent(
+        collection,
+        requestId
+      )
+
+    const parentId =
+      parent?.id ??
+      collection.id
+
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (item) =>
+            item.id ===
+            collectionId
+              ? insertNode(
+                  item,
+                  parentId,
+                  duplicate
+                )
+              : item
+        )
+    )
+
+    setSelectedRequestId(
+      duplicate.id
+    )
+  }
+
+
+  /* =======================================================
+     DELETE REQUEST
+     ======================================================= */
+
+  function deleteRequest(
+    collectionId,
+    requestId
+  ) {
+    const collection =
+      collections.find(
+        (item) =>
+          item.id === collectionId
+      )
+
+    const request =
+      collection
+        ? findNode(
+            collection,
+            requestId
+          )
+        : null
+
+    if (
+      !collection ||
+      !request ||
+      request.type !== 'request'
+    ) {
+      return
+    }
+
+    promptForName(
+      `Delete request "${request.name}"? Type DELETE to confirm.`,
+      '',
+      (value) => {
+        if (
+          String(value ?? '')
+            .trim()
+            .toLowerCase() !==
+          'delete'
+        ) {
+          return
+        }
+
+        setCollections(
+          (currentCollections) =>
+            currentCollections.map(
+              (item) =>
+                item.id ===
+                collectionId
+                  ? deleteNodeFromTree(
+                      item,
+                      requestId
+                    )
+                  : item
+            )
+        )
+
+        if (
+          selectedRequestId ===
+          requestId
+        ) {
+          const remainingRequests =
+            getAllRequests(
+              collection
+            ).filter(
+              (item) =>
+                item.id !==
+                requestId
+            )
+
+          setSelectedRequestId(
+            remainingRequests[0]
+              ?.id ?? null
+          )
+        }
+      }
+    )
+  }
+
+
+  /* =======================================================
+     UPDATE REQUEST
+     ======================================================= */
+
+  function updateRequest(
+    updatedRequest
+  ) {
+    if (!updatedRequest?.id) {
+      return
+    }
+
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (collection) =>
+            findNode(
+              collection,
+              updatedRequest.id
+            )
+              ? updateTreeNode(
+                  collection,
+                  updatedRequest.id,
+                  updatedRequest
+                )
+              : collection
+        )
+    )
+  }
+
+
+  /* =======================================================
+     RESTORE REQUEST FROM HISTORY
+     ======================================================= */
+
+  function restoreRequest(
+    template,
+    preferredCollectionId = null
+  ) {
+    const targetCollection =
+      preferredCollectionId
+        ? collections.find(
+            (collection) =>
+              collection.id ===
+              preferredCollectionId
+          )
+        : findCollectionContainingRequest(
+            collections,
+            selectedRequestId
+          ) ??
+          collections[0]
+
+    if (!targetCollection) {
+      return null
+    }
+
+    const request =
+      createRequestNode(
+        buildRequestFromTemplate(
+          template,
+          `Copy of ${
+            template?.name ??
+            'Request'
+          }`
+        )
+      )
+
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (collection) =>
+            collection.id ===
+            targetCollection.id
+              ? insertNode(
+                  collection,
+                  collection.id,
+                  request
+                )
+              : collection
+        )
+    )
+
+    setSelectedRequestId(
+      request.id
+    )
+
     return request
   }
 
-  return { collections, selectedRequestId, selectedRequest, createNewCollection, importCollection, exportCollection, importCollectionIntoCollection, createNewRequest, selectRequest: (_collectionId, requestId) => setSelectedRequestId(requestId), toggleCollection, renameCollection, duplicateCollection, deleteCollection, renameRequest, duplicateRequest: duplicateRequestInCollection, deleteRequest, updateRequest, restoreRequest }
+
+  /* =======================================================
+     MOVE NODE
+     ======================================================= */
+
+  function moveCollectionNode(
+    collectionId,
+    nodeId,
+    destinationId,
+    index = null
+  ) {
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (collection) => {
+            if (
+              collection.id !==
+              collectionId
+            ) {
+              return collection
+            }
+
+            return moveNode(
+              collection,
+              nodeId,
+              destinationId,
+              index
+            )
+          }
+        )
+    )
+  }
+
+
+  /* =======================================================
+     CREATE FOLDER
+     ======================================================= */
+
+  function createFolder(
+    collectionId,
+    parentId = null,
+    name = 'New Folder'
+  ) {
+    const folder =
+      createFolderNode(name)
+
+    setCollections(
+      (currentCollections) =>
+        currentCollections.map(
+          (collection) => {
+            if (
+              collection.id !==
+              collectionId
+            ) {
+              return collection
+            }
+
+            const destination =
+              parentId ||
+              collection.id
+
+            return insertNode(
+              collection,
+              destination,
+              folder
+            )
+          }
+        )
+    )
+
+    return folder.id
+  }
+
+
+  /* =======================================================
+     RETURN API
+     ======================================================= */
+
+  return {
+    collections,
+
+    selectedRequestId,
+
+    selectedRequest,
+
+    createNewCollection,
+
+    importCollection,
+
+    exportCollection,
+
+    importCollectionIntoCollection,
+
+    createNewRequest,
+
+    selectRequest,
+
+    toggleCollection,
+
+    renameCollection,
+
+    duplicateCollection,
+
+    deleteCollection,
+
+    renameRequest,
+
+    duplicateRequest:
+      duplicateRequestInCollection,
+
+    deleteRequest,
+
+    updateRequest,
+
+    restoreRequest,
+
+    createFolder,
+
+    moveCollectionNode,
+  }
 }
