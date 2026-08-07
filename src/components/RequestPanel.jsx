@@ -107,25 +107,94 @@ if (!request) {
 )}
 
 
-<div style={{ color: "#00ff99", fontSize: "12px" }}>
-  Current Request: {request.name}<br />
-  Body Length: {(request.body ?? "").length}
-</div>
 
 {activeTab === "Body" && (
   <div className="body-editor-area">
-    <label className="body-label">raw · JSON</label>
+    <div className="body-toolbar">
 
-    <VariableField
+  <div className="body-type-group">
+
+    <select
+      className="body-mode-select"
+      value={request.bodyMode ?? "raw"}
+      onChange={(e) =>
+        updateRequest({
+          bodyMode: e.target.value,
+        })
+      }
+    >
+      <option value="none">none</option>
+      <option value="form-data">form-data</option>
+      <option value="x-www-form-urlencoded">
+        x-www-form-urlencoded
+      </option>
+      <option value="raw">raw</option>
+      <option value="binary">binary</option>
+      <option value="graphql">GraphQL</option>
+    </select>
+
+    {(request.bodyMode ?? "raw") === "raw" && (
+      <select
+        className="body-format-select"
+        value={request.bodyFormat ?? "json"}
+        onChange={(e) =>
+          updateRequest({
+            bodyFormat: e.target.value,
+          })
+        }
+      >
+        <option value="text">Text</option>
+        <option value="javascript">JavaScript</option>
+        <option value="json">JSON</option>
+        <option value="html">HTML</option>
+        <option value="xml">XML</option>
+      </select>
+    )}
+
+    {(request.bodyMode ?? "raw") === "raw" && (
+      <button
+        type="button"
+        className="beautify-button"
+        onClick={() => {
+          if ((request.bodyFormat ?? "json") !== "json") return
+
+          try {
+            const formatted = JSON.stringify(
+              JSON.parse(request.body ?? ""),
+              null,
+              2
+            )
+
+            updateRequest({ body: formatted })
+          } catch {
+            // Keep invalid/incomplete JSON editable.
+          }
+        }}
+      >
+        Beautify
+      </button>
+    )}
+
+  </div>
+
+</div>
+
+{(request.bodyMode ?? "raw") === "raw" && (
+  <VariableField
     key={request.id}
     environment={environment}
     className="json-editor"
     multiline
     value={request.body ?? ""}
     onChange={(e) =>
-        updateRequest({ body: e.target.value })
+      updateRequest({
+        body: e.target.value,
+      })
     }
-/>
+  />
+)}
+
+
   </div>
 )}
 

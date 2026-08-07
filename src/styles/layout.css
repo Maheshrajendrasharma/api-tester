@@ -429,34 +429,6 @@ padding:0 6px;
 
 
 
-.action-menu-trigger {
-  display: grid;
-
-  width: 30px;
-  height: 30px;
-
-  place-items: center;
-
-  padding: 0;
-
-  color: #98a6b5;
-  background: transparent;
-
-  border: 0;
-  border-radius: 5px;
-
-  cursor: pointer;
-
-  font: inherit;
-  line-height: 1;
-
-  opacity: 0;
-
-  transition:
-    opacity 120ms ease,
-    color 120ms ease,
-    background 120ms ease;
-}
 
 /* Horizontal three dots */
 .action-menu-dots {
@@ -519,7 +491,7 @@ padding:0 6px;
   padding: 0 10px;
 
   color: #d9e2eb;
-  background: transparent;
+  background: #422a30;
 
   border: 0;
   border-radius: 5px;
@@ -1196,18 +1168,8 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    The ActionMenu itself must stay in normal flex flow.
    Do NOT position it absolute.
 */
-.tree-row-actions .action-menu {
-  position: relative;
-  top: auto;
-  right: auto;
-  display: flex;
-  width: 18px;
-  height: 20px;
-  flex: 0 0 18px;
-  align-items: center;
-  justify-content: center;
-  transform: none;
-}
+/* Action menu container */
+
 
 /* Three-dot button */
 .tree-row-actions .action-menu-trigger {
@@ -1217,7 +1179,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   place-items: center;
   padding: 0;
   color: #98a6b5;
-  background: transparent;
+  background: #0f335a;
   border: 0;
   border-radius: 5px;
   cursor: pointer;
@@ -1272,8 +1234,8 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   width: 100%;
   height: 34px;
   padding: 0 10px;
-  color: #d9e2eb;
-  background: transparent;
+   color: #ffc0c4;
+  background: #422a30;
   border: 0;
   border-radius: 5px;
   cursor: pointer;
@@ -1590,4 +1552,418 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+}
+
+/* =========================================================
+   REQUEST BODY TOOLBAR
+   ========================================================= */
+
+.body-editor-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    padding-top: 10px;
+}
+
+.body-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 42px;
+    margin-bottom: 8px;
+}
+
+.body-type-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.body-mode-select,
+.body-format-select {
+    height: 34px;
+    padding: 0 30px 0 10px;
+    color: #dbe5ee;
+    background: #151b22;
+    border: 1px solid #303b47;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.body-mode-select {
+    min-width: 130px;
+}
+
+.body-format-select {
+    min-width: 105px;
+}
+
+.body-mode-select:hover,
+.body-format-select:hover {
+    border-color: #4e8f77;
+}
+
+.body-mode-select:focus,
+.body-format-select:focus {
+    outline: none;
+    border-color: #6ee7b7;
+}
+
+.beautify-button {
+    height: 34px;
+    padding: 0 13px;
+    color: #6ee7b7;
+    background: transparent;
+    border: 1px solid #35434e;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.beautify-button:hover {
+    background: #1b2926;
+    border-color: #6ee7b7;
+}
+
+
+.request-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.body-editor-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.json-editor {
+    flex: 1;
+    min-height: 180px;
+    height: auto !important;
+    max-height: none;
+    overflow: auto !important;
+    resize: none;
+}
+
+.request-panel {
+    overflow: hidden;
+}
+
+.json-editor {
+    overflow: auto !important;
+}
+
+
+
+/* Dropdown */
+.action-menu [role="menu"] {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+
+    min-width: 120px;
+    width: max-content;
+    max-width: 180px;
+
+    padding: 4px;
+    margin: 0;
+
+    background: #20252b;
+    border: 1px solid #39434e;
+    border-radius: 6px;
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+
+    z-index: 9999;
+}
+
+.action-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    /* Keep menus above the tree */
+    z-index: 1000;
+}
+
+.action-menu-trigger {
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+    margin: 0;
+
+    border: 0;
+    border-radius: 5px;
+
+    background: transparent;
+    color: #dce3ea;
+
+    font-size: 21px;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.action-menu-trigger:hover {
+    background: #293541;
+    color: #ffffff;
+}
+
+/* IMPORTANT */
+.action-menu-dropdown {
+    position: absolute;
+
+    top: calc(100% + 4px);
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    width: 135px;
+    min-width: 135px;
+
+    padding: 4px;
+
+    background: #20252b;
+    border: 1px solid #46515d;
+    border-radius: 6px;
+
+    box-sizing: border-box;
+
+    /* VERY HIGH */
+    z-index: 999999;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+/* Every option gets its own row */
+.action-menu-item {
+    display: block;
+
+    width: 100%;
+    height: 32px;
+
+    box-sizing: border-box;
+
+    padding: 6px 10px;
+    margin: 0;
+
+    border: 0;
+    border-radius: 4px;
+
+    background: transparent;
+    color: #e5e7eb;
+
+    font-size: 13px;
+    line-height: 20px;
+
+    text-align: left;
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
+.action-menu-item:hover {
+    background: #303a45;
+}
+
+.action-menu-item.destructive {
+    color: #ff7777;
+}
+
+.action-menu-item.destructive:hover {
+    background: rgba(255, 70, 70, 0.15);
+}
+
+/* =========================================================
+   FINAL ACTION MENU FIX
+   ========================================================= */
+
+/* The menu wrapper */
+.action-menu {
+  position: relative !important;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000 !important;
+}
+
+/* Three-dot trigger */
+.action-menu-trigger {
+  width: 24px !important;
+  height: 24px !important;
+
+  display: grid !important;
+  place-items: center;
+
+  padding: 0 !important;
+  margin: 0;
+
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+
+  color: #98a6b5;
+  cursor: pointer;
+
+  font-family: Arial, sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 700;
+  line-height: 1 !important;
+
+  opacity: 0;
+}
+
+/* Show dots when row is hovered */
+.tree-node-row:hover .action-menu-trigger,
+.tree-request-row:hover .action-menu-trigger,
+.tree-row-actions:hover .action-menu-trigger,
+.action-menu:focus-within .action-menu-trigger,
+.action-menu-trigger[aria-expanded="true"] {
+  opacity: 1;
+}
+
+/* Dot hover */
+.action-menu-trigger:hover,
+.action-menu-trigger[aria-expanded="true"] {
+  color: #ffffff !important;
+  background: #35414d !important;
+}
+
+
+/* =========================================================
+   DROPDOWN
+   ========================================================= */
+
+.action-menu-dropdown {
+  position: absolute !important;
+
+  top: calc(100% + 5px) !important;
+  right: 0 !important;
+
+  width: 150px !important;
+  min-width: 150px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  padding: 4px !important;
+  margin: 0 !important;
+
+  background: #1a222b !important;
+
+  border: 1px solid #384552 !important;
+  border-radius: 7px !important;
+
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55) !important;
+
+  z-index: 99999 !important;
+}
+
+
+/* Every option must occupy its own row */
+.action-menu-item {
+  display: block !important;
+
+  width: 100% !important;
+  height: 30px !important;
+  min-height: 30px !important;
+
+  box-sizing: border-box !important;
+
+  padding: 0 10px !important;
+  margin: 0 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 5px !important;
+
+  color: #d9e2eb !important;
+
+  font-family: inherit !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+
+  line-height: 30px !important;
+  text-align: left !important;
+
+  cursor: pointer !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* Menu item hover */
+.action-menu-item:hover,
+.action-menu-item:focus-visible {
+  background: #303c48 !important;
+  color: #ffffff !important;
+  outline: none !important;
+}
+
+
+/* Delete / destructive action */
+.action-menu-item.destructive {
+  color: #f09a9f !important;
+}
+
+.action-menu-item.destructive:hover,
+.action-menu-item.destructive:focus-visible {
+  color: #ffc0c4 !important;
+  background: #422a30 !important;
+}
+
+
+/* =========================================================
+   TREE MENU MUST APPEAR ABOVE OTHER ROWS
+   ========================================================= */
+
+.tree-row-actions {
+  position: relative !important;
+  z-index: 10000 !important;
+}
+
+.tree-node-row,
+.tree-request-row {
+  position: relative;
+  overflow: visible !important;
+}
+
+.tree-node-children {
+  overflow: visible !important;
+}
+
+.collection-list,
+.collection-group {
+  overflow: visible !important;
+}
+
+
+/* When menu is open, make its row highest priority */
+.tree-node-row:has(.action-menu-trigger[aria-expanded="true"]),
+.tree-request-row:has(.action-menu-trigger[aria-expanded="true"]) {
+  z-index: 100000 !important;
+}
+
+
+/* Don't let other rows cover an open menu */
+.tree-node-row:hover,
+.tree-request-row:hover {
+  z-index: 1000;
 }

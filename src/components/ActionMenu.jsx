@@ -68,62 +68,54 @@ function ActionMenu({ label, actions }) {
   }
 
   return (
-    <div
-      className="action-menu"
-      ref={menuRef}
-      onClick={(event) => event.stopPropagation()}
-      onKeyDown={handleMenuKeyDown}
+  <div
+    className="action-menu"
+    ref={menuRef}
+    onClick={(event) => event.stopPropagation()}
+    onKeyDown={handleMenuKeyDown}
+  >
+    <button
+      className="action-menu-trigger"
+      type="button"
+      aria-label={label}
+      aria-haspopup="menu"
+      aria-expanded={isOpen}
+      data-tooltip={label}
+      onClick={() => setIsOpen((open) => !open)}
+      onKeyDown={openMenuWithKeyboard}
     >
-      <button
-        className="action-menu-trigger"
-        type="button"
-        aria-label={label}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        data-tooltip={label}
-        onClick={() => setIsOpen((open) => !open)}
-        onKeyDown={openMenuWithKeyboard}
-      >
-        <span className="action-menu-dots" aria-hidden="true">
-            ⋮
-        </span>
-      </button>
+      ⋮
+    </button>
 
-      {isOpen && (
-        <div
-          className="action-menu-popover"
-          role="menu"
-        >
-          {actions.map((action) => (
-            <button
-              className={
-                action.destructive
-                  ? 'destructive'
-                  : ''
-              }
-              key={action.label}
-              type="button"
-              role="menuitem"
-              disabled={action.disabled}
-              title={
-                action.disabled
-                  ? action.tooltip || 'Coming Soon'
-                  : undefined
-              }
-              onClick={() => {
-                if (action.disabled) return
-
-                setIsOpen(false)
-                action.onClick()
-              }}
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+    {isOpen && (
+      <div className="action-menu-dropdown" role="menu">
+        {actions.map((action) => (
+          <button
+            className={`action-menu-item ${
+              action.destructive ? 'destructive' : ''
+            }`}
+            key={action.label}
+            type="button"
+            role="menuitem"
+            disabled={action.disabled}
+            title={
+              action.disabled
+                ? action.tooltip || 'Coming Soon'
+                : undefined
+            }
+            onClick={() => {
+              if (action.disabled) return
+              setIsOpen(false)
+              action.onClick()
+            }}
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+)
 }
 
 export default ActionMenu
