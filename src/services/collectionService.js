@@ -112,9 +112,26 @@ function normalizePostmanCollection(raw, fallbackName = 'Imported Collection') {
   }
 }
 
-export function normalizeCollectionData(raw, fallbackName = 'Imported Collection') {
+export function normalizeCollectionData(
+  raw,
+  fallbackName = 'Imported Collection'
+) {
   if (!raw || typeof raw !== 'object') {
     throw new Error('Unsupported collection format.')
+  }
+
+
+
+  
+  // API Tester exported collection
+  if (
+    raw.version === 'api-tester-collection' &&
+    raw.collection
+  ) {
+    return normalizeCollectionData(
+      raw.collection,
+      fallbackName
+    )
   }
 
   if (Array.isArray(raw.collections) && raw.collections.length) {
@@ -207,15 +224,55 @@ export function buildRequestFromTemplate(template, fallbackName) {
   }
 }
 
+function normalizeRequestForExport(request) {
+  return {
+    ...request,
+    params: request.params ?? [],
+    headers: request.headers ?? [],
+  }
+}
+
+function normalizeChildrenForExport(children) {
+  if (!Array.isArray(children)) {
+    return []
+  }
+
+  return children.map((child) => {
+    if (child.type === 'request') {
+      return normalizeRequestForExport(child)
+    }
+
+    if (child.type === 'folder') {
+      return {
+        ...child,
+        children: normalizeChildrenForExport(child.children),
+      }
+    }
+
+    return child
+  })
+}
+
 export function serializeCollectionForExport(collection) {
-  return JSON.stringify({
-    version: 'api-tester-collection',
-    collection: {
-      ...collection,
-      requests: collection.requests.map((request) => ({ ...request, params: request.params ?? [], headers: request.headers ?? [] })),
-      folders: collection.folders ?? [],
+  if (!collection) {
+    throw new Error('Collection is missing.')
+  }
+
+  return JSON.stringify(
+    {
+      version: 'api-tester-collection',
+
+      collection: {
+        ...collection,
+
+        children: normalizeChildrenForExport(
+          collection.children
+        ),
+      },
     },
-  }, null, 2)
+    null,
+    2
+  )
 }
 export function normalizeEnvironmentData(raw, fallbackName = 'Imported Environment') {
   if (!raw || typeof raw !== 'object') {

@@ -826,62 +826,63 @@ export function useCollections({ onShowDialog } = {}) {
      CREATE REQUEST
      ======================================================= */
 
-  function createNewRequest(
-    parentId
-  ) {
-    const collection =
-      collections.find(
-        (item) =>
-          item.id === parentId
-      )
-
-    if (!collection) {
-      return
-    }
-
-    const existingNames =
-      getAllRequests(
-        collection
-      ).map(
-        (request) =>
-          request.name
-      )
-
-    const name =
-      generateUniqueName(
-        'New Request',
-        existingNames
-      )
-
-    const request =
-      createRequestNode(
-        createRequest(name)
-      )
-
-    setCollections(
-      (currentCollections) =>
-        currentCollections.map(
-          (collectionItem) => {
-            if (
-              collectionItem.id !==
-              parentId
-            ) {
-              return collectionItem
-            }
-
-            return insertNode(
-              collectionItem,
-              parentId,
-              request
-            )
-          }
-        )
-    )
-
-    setSelectedRequestId(
-      request.id
-    )
+function createNewRequest(parentId) {
+  if (!parentId) {
+    return
   }
+
+  // Find the parent node across all collections.
+  // The parent can be either:
+  // 1. a collection
+  // 2. a folder
+  let parentNode = null
+  let parentCollection = null
+
+  for (const collection of collections) {
+    const found = findNode(collection, parentId)
+
+    if (found) {
+      parentNode = found
+      parentCollection = collection
+      break
+    }
+  }
+
+  if (!parentNode || !parentCollection) {
+    return
+  }
+
+  // Collect request names from the entire collection
+  // so the existing naming convention is preserved.
+  const existingNames = getAllRequests(
+    parentCollection
+  ).map((request) => request.name)
+
+  const name = generateUniqueName(
+    'New Request',
+    existingNames
+  )
+
+  const request = createRequestNode(
+    createRequest(name)
+  )
+
+  setCollections((currentCollections) =>
+    currentCollections.map((collection) => {
+      if (collection.id !== parentCollection.id) {
+        return collection
+      }
+
+      return insertNode(
+        collection,
+        parentId,
+        request
+      )
+    })
+  )
+
+  setSelectedRequestId(request.id)
+}
 
 
   /* =======================================================
@@ -923,6 +924,303 @@ export function useCollections({ onShowDialog } = {}) {
         )
     )
   }
+
+
+/* =======================================================
+   DUPLICATE FOLDER
+   ======================================================= */
+
+function duplicateFolder(folderId) {
+  let sourceFolder = null
+  let parentId = null
+  let collectionId = null
+
+  function findParent(root, targetId, parent = null) {
+    if (!root) return null
+
+    if (root.id === targetId) {
+      return parent
+    }
+
+    if (Array.isArray(root.children)) {
+      for (const child of root.children) {
+        const result = findParent(child, targetId, root)
+
+        if (result) {
+          return result
+        }
+      }
+    }
+
+    return null
+  }
+
+  for (const collection of collections) {
+    const found = findNode(collection, folderId)
+
+    if (found?.type === 'folder') {
+      sourceFolder = found
+      collectionId = collection.id
+      parentId = findParent(collection, folderId)
+      break
+    }
+  }
+
+  if (!sourceFolder || !collectionId) return
+
+  const existingNames = []
+
+  function collectNames(node) {
+    if (!node) return
+
+    if (node.type === 'folder') {
+      existingNames.push(node.name)
+    }
+
+    if (Array.isArray(node.children)) {
+      node.children.forEach(collectNames)
+    }
+  }
+
+  const collection = collections.find(
+    (item) => item.id === collectionId
+  )
+
+  collectNames(collection)
+
+  const duplicateName = generateUniqueName(
+    sourceFolder.name || 'New Folder',
+    existingNames
+  )
+
+  function cloneNode(node) {
+    return {
+      ...node,
+      id: createId(),
+      name:
+        node === sourceFolder
+          ? duplicateName
+          : node.name,
+      children: Array.isArray(node.children)
+        ? node.children.map(cloneNode)
+        : [],
+    }
+  }
+
+  const duplicate = cloneNode(sourceFolder)
+
+  setCollections((currentCollections) =>
+    currentCollections.map((collectionItem) => {
+      if (collectionItem.id !== collectionId) {
+        return collectionItem
+      }
+
+      const destinationId =
+        parentId?.id || collectionId
+
+      return insertNode(
+        collectionItem,
+        destinationId,
+        duplicate
+      )
+    })
+  )
+}
+
+
+
+
+/* =======================================================
+   DELETE FOLDER
+   ======================================================= */
+
+function deleteFolder(folderId) {
+  let folder = null
+
+  for (const collection of collections) {
+    folder = findNode(collection, folderId)
+
+    if (folder?.type === 'folder') {
+      break
+    }
+
+    folder = null
+  }
+
+  if (!folder) return
+
+  promptForName(
+    `Delete folder "${folder.name}"? Type DELETE to confirm.`,
+    '',
+    (value) => {
+      if (
+        String(value ?? '').trim().toLowerCase() !== 'delete'
+      ) {
+        return
+      }
+
+      setCollections((currentCollections) =>
+        currentCollections.map((collection) =>
+          deleteNodeFromTree(collection, folderId)
+        )
+      )
+    }
+  )
+}
+
+
+
+/* =======================================================
+   RENAME FOLDER
+   ======================================================= */
+
+function renameFolder(folderId) {
+  let folder = null
+
+  for (const collection of collections) {
+    folder = findNode(collection, folderId)
+
+    if (folder?.type === 'folder') {
+      break
+    }
+
+    folder = null
+  }
+
+  if (!folder) return
+
+  promptForName(
+    'Folder name',
+    folder.name,
+    (name) => {
+      if (!name || !String(name).trim()) return
+
+      setCollections((currentCollections) =>
+        currentCollections.map((collection) =>
+          updateTreeNode(collection, folderId, {
+            name: String(name).trim(),
+          })
+        )
+      )
+    }
+  )
+}
+
+  /* =======================================================
+    EXPORT FOLDER
+     ======================================================= */
+async function exportFolder(folderId) {
+  let folder = null
+
+  for (const collection of collections) {
+    const found = findNode(
+      collection,
+      folderId
+    )
+
+    if (found?.type === 'folder') {
+      folder = found
+      break
+    }
+  }
+
+  if (!folder) {
+    throw new Error('Folder not found.')
+  }
+
+  const postmanItems = []
+
+  function convertNode(node) {
+    if (!node) {
+      return null
+    }
+
+    if (node.type === 'request') {
+      return {
+        name: node.name || 'New Request',
+        request: {
+          method: node.method || 'GET',
+          header: Array.isArray(node.headers)
+            ? node.headers
+                .filter((header) => header.enabled !== false)
+                .map((header) => ({
+                  key: header.key || '',
+                  value: header.value || '',
+                }))
+            : [],
+          url: node.url || '',
+          body: node.body
+            ? {
+                mode: 'raw',
+                raw:
+                  typeof node.body === 'string'
+                    ? node.body
+                    : JSON.stringify(node.body),
+              }
+            : undefined,
+        },
+      }
+    }
+
+    if (node.type === 'folder') {
+      return {
+        name: node.name || 'New Folder',
+        item: Array.isArray(node.children)
+          ? node.children
+              .map(convertNode)
+              .filter(Boolean)
+          : [],
+      }
+    }
+
+    return null
+  }
+
+  const folderItem = convertNode(folder)
+
+  const content = JSON.stringify(
+    {
+      info: {
+        name: folder.name || 'Exported Folder',
+        schema:
+          'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+      },
+      item: folderItem?.item || [],
+    },
+    null,
+    2
+  )
+
+  const dialog =
+    await window.apiTester
+      ?.showSaveDialog?.({
+        filters: [
+          {
+            name: 'JSON Files',
+            extensions: ['json'],
+          },
+        ],
+        defaultPath:
+          `${folder.name || 'Folder'}.json`,
+      })
+
+  if (
+    !dialog ||
+    dialog.canceled ||
+    !dialog.filePath
+  ) {
+    return
+  }
+
+  await window.apiTester
+    ?.writeFile?.(
+      dialog.filePath,
+      content
+    )
+}
+
+
+
 
 
   /* =======================================================
@@ -1501,86 +1799,82 @@ export function useCollections({ onShowDialog } = {}) {
      CREATE FOLDER
      ======================================================= */
 
-  function createFolder(
-    collectionId,
-    parentId = null,
-    name = 'New Folder'
-  ) {
-    const folder =
-      createFolderNode(name)
-
-    setCollections(
-      (currentCollections) =>
-        currentCollections.map(
-          (collection) => {
-            if (
-              collection.id !==
-              collectionId
-            ) {
-              return collection
-            }
-
-            const destination =
-              parentId ||
-              collection.id
-
-            return insertNode(
-              collection,
-              destination,
-              folder
-            )
-          }
-        )
-    )
-
-    return folder.id
+function createFolder(parentId, name = 'New Folder') {
+  if (!parentId) {
+    return null
   }
 
+  // Find which top-level collection contains the clicked parent.
+  const collection = collections.find(
+    (item) => findNode(item, parentId)
+  )
+
+  if (!collection) {
+    return null
+  }
+
+  // Keep the naming convention:
+  // New Folder
+  // New Folder Copy
+  // New Folder Copy 1
+  // etc., depending on your existing generateUniqueName behavior.
+  const existingNames = getAllNodes(collection).map(
+    (node) => node.name
+  )
+
+  const folderName = generateUniqueName(
+    name,
+    existingNames
+  )
+
+  const folder = createFolderNode(folderName)
+
+  setCollections((currentCollections) =>
+    currentCollections.map((collectionItem) => {
+      if (collectionItem.id !== collection.id) {
+        return collectionItem
+      }
+
+      return insertNode(
+        collectionItem,
+        parentId,
+        folder
+      )
+    })
+  )
+
+  return folder.id
+}
 
   /* =======================================================
      RETURN API
      ======================================================= */
 
   return {
-    collections,
+  collections,
+  selectedRequestId,
+  selectedRequest,
+  createNewCollection,
+  importCollection,
+  exportCollection,
+  importCollectionIntoCollection,
+  createNewRequest,
+  selectRequest,
+  toggleCollection,
+  renameCollection,
+  duplicateCollection,
+  deleteCollection,
+  renameRequest,
+  duplicateRequest: duplicateRequestInCollection,
+  deleteRequest,
+  updateRequest,
+  restoreRequest,
 
-    selectedRequestId,
-
-    selectedRequest,
-
-    createNewCollection,
-
-    importCollection,
-
-    exportCollection,
-
-    importCollectionIntoCollection,
-
-    createNewRequest,
-
-    selectRequest,
-
-    toggleCollection,
-
-    renameCollection,
-
-    duplicateCollection,
-
-    deleteCollection,
-
-    renameRequest,
-
-    duplicateRequest:
-      duplicateRequestInCollection,
-
-    deleteRequest,
-
-    updateRequest,
-
-    restoreRequest,
-
-    createFolder,
-
-    moveCollectionNode,
-  }
+  createFolder,
+  renameFolder,
+  duplicateFolder,
+  deleteFolder,
+  exportFolder,
+  moveCollectionNode,
+}
 }

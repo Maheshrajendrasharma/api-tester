@@ -304,7 +304,55 @@ onRenameEnvironment={handleRenameEnvironment}
 
     onExportAllEnvironments={handleExportAllEnvironments}
 />
-} sidebar={<Sidebar collections={collectionState.collections} selectedRequestId={collectionState.selectedRequestId} onCreateCollection={collectionState.createNewCollection} onImportCollection={collectionState.importCollection} onExportCollection={collectionState.exportCollection} onImportIntoCollection={collectionState.importCollectionIntoCollection} onCreateRequest={collectionState.createNewRequest} onSelectRequest={collectionState.selectRequest} onToggleCollection={collectionState.toggleCollection} onRenameCollection={collectionState.renameCollection} onDuplicateCollection={collectionState.duplicateCollection} onDeleteCollection={collectionState.deleteCollection} onRenameRequest={collectionState.renameRequest} onDuplicateRequest={collectionState.duplicateRequest} onDeleteRequest={collectionState.deleteRequest} historyEntries={historyState.displayHistory} favorites={historyState.favorites} historySearch={historyState.searchQuery} activeHistoryFilter={historyState.filter} onHistorySearchChange={historyState.setSearchQuery} onHistoryFilterChange={historyState.setFilter} onRestoreHistoryEntry={handleHistoryRestore} onRenameHistoryEntry={historyState.renameEntry} onDuplicateHistoryEntry={historyState.duplicateEntry} onDeleteHistoryEntry={historyState.deleteEntry} onToggleHistoryFavorite={historyState.toggleFavorite} onClearHistory={handleClearHistory} />} environmentPanel={<EnvironmentPanel environments={environments} onEnvironmentChange={handleEnvironmentChange} onEnvironmentsChange={handleEnvironmentsChange} onImportEnvironment={handleImportEnvironment} onExportEnvironment={handleExportEnvironment} />}>
+} sidebar={<Sidebar
+  collections={collectionState.collections}
+  selectedRequestId={collectionState.selectedRequestId}
+
+  onCreateCollection={collectionState.createNewCollection}
+  onCreateFolder={collectionState.createFolder}
+  onImportCollection={collectionState.importCollection}
+
+  onRenameFolder={collectionState.renameFolder}
+  onDuplicateFolder={collectionState.duplicateFolder}
+  onDeleteFolder={collectionState.deleteFolder}
+  onExportFolder={collectionState.exportFolder}
+
+  onExportCollection={collectionState.exportCollection}
+  onImportIntoCollection={collectionState.importCollectionIntoCollection}
+
+  onCreateRequest={collectionState.createNewRequest}
+  onSelectRequest={collectionState.selectRequest}
+  onToggleCollection={collectionState.toggleCollection}
+
+  onRenameCollection={collectionState.renameCollection}
+  onDuplicateCollection={collectionState.duplicateCollection}
+  onDeleteCollection={collectionState.deleteCollection}
+
+  onRenameRequest={collectionState.renameRequest}
+  onDuplicateRequest={collectionState.duplicateRequest}
+  onDeleteRequest={collectionState.deleteRequest}
+
+  historyEntries={historyState.displayHistory}
+  favorites={historyState.favorites}
+  historySearch={historyState.searchQuery}
+  activeHistoryFilter={historyState.filter}
+
+  onHistorySearchChange={historyState.setSearchQuery}
+  onHistoryFilterChange={historyState.setFilter}
+
+  onRestoreHistoryEntry={handleHistoryRestore}
+  onRenameHistoryEntry={historyState.renameEntry}
+  onDuplicateHistoryEntry={historyState.duplicateEntry}
+  onDeleteHistoryEntry={historyState.deleteEntry}
+  onToggleHistoryFavorite={historyState.toggleFavorite}
+  onClearHistory={handleClearHistory}
+/>} environmentPanel={<EnvironmentPanel
+  environments={environments}
+  onEnvironmentChange={handleEnvironmentChange}
+  onEnvironmentsChange={handleEnvironmentsChange}
+  onImportEnvironment={handleImportEnvironment}
+  onExportEnvironment={handleExportEnvironment}
+/>}>
         <Workspace environment={activeEnvironment} isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} />
       </AppLayout>
       <SharedDialog open={dialogState.open} type={dialogState.type} title={dialogState.title} message={dialogState.message} initialValue={dialogState.initialValue} options={dialogState.options} confirmLabel={dialogState.confirmLabel} cancelLabel={dialogState.cancelLabel} onConfirm={dialogState.onConfirm} onCancel={dialogState.onCancel} />

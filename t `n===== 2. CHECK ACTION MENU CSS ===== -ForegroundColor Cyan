@@ -1,0 +1,164 @@
+[1mdiff --git a/src/styles/layout.css b/src/styles/layout.css[m
+[1mindex a47b3de..76404e1 100644[m
+[1m--- a/src/styles/layout.css[m
+[1m+++ b/src/styles/layout.css[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-.app-shell {[m
+[32m+[m[32m﻿.app-shell {[m
+   display: grid;[m
+   grid-template-rows: 56px minmax(0, 1fr);[m
+   height: 100vh;[m
+[36m@@ -1381,7 +1381,7 @@[m [mbutton, input, select, textarea { transition: background 150ms ease, border-colo[m
+ }[m
+ [m
+ /* =========================================================[m
+[31m-   COMPACT SIDEBAR — 70% SCALE[m
+[32m+[m[32m   COMPACT SIDEBAR â€” 70% SCALE[m
+    ========================================================= */[m
+ [m
+ .sidebar {[m
+[36m@@ -1664,137 +1664,6 @@[m [mbutton, input, select, textarea { transition: background 150ms ease, border-colo[m
+ [m
+ [m
+ /* Dropdown */[m
+[31m-.action-menu [role="menu"] {[m
+[31m-    position: absolute;[m
+[31m-    top: calc(100% + 4px);[m
+[31m-    right: 0;[m
+[31m-[m
+[31m-    min-width: 120px;[m
+[31m-    width: max-content;[m
+[31m-    max-width: 180px;[m
+[31m-[m
+[31m-    padding: 4px;[m
+[31m-    margin: 0;[m
+[31m-[m
+[31m-    background: #20252b;[m
+[31m-    border: 1px solid #39434e;[m
+[31m-    border-radius: 6px;[m
+[31m-[m
+[31m-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);[m
+[31m-[m
+[31m-    z-index: 9999;[m
+[31m-}[m
+[31m-[m
+[31m-.action-menu {[m
+[31m-    position: relative;[m
+[31m-    display: inline-flex;[m
+[31m-    align-items: center;[m
+[31m-    flex-shrink: 0;[m
+[31m-[m
+[31m-    /* Keep menus above the tree */[m
+[31m-    z-index: 1000;[m
+[31m-}[m
+[31m-[m
+[31m-.action-menu-trigger {[m
+[31m-    width: 28px;[m
+[31m-    height: 28px;[m
+[31m-[m
+[31m-    padding: 0;[m
+[31m-    margin: 0;[m
+[31m-[m
+[31m-    border: 0;[m
+[31m-    border-radius: 5px;[m
+[31m-[m
+[31m-    background: transparent;[m
+[31m-    color: #dce3ea;[m
+[31m-[m
+[31m-    font-size: 21px;[m
+[31m-    line-height: 1;[m
+[31m-[m
+[31m-    display: flex;[m
+[31m-    align-items: center;[m
+[31m-    justify-content: center;[m
+[31m-[m
+[31m-    cursor: pointer;[m
+[31m-}[m
+[31m-[m
+[31m-.action-menu-trigger:hover {[m
+[31m-    background: #293541;[m
+[31m-    color: #ffffff;[m
+[31m-}[m
+[31m-[m
+[31m-/* IMPORTANT */[m
+[31m-.action-menu-dropdown {[m
+[31m-    position: absolute;[m
+[31m-[m
+[31m-    top: calc(100% + 4px);[m
+[31m-    right: 0;[m
+[31m-[m
+[31m-    display: flex;[m
+[31m-    flex-direction: column;[m
+[31m-    align-items: stretch;[m
+[31m-[m
+[31m-    width: 135px;[m
+[31m-    min-width: 135px;[m
+[31m-[m
+[31m-    padding: 4px;[m
+[31m-[m
+[31m-    background: #20252b;[m
+[31m-    border: 1px solid #46515d;[m
+[31m-    border-radius: 6px;[m
+[31m-[m
+[31m-    box-sizing: border-box;[m
+[31m-[m
+[31m-    /* VERY HIGH */[m
+[31m-    z-index: 999999;[m
+[31m-[m
+[31m-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);[m
+[31m-}[m
+[31m-[m
+[31m-/* Every option gets its own row */[m
+[31m-.action-menu-item {[m
+[31m-    display: block;[m
+[31m-[m
+[31m-    width: 100%;[m
+[31m-    height: 32px;[m
+[31m-[m
+[31m-    box-sizing: border-box;[m
+[31m-[m
+[31m-    padding: 6px 10px;[m
+[31m-    margin: 0;[m
+[31m-[m
+[31m-    border: 0;[m
+[31m-    border-radius: 4px;[m
+[31m-[m
+[31m-    background: transparent;[m
+[31m-    color: #e5e7eb;[m
+[31m-[m
+[31m-    font-size: 13px;[m
+[31m-    line-height: 20px;[m
+[31m-[m
+[31m-    text-align: left;[m
+[31m-    white-space: nowrap;[m
+[31m-[m
+[31m-    cursor: pointer;[m
+[31m-}[m
+[31m-[m
+[31m-.action-menu-item:hover {[m
+[31m-    background: #303a45;[m
+[31m-}[m
+[31m-[m
+[31m-.action-menu-item.destructive {[m
+[31m-    color: #ff7777;[m
+[31m-}[m
+[31m-[m
+[31m-.action-menu-item.destructive:hover {[m
+[31m-    background: rgba(255, 70, 70, 0.15);[m
+[31m-}[m
+[31m-[m
+[31m-/* =========================================================[m
+[31m-   FINAL ACTION MENU FIX[m
+[31m-   ========================================================= */[m
+[31m-[m
+[31m-/* The menu wrapper */[m
+ .action-menu {[m
+   position: relative !important;[m
+   display: flex;[m
+[36m@@ -1966,4 +1835,4 @@[m [mbutton, input, select, textarea { transition: background 150ms ease, border-colo[m
+ .tree-node-row:hover,[m
+ .tree-request-row:hover {[m
+   z-index: 1000;[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m

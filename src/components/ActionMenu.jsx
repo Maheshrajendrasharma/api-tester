@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 function ActionMenu({ label, actions }) {
   const menuRef = useRef(null)
+  const triggerRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -42,19 +43,20 @@ function ActionMenu({ label, actions }) {
             menuItems.length
 
       menuItems[nextIndex]?.focus()
+      return
     }
 
     if (event.key === 'Escape') {
+      event.preventDefault()
       setIsOpen(false)
-
-      event.currentTarget
-        .querySelector('.action-menu-trigger')
-        ?.focus()
+      triggerRef.current?.focus()
     }
   }
 
   function openMenuWithKeyboard(event) {
-    if (event.key !== 'ArrowDown') return
+    if (event.key !== 'ArrowDown' && event.key !== 'Enter' && event.key !== ' ') {
+      return
+    }
 
     event.preventDefault()
 
@@ -62,60 +64,66 @@ function ActionMenu({ label, actions }) {
 
     requestAnimationFrame(() => {
       menuRef.current
-        ?.querySelector('[role="menuitem"]')
+        ?.querySelector('[role="menuitem"]:not(:disabled)')
         ?.focus()
     })
   }
 
-  return (
-  <div
-    className="action-menu"
-    ref={menuRef}
-    onClick={(event) => event.stopPropagation()}
-    onKeyDown={handleMenuKeyDown}
-  >
-    <button
-      className="action-menu-trigger"
-      type="button"
-      aria-label={label}
-      aria-haspopup="menu"
-      aria-expanded={isOpen}
-      data-tooltip={label}
-      onClick={() => setIsOpen((open) => !open)}
-      onKeyDown={openMenuWithKeyboard}
-    >
-      ⋮
-    </button>
+  function handleActionClick(action) {
+    if (action.disabled) {
+      return
+    }
 
-    {isOpen && (
-      <div className="action-menu-dropdown" role="menu">
-        {actions.map((action) => (
-          <button
-            className={`action-menu-item ${
-              action.destructive ? 'destructive' : ''
-            }`}
-            key={action.label}
-            type="button"
-            role="menuitem"
-            disabled={action.disabled}
-            title={
-              action.disabled
-                ? action.tooltip || 'Coming Soon'
-                : undefined
-            }
-            onClick={() => {
-              if (action.disabled) return
-              setIsOpen(false)
-              action.onClick()
-            }}
-          >
-            {action.label}
-          </button>
-        ))}
-      </div>
-    )}
-  </div>
-)
+    setIsOpen(false)
+    action.onClick?.()
+  }
+
+  return (
+    <div
+      className="action-menu"
+      ref={menuRef}
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={handleMenuKeyDown}
+    >
+      <button
+        ref={triggerRef}
+        className="action-menu-trigger"
+        type="button"
+        aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        data-tooltip={label}
+        onClick={() => setIsOpen((open) => !open)}
+        onKeyDown={openMenuWithKeyboard}
+      >
+        ⋮
+      </button>
+
+      {isOpen && (
+        <div className="action-menu-dropdown" role="menu">
+          {actions.map((action) => (
+            <button
+              className={`action-menu-item ${
+                action.destructive ? 'destructive' : ''
+              }`}
+              key={action.label}
+              type="button"
+              role="menuitem"
+              disabled={action.disabled}
+              title={
+                action.disabled
+                  ? action.tooltip || 'Coming Soon'
+                  : undefined
+              }
+              onClick={() => handleActionClick(action)}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
-export default ActionMenu
+export default ActionMenu 
