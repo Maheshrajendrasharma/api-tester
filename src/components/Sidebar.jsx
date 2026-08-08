@@ -1,8 +1,108 @@
   import { useState } from 'react'
 
+  import {
+  findNode,
+  findParent,
+} from '../utils/treeHelpers'
+
   import ActionMenu from './ActionMenu'
   import MethodBadge from './MethodBadge'
   import SidebarRow from './SidebarRow'
+
+
+
+function NewIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 5v14M5 12h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function ImportIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 4v11"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="m7 10 5 5 5-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M5 20h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function HistoryIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 12a8 8 0 1 0 2.3-5.65"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M4 5v5h5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M12 8v4l3 2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+
 
   function TreeGuide({ children }) {
     return (
@@ -41,10 +141,35 @@
     onRenameRequest,
     onDuplicateRequest,
     onDeleteRequest,
+    onMoveNode,
+      onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+
+  dropTargetId,
+  dropPosition,
   }) {
     return (
-      <SidebarRow
-        className="request-row tree-request-row"
+<SidebarRow
+  className={`request-row tree-request-row ${
+    dropTargetId === request.id
+      ? `drop-${dropPosition}`
+      : ''
+  }`}
+  draggable
+  onDragStart={(event) =>
+    onDragStart(event, request)
+  }
+  onDragEnd={onDragEnd}
+  onDragOver={(event) =>
+    onDragOver(event, request)
+  }
+  onDragLeave={onDragLeave}
+  onDrop={(event) =>
+    onDrop(event, request)
+  }
         selected={selectedRequestId === request.id}
         onClick={() => onSelectRequest(request.id)}
       >
@@ -87,6 +212,16 @@ function TreeNode({
   node,
    collectionId,
   selectedRequestId,
+    onMoveNode,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+
+  dropTargetId,
+  dropPosition,
+  draggedNodeId,  
   onSelectRequest,
 
   onRenameCollection,
@@ -122,6 +257,17 @@ function TreeNode({
           onRenameRequest={onRenameRequest}
           onDuplicateRequest={onDuplicateRequest}
           onDeleteRequest={onDeleteRequest}
+
+           onDragStart={onDragStart}
+    onDragEnd={onDragEnd}
+    onDragOver={onDragOver}
+    onDragLeave={onDragLeave}
+    onDrop={onDrop}
+
+    dropTargetId={dropTargetId}
+    dropPosition={dropPosition}
+
+
         />
       )
     }
@@ -146,9 +292,27 @@ function TreeNode({
         }`}
       >
         <div
-          className="tree-node-row"
-          onClick={() => onToggleNode(node.id)}
-        >
+  className={`tree-node-row ${
+    dropTargetId === node.id
+      ? 'drop-inside'
+      : ''
+  }`}
+  draggable={!isCollection}
+  onDragStart={(event) => {
+    if (!isCollection) {
+      onDragStart(event, node)
+    }
+  }}
+  onDragEnd={onDragEnd}
+  onDragOver={(event) =>
+    onDragOver(event, node)
+  }
+  onDragLeave={onDragLeave}
+  onDrop={(event) =>
+    onDrop(event, node)
+  }
+  onClick={() => onToggleNode(node.id)}
+>
           <ExpandIcon expanded={node.expanded !== false} />
 
           <FolderIcon expanded={node.expanded !== false} />
@@ -243,6 +407,18 @@ function TreeNode({
     onSelectRequest={onSelectRequest}
     onExportCollection={onExportCollection}
 
+      onMoveNode={onMoveNode}
+
+  onDragStart={onDragStart}
+  onDragEnd={onDragEnd}
+  onDragOver={onDragOver}
+  onDragLeave={onDragLeave}
+  onDrop={onDrop}
+
+  dropTargetId={dropTargetId}
+  dropPosition={dropPosition}
+  draggedNodeId={draggedNodeId}
+
     onRenameCollection={onRenameCollection}
     onDuplicateCollection={onDuplicateCollection}
     onDeleteCollection={onDeleteCollection}
@@ -256,10 +432,12 @@ function TreeNode({
     onToggleNode={onToggleNode}
 
 onRenameFolder={onRenameFolder}
-onDuplicateFolder={onDuplicateFolder}
+onDuplicateFolder={(folderId) =>
+  onDuplicateFolder?.(collection.id, folderId)
+}
 onExportFolder={onExportFolder}
 onDeleteFolder={onDeleteFolder}
-collectionId={collectionId}
+collectionId={collectionId} 
 
   />
 ))}
@@ -413,6 +591,7 @@ function Sidebar({
   onRenameRequest,
   onDuplicateRequest,
   onDeleteRequest,
+  onMoveNode,
   historyEntries,
   favorites,
   historySearch,
@@ -437,6 +616,15 @@ function Sidebar({
     * be opened/closed without changing the data model.
     */
     const [expandedNodes, setExpandedNodes] = useState({})
+
+    const [draggedNodeId, setDraggedNodeId] =
+  useState(null)
+
+const [dropTargetId, setDropTargetId] =
+  useState(null)
+
+const [dropPosition, setDropPosition] =
+  useState(null)
 
     function toggleNode(nodeId) {
       if (!nodeId) return
@@ -467,6 +655,217 @@ function Sidebar({
 
       return node.expanded !== false
     }
+
+
+   function handleDragStart(event, node) {
+  if (!node || node.type === 'collection') {
+    return
+  }
+
+  setDraggedNodeId(node.id)
+
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData(
+    'text/plain',
+    node.id
+  )
+}
+
+function handleDragEnd() {
+  setDraggedNodeId(null)
+  setDropTargetId(null)
+  setDropPosition(null)
+}
+
+function handleDragOver(
+  event,
+  node
+) {
+  if (
+    !node ||
+    node.type === 'collection' ||
+    !draggedNodeId ||
+    node.id === draggedNodeId
+  ) {
+    return
+  }
+
+  event.preventDefault()
+
+  event.dataTransfer.dropEffect = 'move'
+
+  /*
+   * Folder:
+   * dropping on it means move INSIDE it.
+   */
+  if (node.type === 'folder') {
+    setDropTargetId(node.id)
+    setDropPosition('inside')
+    return
+  }
+
+  /*
+   * Request:
+   * dropping above/below it means reorder
+   * at the request's existing level.
+   */
+  if (node.type === 'request') {
+    const rect =
+      event.currentTarget.getBoundingClientRect()
+
+    const middle =
+      rect.top + rect.height / 2
+
+    const position =
+      event.clientY < middle
+        ? 'before'
+        : 'after'
+
+    setDropTargetId(node.id)
+    setDropPosition(position)
+  }
+}
+
+function handleDragLeave(event) {
+  /*
+   * Only clear when leaving the actual row.
+   */
+  if (
+    event.currentTarget ===
+    event.relatedTarget
+  ) {
+    return
+  }
+
+  setDropTargetId(null)
+  setDropPosition(null)
+}
+
+function handleDrop(
+  event,
+  collectionId,
+  targetNode
+) {
+  event.preventDefault()
+  event.stopPropagation()
+
+  const sourceNodeId =
+    event.dataTransfer.getData(
+      'text/plain'
+    ) || draggedNodeId
+
+  if (
+    !sourceNodeId ||
+    !targetNode ||
+    sourceNodeId === targetNode.id
+  ) {
+    handleDragEnd()
+    return
+  }
+
+  const collection =
+    collections.find(
+      (item) =>
+        item.id === collectionId
+    )
+
+  if (!collection) {
+    handleDragEnd()
+    return
+  }
+
+  const sourceNode =
+    findNode(
+      collection,
+      sourceNodeId
+    )
+
+  if (!sourceNode) {
+    handleDragEnd()
+    return
+  }
+
+  /*
+   * ------------------------------------------------
+   * DROP ON FOLDER
+   * ------------------------------------------------
+   *
+   * Folder becomes the new parent.
+   * The dragged item goes to the end of
+   * that folder's children.
+   */
+  if (targetNode.type === 'folder') {
+    const children =
+      Array.isArray(
+        targetNode.children
+      )
+        ? targetNode.children
+        : []
+
+    onMoveNode(
+      collectionId,
+      sourceNodeId,
+      targetNode.id,
+      children.length
+    )
+
+    handleDragEnd()
+    return
+  }
+
+  /*
+   * ------------------------------------------------
+   * DROP ON REQUEST
+   * ------------------------------------------------
+   *
+   * Request remains at the same hierarchy level.
+   */
+  if (targetNode.type === 'request') {
+    const parent =
+      findParent(
+        collection,
+        targetNode.id
+      )
+
+    if (!parent) {
+      handleDragEnd()
+      return
+    }
+
+    const targetIndex =
+      parent.children?.findIndex(
+        (child) =>
+          child.id === targetNode.id
+      )
+
+    if (
+      targetIndex === undefined ||
+      targetIndex < 0
+    ) {
+      handleDragEnd()
+      return
+    }
+
+    let destinationIndex =
+      targetIndex
+
+    if (
+      dropPosition === 'after'
+    ) {
+      destinationIndex =
+        targetIndex + 1
+    }
+
+    onMoveNode(
+      collectionId,
+      sourceNodeId,
+      parent.id,
+      destinationIndex
+    )
+  }
+
+  handleDragEnd()
+}
 
     /*
     * Convert old flat collections to a tree temporarily.
@@ -595,6 +994,21 @@ function Sidebar({
               requestId
             )
           }
+          onMoveNode={onMoveNode}
+onDragStart={handleDragStart}
+onDragEnd={handleDragEnd}
+onDragOver={handleDragOver}
+onDragLeave={handleDragLeave}
+onDrop={(event, targetNode) =>
+  handleDrop(
+    event,
+    collection.id,
+    targetNode
+  )
+}
+dropTargetId={dropTargetId}
+dropPosition={dropPosition}
+draggedNodeId={draggedNodeId}
 onCreateRequest={(parentId) =>
   onCreateRequest(
     parentId || collection.id
@@ -615,7 +1029,13 @@ onCreateFolder={(parentId) =>
     }
 
     return (
+
+     
+
       <div className="sidebar">
+        <div className="sidebar-section-header">
+  COLLECTIONS
+</div>
         <div className="collection-tabs">
           <button
             className="collection-tab active"
@@ -625,8 +1045,10 @@ onCreateFolder={(parentId) =>
             }
             onClick={onCreateCollection}
           >
-            NEW
-          </button>
+  <NewIcon />
+  <span className="tab-tooltip">
+  </span>
+</button>
 
           <button
             className="collection-tab"
@@ -636,23 +1058,12 @@ onCreateFolder={(parentId) =>
             }
             onClick={onImportCollection}
           >
-            IMPORT
-          </button>
+  <ImportIcon />
+  <span className="tab-tooltip">
+  </span>
+</button>
 
-          <button
-            className="collection-tab"
-            type="button"
-            onMouseEnter={() =>
-              setSidebarView('collections')
-            }
-            onClick={() => {
-              alert(
-                'Please use Collection Menu (⋮) to export.'
-              )
-            }}
-          >
-            EXPORT
-          </button>
+
 
           <button
             className="collection-tab"
@@ -661,8 +1072,10 @@ onCreateFolder={(parentId) =>
               setSidebarView('history')
             }
           >
-            HIST
-          </button>
+  <HistoryIcon />
+  <span className="tab-tooltip">
+  </span>
+</button>
         </div>
 
         {sidebarView === 'collections' && (

@@ -932,21 +932,60 @@ function createNewRequest(parentId) {
    DUPLICATE FOLDER
    ======================================================= */
 
-function duplicateFolder(folderId) {
-  let sourceFolder = null
-  let parentId = null
-  let collectionId = null
+function duplicateFolder(
+  collectionId,
+  folderId
+) {
+  if (!collectionId || !folderId) {
+    return
+  }
 
-  function findParent(root, targetId, parent = null) {
-    if (!root) return null
+  const collection =
+    collections.find(
+      (item) =>
+        item.id === collectionId
+    )
+
+  if (!collection) {
+    return
+  }
+
+  const sourceFolder =
+    findNode(
+      collection,
+      folderId
+    )
+
+  if (
+    !sourceFolder ||
+    sourceFolder.type !== 'folder'
+  ) {
+    return
+  }
+
+  function findParent(
+    root,
+    targetId,
+    parent = null
+  ) {
+    if (!root) {
+      return null
+    }
 
     if (root.id === targetId) {
       return parent
     }
 
-    if (Array.isArray(root.children)) {
+    if (
+      Array.isArray(root.children)
+    ) {
       for (const child of root.children) {
-        const result = findParent(child, targetId, root)
+        const result =
+          findParent(
+            child,
+            targetId,
+            root
+          )
 
         if (result) {
           return result
@@ -957,81 +996,83 @@ function duplicateFolder(folderId) {
     return null
   }
 
-  for (const collection of collections) {
-    const found = findNode(collection, folderId)
-
-    if (found?.type === 'folder') {
-      sourceFolder = found
-      collectionId = collection.id
-      parentId = findParent(collection, folderId)
-      break
-    }
-  }
-
-  if (!sourceFolder || !collectionId) return
+  const parent =
+    findParent(
+      collection,
+      folderId
+    )
 
   const existingNames = []
 
-  function collectNames(node) {
+  function collectFolderNames(node) {
     if (!node) return
 
     if (node.type === 'folder') {
       existingNames.push(node.name)
     }
 
-    if (Array.isArray(node.children)) {
-      node.children.forEach(collectNames)
+    if (
+      Array.isArray(node.children)
+    ) {
+      node.children.forEach(
+        collectFolderNames
+      )
     }
   }
 
-for (const collection of collections) {
-  const found = findNode(collection, parentId)
+  collectFolderNames(collection)
 
-  if (found) {
-    parentCollection = collection
-    parentNode = found
-    break
-  }
-}
-
-  collectNames(collection)
-
-  const duplicateName = generateUniqueName(
-    sourceFolder.name || 'New Folder',
-    existingNames
-  )
+  const duplicateName =
+    generateUniqueName(
+      sourceFolder.name ||
+        'New Folder',
+      existingNames
+    )
 
   function cloneNode(node) {
     return {
       ...node,
+
       id: createId(),
+
       name:
-        node === sourceFolder
+        node.id === sourceFolder.id
           ? duplicateName
           : node.name,
-      children: Array.isArray(node.children)
-        ? node.children.map(cloneNode)
-        : [],
+
+      children:
+        Array.isArray(node.children)
+          ? node.children.map(
+              cloneNode
+            )
+          : [],
     }
   }
 
-  const duplicate = cloneNode(sourceFolder)
+  const duplicate =
+    cloneNode(sourceFolder)
 
-  setCollections((currentCollections) =>
-    currentCollections.map((collectionItem) => {
-      if (collectionItem.id !== collectionId) {
-        return collectionItem
-      }
+  const destinationId =
+    parent?.id || collection.id
 
-      const destinationId =
-        parentId?.id || collectionId
+  setCollections(
+    (currentCollections) =>
+      currentCollections.map(
+        (collectionItem) => {
+          if (
+            collectionItem.id !==
+            collectionId
+          ) {
+            return collectionItem
+          }
 
-      return insertNode(
-        collectionItem,
-        destinationId,
-        duplicate
+          return insertNode(
+            collectionItem,
+            destinationId,
+            duplicate
+          )
+        }
       )
-    })
   )
 }
 
@@ -1774,33 +1815,62 @@ async function exportFolder(folderId) {
      MOVE NODE
      ======================================================= */
 
-  function moveCollectionNode(
-    collectionId,
-    nodeId,
-    destinationId,
-    index = null
-  ) {
-    setCollections(
-      (currentCollections) =>
-        currentCollections.map(
-          (collection) => {
-            if (
-              collection.id !==
-              collectionId
-            ) {
-              return collection
-            }
+function moveCollectionNode(
+  collectionId,
+  nodeId,
+  destinationId,
+  index = null
+) {
+  setCollections((currentCollections) =>
+    currentCollections.map((collection) => {
+      if (collection.id !== collectionId) {
+        return collection
+      }
 
-            return moveNode(
-              collection,
-              nodeId,
-              destinationId,
-              index
-            )
-          }
-        )
-    )
-  }
+      const sourceParent = findParent(
+        collection,
+        nodeId
+      )
+
+      const destinationParent = findNode(
+        collection,
+        destinationId
+      )
+
+      if (!destinationParent) {
+        return collection
+      }
+
+      let finalIndex = index
+
+      // Same-parent reorder correction.
+      if (
+        sourceParent &&
+        sourceParent.id === destinationParent.id &&
+        index !== null
+      ) {
+        const sourceIndex =
+          sourceParent.children?.findIndex(
+            (child) => child.id === nodeId
+          )
+
+        if (
+          sourceIndex !== -1 &&
+          sourceIndex < index
+        ) {
+          finalIndex = index - 1
+        }
+      }
+
+      return moveNode(
+        collection,
+        nodeId,
+        destinationId,
+        finalIndex
+      )
+    })
+  )
+}
 
 
   /* =======================================================

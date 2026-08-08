@@ -1836,3 +1836,54 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .tree-request-row:hover {
   z-index: 1000;
 }
+
+
+/* =========================================================
+   DRAG & DROP TREE
+   ========================================================= */
+
+.tree-node-row[draggable="true"],
+.tree-request-row[draggable="true"] {
+  cursor: grab;
+}
+
+.tree-node-row[draggable="true"]:active,
+.tree-request-row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/*
+ * Folder is the destination.
+ * Highlight means:
+ * "Drop here to move inside this folder."
+ */
+.tree-node-row.drop-inside {
+  background: #263d36;
+  box-shadow:
+    inset 0 0 0 1px #6ee7b7;
+}
+
+/*
+ * Request target - move before.
+ */
+.tree-request-row.drop-before {
+  box-shadow:
+    inset 0 2px 0 #6ee7b7;
+}
+
+/*
+ * Request target - move after.
+ */
+.tree-request-row.drop-after {
+  box-shadow:
+    inset 0 -2px 0 #6ee7b7;
+}
+
+/*
+ * Slight visual feedback while dragging.
+ */
+.tree-node-row[draggable="true"]:active,
+.tree-request-row[draggable="true"]:active {
+  opacity: 0.55;
+}
+

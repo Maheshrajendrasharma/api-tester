@@ -331,6 +331,7 @@ onRenameEnvironment={handleRenameEnvironment}
   onRenameRequest={collectionState.renameRequest}
   onDuplicateRequest={collectionState.duplicateRequest}
   onDeleteRequest={collectionState.deleteRequest}
+  onMoveNode={collectionState.moveCollectionNode}
 
   historyEntries={historyState.displayHistory}
   favorites={historyState.favorites}
