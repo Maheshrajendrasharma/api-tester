@@ -828,32 +828,29 @@ export function useCollections({ onShowDialog } = {}) {
 
 function createNewRequest(parentId) {
   if (!parentId) {
-    return
+    return null
   }
 
-  // Find the parent node across all collections.
-  // The parent can be either:
-  // 1. a collection
-  // 2. a folder
-  let parentNode = null
+  // Find the collection containing the clicked
+  // collection/folder at ANY hierarchy level.
   let parentCollection = null
+  let parentNode = null
 
   for (const collection of collections) {
     const found = findNode(collection, parentId)
 
     if (found) {
-      parentNode = found
       parentCollection = collection
+      parentNode = found
       break
     }
   }
 
-  if (!parentNode || !parentCollection) {
-    return
+  if (!parentCollection || !parentNode) {
+    return null
   }
 
-  // Collect request names from the entire collection
-  // so the existing naming convention is preserved.
+  // Keep existing naming convention.
   const existingNames = getAllRequests(
     parentCollection
   ).map((request) => request.name)
@@ -868,13 +865,16 @@ function createNewRequest(parentId) {
   )
 
   setCollections((currentCollections) =>
-    currentCollections.map((collection) => {
-      if (collection.id !== parentCollection.id) {
-        return collection
+    currentCollections.map((collectionItem) => {
+      if (
+        collectionItem.id !==
+        parentCollection.id
+      ) {
+        return collectionItem
       }
 
       return insertNode(
-        collection,
+        collectionItem,
         parentId,
         request
       )
@@ -882,6 +882,8 @@ function createNewRequest(parentId) {
   )
 
   setSelectedRequestId(request.id)
+
+  return request.id
 }
 
 
@@ -982,9 +984,15 @@ function duplicateFolder(folderId) {
     }
   }
 
-  const collection = collections.find(
-    (item) => item.id === collectionId
-  )
+for (const collection of collections) {
+  const found = findNode(collection, parentId)
+
+  if (found) {
+    parentCollection = collection
+    parentNode = found
+    break
+  }
+}
 
   collectNames(collection)
 
@@ -1799,44 +1807,69 @@ async function exportFolder(folderId) {
      CREATE FOLDER
      ======================================================= */
 
-function createFolder(parentId, name = 'New Folder') {
+function createFolder(parentId) {
   if (!parentId) {
     return null
   }
 
-  // Find which top-level collection contains the clicked parent.
-  const collection = collections.find(
-    (item) => findNode(item, parentId)
-  )
+  // Find the actual parent node and the collection containing it.
+  // parentId can be a collection ID or any folder ID.
+  let parentNode = null
+  let parentCollection = null
 
-  if (!collection) {
+  for (const collection of collections) {
+    const found = findNode(collection, parentId)
+
+    if (found) {
+      parentNode = found
+      parentCollection = collection
+      break
+    }
+  }
+
+  if (!parentNode || !parentCollection) {
     return null
   }
 
-  // Keep the naming convention:
+  // Collect all existing folder names from this collection.
+  const existingFolderNames = []
+
+  function collectFolderNames(node) {
+    if (!node) {
+      return
+    }
+
+    if (node.type === 'folder') {
+      existingFolderNames.push(node.name)
+    }
+
+    if (Array.isArray(node.children)) {
+      node.children.forEach(collectFolderNames)
+    }
+  }
+
+  collectFolderNames(parentCollection)
+
+  // Existing naming convention:
   // New Folder
   // New Folder Copy
   // New Folder Copy 1
-  // etc., depending on your existing generateUniqueName behavior.
-  const existingNames = getAllNodes(collection).map(
-    (node) => node.name
+  // New Folder Copy 2
+  const name = generateUniqueName(
+    'New Folder',
+    existingFolderNames
   )
 
-  const folderName = generateUniqueName(
-    name,
-    existingNames
-  )
-
-  const folder = createFolderNode(folderName)
+  const folder = createFolderNode(name)
 
   setCollections((currentCollections) =>
-    currentCollections.map((collectionItem) => {
-      if (collectionItem.id !== collection.id) {
-        return collectionItem
+    currentCollections.map((collection) => {
+      if (collection.id !== parentCollection.id) {
+        return collection
       }
 
       return insertNode(
-        collectionItem,
+        collection,
         parentId,
         folder
       )

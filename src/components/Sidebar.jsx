@@ -164,23 +164,23 @@ function TreeNode({
             <ActionMenu
   label={`${isCollection ? 'Collection' : 'Folder'} actions`}
   actions={[
-    {
+{
   label: 'New Request',
   onClick: () =>
-    isCollection
-      ? onCreateRequest?.(collectionId)
-      : onCreateRequest?.(collectionId, node.id),
+    onCreateRequest?.(
+      isCollection ? collectionId : node.id
+    ),
 },
 
 ...(onCreateFolder
   ? [
       {
-        label: 'New Folder',
-        onClick: () =>
-          isCollection
-            ? onCreateFolder(collectionId, null)
-            : onCreateFolder(collectionId, node.id),
-      },
+  label: 'New Folder',
+  onClick: () =>
+    onCreateFolder?.(
+      isCollection ? collectionId : node.id
+    ),
+},
     ]
   : []),
 
@@ -595,13 +595,17 @@ function Sidebar({
               requestId
             )
           }
-          onCreateRequest={(parentId) =>
-            onCreateRequest(
-              parentId || collection.id
-            )
-          }
-          onToggleNode={toggleNode}
-          onCreateFolder={onCreateFolder}
+onCreateRequest={(parentId) =>
+  onCreateRequest(
+    parentId || collection.id
+  )
+}
+onToggleNode={toggleNode}
+onCreateFolder={(parentId) =>
+  onCreateFolder(
+    parentId || collection.id
+  )
+}
           onRenameFolder={onRenameFolder}
   onDuplicateFolder={onDuplicateFolder}
   onExportFolder={onExportFolder}
