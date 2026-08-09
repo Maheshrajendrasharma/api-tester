@@ -13,10 +13,21 @@ export function getVariableReferences(text, environment) {
 }
 
 export function getAutocompleteQuery(text, cursorPosition) {
-  if (typeof text !== 'string') return null
-
-  const beforeCursor = text.slice(0, cursorPosition)
-  const openingIndex = beforeCursor.lastIndexOf('{{')
-  if (openingIndex === -1 || beforeCursor.slice(openingIndex).includes('}}')) return null
-  return { start: openingIndex, end: cursorPosition, query: beforeCursor.slice(openingIndex + 2).trim() }
+  if (typeof text !== 'string') return null;
+  // Ensure cursor is within bounds
+  const cursor = Math.max(0, Math.min(cursorPosition ?? text.length, text.length));
+  // Find the last "{{" before cursor
+  const openingIndex = text.lastIndexOf('{{', cursor);
+  if (openingIndex === -1) return null;
+  // Find the next closing "}}" after opening
+  const closingIndex = text.indexOf('}}', openingIndex + 2);
+  // If a "}}" exists before the cursor, we're not in a variable
+  if (closingIndex !== -1 && closingIndex < cursor) return null;
+  const queryEnd = (closingIndex !== -1 ? closingIndex : cursor);
+  const query = text.slice(openingIndex + 2, queryEnd).trim();
+  return {
+    start: openingIndex,
+    end: closingIndex !== -1 ? closingIndex + 2 : cursor,
+    query,
+  };
 }

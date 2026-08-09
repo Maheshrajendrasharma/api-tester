@@ -22,17 +22,29 @@ function VariableField({ environment, value, onChange, className = '', multiline
     updateAutocomplete(event.target.value, event.target.selectionStart)
   }
 
-  function applySuggestion(variable) {
-    if (!autocomplete) return
-    const nextValue = `${value.slice(0, autocomplete.start)}{{${variable.key.trim()}}}${value.slice(autocomplete.end)}`
-    onChange({ target: { value: nextValue } })
-    setAutocomplete(null)
-    requestAnimationFrame(() => {
-      const cursorPosition = autocomplete.start + variable.key.trim().length + 4
-      inputRef.current?.focus()
-      inputRef.current?.setSelectionRange(cursorPosition, cursorPosition)
-    })
-  }
+function applySuggestion(variable) {
+  if (!autocomplete) return;
+  // Trim and build replacement string
+  const key = String(variable.key ?? '').trim();
+  if (!key) return;
+  const replacement = `{{${key}}}`;
+  // Replace full variable range
+  const nextValue =
+    value.slice(0, autocomplete.start) +
+    replacement +
+    value.slice(autocomplete.end);
+  onChange({ target: { value: nextValue } });
+  // Move cursor to end of inserted token
+  const cursorPosition = autocomplete.start + replacement.length;
+  setAutocomplete(null);
+  requestAnimationFrame(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(cursorPosition, cursorPosition);
+  });
+}
+
 
   function handleKeyDown(event) {
     if (!suggestions.length) return

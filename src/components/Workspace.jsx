@@ -20,18 +20,28 @@ function Workspace({ environment, isSending, onSend, response, request, onReques
     cleanupDragRef.current = null
   }
 
-  function resizePanels(event) {
-    const workspace = workspaceRef.current
-    if (!workspace) return
 
-    const workspaceBounds = workspace.getBoundingClientRect()
-    const availableHeight = workspaceBounds.height - dividerHeight
-    const maximumRequestHeight = Math.min(availableHeight * 0.8, availableHeight - minimumResponseHeight)
-    const minimumHeight = Math.min(minimumRequestHeight, maximumRequestHeight)
-    const nextHeight = event.clientY - workspaceBounds.top
+function resizePanels(event) {
+  const workspace = workspaceRef.current
+  if (!workspace) return
 
-    setRequestHeight(Math.min(Math.max(nextHeight, minimumHeight), maximumRequestHeight))
-  }
+  const workspaceBounds = workspace.getBoundingClientRect()
+
+  const minimumHeight = 120
+  const minimumResponseHeight = 80
+
+  const nextHeight = event.clientY - workspaceBounds.top
+
+  const maximumRequestHeight =
+    workspaceBounds.height - minimumResponseHeight
+
+  setRequestHeight(
+    Math.min(
+      Math.max(nextHeight, minimumHeight),
+      maximumRequestHeight
+    )
+  )
+}
 
   function startDragging(event) {
     event.preventDefault()
@@ -47,21 +57,33 @@ function Workspace({ environment, isSending, onSend, response, request, onReques
 
   const splitStyle = requestHeight === null ? undefined : { '--request-height': `${requestHeight}px` }
 
-  return (
-    <section className={`workspace${requestHeight === null ? '' : ' custom-split'}`} ref={workspaceRef} style={splitStyle} aria-label="API request workspace">
-      <RequestPanel
-    key={request?.id}
-    environment={environment}
-    isSending={isSending}
-    onSend={onSend}
-    request={request}
-    onRequestChange={onRequestChange}
-/>
+return (
+  <section
+    className={`workspace${requestHeight === null ? '' : ' custom-split'}`}
+    ref={workspaceRef}
+    style={splitStyle}
+    aria-label="API request workspace"
+  >
+    <RequestPanel
+      environment={environment}
+      isSending={isSending}
+      onSend={onSend}
+      request={request}
+      onRequestChange={onRequestChange}
+    />
 
-      <div className="workspace-divider" role="separator" aria-orientation="horizontal" aria-label="Resize request and response panels" onMouseDown={startDragging} onDoubleClick={resetSplit} />
-      <ResponsePanel response={response} />
-    </section>
-  )
+    <div
+      className="workspace-divider"
+      role="separator"
+      aria-orientation="horizontal"
+      aria-label="Resize request and response panels"
+      onMouseDown={startDragging}
+      onDoubleClick={resetSplit}
+    />
+
+    <ResponsePanel response={response} />
+  </section>
+)
 }
 
 export default Workspace

@@ -1,4 +1,4 @@
-.app-shell {
+﻿.app-shell {
   display: grid;
   grid-template-rows: 56px minmax(0, 1fr);
   height: 100vh;
@@ -215,25 +215,116 @@
 
 
 
-.variable-field { position: relative; display: block; min-width: 0; }
-.variable-field-overlay { position: absolute; inset: 0; z-index: 0; padding: inherit; overflow: hidden; color: #dbe5ee; font: inherit; line-height: inherit; pointer-events: none; white-space: pre; }
-.variable-field.multiline .variable-field-overlay { white-space: pre-wrap; overflow: hidden; }
-.variable-field-input { position: relative; z-index: 1; box-sizing: border-box; width: 100%; height: 100%; min-width: 0; padding: inherit; color: inherit; caret-color: #eef6fc; background: transparent; border: 0; border-radius: inherit; font: inherit; line-height: inherit; outline: none; resize: inherit; }
-.variable-field-input.has-variables { color: transparent; text-shadow: none; }
-.variable-field-input.has-variables::placeholder { color: transparent; }
-.variable-field-text { color: #dbe5ee; }
-.variable-token.enabled { color: #6ee7b7; }
-.variable-token.disabled { color: #8b97a4; }
-.variable-token.undefined { color: #f38b91; }
+.variable-field {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Highlight layer */
+.variable-field-overlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+
+  margin: 0;
+
+  /* Match normal input padding */
+  padding: 0 10px;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  color: #dbe5ee;
+
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+
+  white-space: pre;
+
+  word-spacing: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+
+
+
+
+
+
+/* Normal text in overlay */
+.variable-field-text {
+  color: #dbe5ee;
+}
+
+/* Variable exists in environment */
+.variable-token.enabled {
+  color: #6ee7b7;
+}
+
+/* Variable exists but disabled */
+.variable-token.disabled {
+  color: #8b97a4;
+}
+
+/* Variable does not exist */
+.variable-token.undefined {
+  color: #f38b91;
+}
+
+
+
+
+/* URL overlay */
+.variable-field:not(.multiline) .variable-field-overlay {
+  padding: 0 10px;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+}
+
+
+/* Body overlay must exactly match JSON editor */
+.variable-field.multiline .variable-field-overlay {
+  padding: 11px;
+
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.65;
+
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: normal;
+
+  tab-size: 4;
+}
+
+
 .variable-autocomplete { position: absolute; z-index: 40; top: calc(100% + 5px); left: 0; min-width: 170px; max-height: 210px; overflow-y: auto; padding: 4px; background: #1a222b; border: 1px solid #3d4b5a; border-radius: 7px; box-shadow: 0 10px 24px rgb(0 0 0 / 40%); }
 .variable-autocomplete button { display: block; width: 100%; height: 30px; padding: 0 9px; color: #dce6ef; background: transparent; border: 0; border-radius: 4px; cursor: pointer; font: inherit; font-size: 12px; text-align: left; }
 .variable-autocomplete button:hover, .variable-autocomplete button.active { color: #effbf5; background: #294039; }
 
 .url-input.variable-field-input { height: 38px; padding: 0 10px; color: #e6edf5; background: #11161c; border: 1px solid #303a45; border-radius: 6px; }
-.json-editor.variable-field-input { height: 170px; padding: 11px; color: #d3dfeb; background: #151b21; border: 1px solid #2c3640; border-radius: 8px; }
 .params-table .variable-field-input, .headers-table .variable-field-input { height: 34px; padding: 0 10px; color: #dbe5ee; background: #151b21; border: 1px solid #2c3640; border-radius: 5px; }
 .authorization-input.variable-field-input { height: 38px; margin-top: 8px; padding: 0 11px; color: #dbe5ee; background: #151b21; border: 1px solid #2c3640; border-radius: 6px; }
 .url-input.variable-field-input:focus, .json-editor.variable-field-input:focus, .params-table .variable-field-input:focus, .headers-table .variable-field-input:focus, .authorization-input.variable-field-input:focus { border-color: #4e8f77; }
+
+
 
 .workspace {
   display: grid;
@@ -1381,7 +1472,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 /* =========================================================
-   COMPACT SIDEBAR — 70% SCALE
+   COMPACT SIDEBAR â€” 70% SCALE
    ========================================================= */
 
 .sidebar {
@@ -1645,12 +1736,23 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 .json-editor {
-    flex: 1;
-    min-height: 180px;
-    height: auto !important;
-    max-height: none;
-    overflow: auto !important;
-    resize: none;
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 170px;
+
+  padding: 11px;
+
+  resize: vertical;
+  outline: none;
+
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.65;
+  letter-spacing: normal;
+
+  white-space: pre-wrap;
+  tab-size: 4;
 }
 
 .request-panel {
@@ -1664,137 +1766,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 
 /* Dropdown */
-.action-menu [role="menu"] {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-
-    min-width: 120px;
-    width: max-content;
-    max-width: 180px;
-
-    padding: 4px;
-    margin: 0;
-
-    background: #20252b;
-    border: 1px solid #39434e;
-    border-radius: 6px;
-
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-
-    z-index: 9999;
-}
-
-.action-menu {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-
-    /* Keep menus above the tree */
-    z-index: 1000;
-}
-
-.action-menu-trigger {
-    width: 28px;
-    height: 28px;
-
-    padding: 0;
-    margin: 0;
-
-    border: 0;
-    border-radius: 5px;
-
-    background: transparent;
-    color: #dce3ea;
-
-    font-size: 21px;
-    line-height: 1;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-}
-
-.action-menu-trigger:hover {
-    background: #293541;
-    color: #ffffff;
-}
-
-/* IMPORTANT */
-.action-menu-dropdown {
-    position: absolute;
-
-    top: calc(100% + 4px);
-    right: 0;
-
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-
-    width: 135px;
-    min-width: 135px;
-
-    padding: 4px;
-
-    background: #20252b;
-    border: 1px solid #46515d;
-    border-radius: 6px;
-
-    box-sizing: border-box;
-
-    /* VERY HIGH */
-    z-index: 999999;
-
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-}
-
-/* Every option gets its own row */
-.action-menu-item {
-    display: block;
-
-    width: 100%;
-    height: 32px;
-
-    box-sizing: border-box;
-
-    padding: 6px 10px;
-    margin: 0;
-
-    border: 0;
-    border-radius: 4px;
-
-    background: transparent;
-    color: #e5e7eb;
-
-    font-size: 13px;
-    line-height: 20px;
-
-    text-align: left;
-    white-space: nowrap;
-
-    cursor: pointer;
-}
-
-.action-menu-item:hover {
-    background: #303a45;
-}
-
-.action-menu-item.destructive {
-    color: #ff7777;
-}
-
-.action-menu-item.destructive:hover {
-    background: rgba(255, 70, 70, 0.15);
-}
-
-/* =========================================================
-   FINAL ACTION MENU FIX
-   ========================================================= */
-
-/* The menu wrapper */
 .action-menu {
   position: relative !important;
   display: flex;
@@ -1967,3 +1938,61 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .tree-request-row:hover {
   z-index: 1000;
 }
+
+
+/* =========================================================
+   DRAG & DROP TREE
+   ========================================================= */
+
+.tree-node-row[draggable="true"],
+.tree-request-row[draggable="true"] {
+  cursor: grab;
+}
+
+.tree-node-row[draggable="true"]:active,
+.tree-request-row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/*
+ * Folder is the destination.
+ * Highlight means:
+ * "Drop here to move inside this folder."
+ */
+.tree-node-row.drop-inside {
+  background: #263d36;
+  box-shadow:
+    inset 0 0 0 1px #6ee7b7;
+}
+
+/*
+ * Request target - move before.
+ */
+.tree-request-row.drop-before {
+  box-shadow:
+    inset 0 2px 0 #6ee7b7;
+}
+
+/*
+ * Request target - move after.
+ */
+.tree-request-row.drop-after {
+  box-shadow:
+    inset 0 -2px 0 #6ee7b7;
+}
+
+/*
+ * Slight visual feedback while dragging.
+ */
+.tree-node-row[draggable="true"]:active,
+.tree-request-row[draggable="true"]:active {
+  opacity: 0.55;
+}
+
+/* VariableField multiline editor alignment */
+.variable-field.multiline {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+}
+
