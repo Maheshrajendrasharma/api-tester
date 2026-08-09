@@ -6,7 +6,7 @@
 [31m-.app-shell {[m
 [32m+[m[32m﻿.app-shell {[m
    display: grid;[m
-   grid-template-rows: 56px minmax(0, 1fr);[m
+   grid-template-rows: 10px minmax(0, 1fr);[m
    height: 100vh;[m
 [36m@@ -1381,7 +1381,7 @@[m [mbutton, input, select, textarea { transition: background 150ms ease, border-colo[m
  }[m

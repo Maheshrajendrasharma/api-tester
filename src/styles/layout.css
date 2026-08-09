@@ -1,8 +1,10 @@
 ﻿.app-shell {
   display: grid;
-  grid-template-rows: 56px minmax(0, 1fr);
+  grid-template-rows: 42px minmax(0, 1fr);
   height: 100vh;
+  min-height: 0;
   overflow: hidden;
+
   background: #101418;
   color: #e9edf2;
 }
@@ -20,8 +22,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
   min-width: 0;
-  padding: 0 20px;
+
+  padding: 0 14px;
+  box-sizing: border-box;
+
   background: #171c22;
   border-bottom: 1px solid #29323c;
 }
@@ -29,22 +38,31 @@
 .app-header-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+
+  gap: 8px;
+
   color: #edf3f8;
-  font-size: 16px;
+
+  font-size: 14px;
   font-weight: 700;
+
   letter-spacing: -0.02em;
 }
 
 .app-header-mark {
   display: grid;
-  width: 28px;
-  height: 28px;
+
+  width: 24px;
+  height: 24px;
+
   place-items: center;
+
   color: #111820;
   background: #6ee7b7;
-  border-radius: 8px;
-  font-size: 13px;
+
+  border-radius: 6px;
+
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -328,21 +346,12 @@
 }
 
 /* === Params / Headers Fields === */
-.params-table .variable-field-input,
-.headers-table .variable-field-input {
-  width: 100%;
-  height: 24px;
-  padding: 0 5px;
-  background: #151b21;
-  color: #dbe5ee;
-  border: 1px solid #2c3640;
-  border-radius: 5px;
-}
+
 
 /* === Authorization Field === */
 .authorization-input.variable-field-input {
-  width: 100%;
-  height: 30px;
+  width: 50%;
+  height: 100%;
   margin-top: 8px;
   padding: 0 11px;
   background: #151b21;
@@ -352,13 +361,7 @@
 }
 
 /* === Focus Styles === */
-.url-input.variable-field-input:focus,
-.json-editor.variable-field-input:focus,
-.params-table .variable-field-input:focus,
-.headers-table .variable-field-input:focus,
-.authorization-input.variable-field-input:focus {
-  border-color: #4e8f77;
-}
+
 
 /* === Autocomplete Dropdown === */
 .variable-autocomplete {
@@ -379,7 +382,7 @@
   display: block;
   width: 100%;
   height: 30px;
-  padding: 0 9px;
+  padding: 0 0px;
   color: #dce6ef;
   background: transparent;
   border: 0;
@@ -498,6 +501,7 @@
   width: 100%;
   min-width: 0;
   min-height: 0;
+  height: 100%;
 }
 
 /* Actual editable input / textarea */
@@ -509,6 +513,7 @@
   box-sizing: border-box;
 
   width: 100%;
+  height: 100%;
   min-width: 0;
   margin: 0;
 
@@ -540,7 +545,7 @@
 /* JSON / Body */
 .json-editor.variable-field-input {
   width: 100%;
-  height: 170px;
+  height: 260px;
 
   box-sizing: border-box;
 
@@ -562,24 +567,12 @@
   resize: vertical;
 }
 
-/* Params / Headers */
-.params-table .variable-field-input,
-.headers-table .variable-field-input {
-  width: 100%;
-  height: 34px;
-  padding: 0 10px;
 
-  color: #dbe5ee;
-  background: #151b21;
-
-  border: 1px solid #2c3640;
-  border-radius: 5px;
-}
 
 /* Authorization */
 .authorization-input.variable-field-input {
   width: 100%;
-  height: 38px;
+  height: 100%;
   margin-top: 8px;
   padding: 0 11px;
 
@@ -590,14 +583,6 @@
   border-radius: 6px;
 }
 
-/* Focus */
-.url-input.variable-field-input:focus,
-.json-editor.variable-field-input:focus,
-.params-table .variable-field-input:focus,
-.headers-table .variable-field-input:focus,
-.authorization-input.variable-field-input:focus {
-  border-color: #4e8f77;
-}
 
 /* =========================================================
    AUTOCOMPLETE
@@ -891,7 +876,7 @@ padding:0 6px;
 .action-menu-popover {
   position: absolute;
 
-  top: calc(100% + 4px);
+top: 46px;
   right: 0;
 
   z-index: 50;
@@ -1173,22 +1158,8 @@ font-weight: 800;
 .tab-placeholder { padding: 34px 0; color: #758393; font-size: 13px; }
 .input-error { margin: 8px 0 0; color: #f39a9a; font-size: 12px; }
 
-.params-editor, .headers-editor { padding-top: 4px; }
-.params-table, .headers-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.params-table th, .headers-table th { padding: 0 10px 9px; color: #8290a0; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-align: left; text-transform: uppercase; }
-.params-table th:first-child, .params-table td:first-child, .headers-table th:first-child, .headers-table td:first-child { width: 74px; text-align: center; }
-.params-table th:last-child, .params-table td:last-child, .headers-table th:last-child, .headers-table td:last-child { width: 44px; text-align: center; }
-.params-table td, .headers-table td { padding: 5px; border-top: 1px solid #28323c; }
-.params-table input[type='text'], .params-table td > input:not([type]), .headers-table input[type='text'], .headers-table td > input:not([type]) { width: 100%; }
-.params-table input:not([type='checkbox']), .headers-table input:not([type='checkbox']) { height: 34px; padding: 0 10px; color: #dbe5ee; background: #151b21; border: 1px solid #2c3640; border-radius: 5px; outline: none; }
-.params-table input:not([type='checkbox']):focus, .headers-table input:not([type='checkbox']):focus { border-color: #4e8f77; }
-.params-table input[type='checkbox'], .headers-table input[type='checkbox'] { accent-color: #6ee7b7; cursor: pointer; }
-.add-parameter-button, .delete-parameter-button, .add-header-button, .delete-header-button { border: 0; cursor: pointer; font: inherit; }
-.add-parameter-button, .add-header-button { margin-top: 12px; padding: 8px 10px; color: #9be8c5; background: #1d3029; border-radius: 5px; font-size: 12px; }
-.delete-parameter-button, .delete-header-button { width: 26px; height: 26px; color: #a6b1bd; background: transparent; border-radius: 4px; font-size: 19px; line-height: 1; }
-.delete-parameter-button:hover, .delete-header-button:hover { color: #f3a0a0; background: #352529; }
 
-.authorization-editor { max-width: 540px; padding-top: 18px; }
+.authorization-editor { max-width: 800px; padding-top: 18px; }
 .authorization-fields { display: grid; gap: 9px; margin-top: 20px; }
 .authorization-label { color: #9ba8b7; font-size: 12px; }
 .authorization-select, .authorization-input { width: 100%; height: 38px; margin-top: 8px; padding: 0 11px; color: #dbe5ee; background: #151b21; border: 1px solid #2c3640; border-radius: 6px; outline: none; font: inherit; font-size: 13px; }
@@ -1412,59 +1383,84 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 
 
-.environment-menu{
+/* =========================================================
+   ENVIRONMENT MENU
+   Match sidebar action-menu styling
+   ========================================================= */
 
-    position:absolute;
+.environment-menu {
+    position: absolute !important;
 
-    top:42px;
+    top: calc(100% + 5px) !important;
+    right: 0 !important;
 
-    right:0;
+    width: 230px !important;
+    min-width: 230px !important;
 
-    width:230px;
+    display: flex !important;
+    flex-direction: column !important;
 
-    background:#1c222d;
+    padding: 4px !important;
+    margin: 0 !important;
 
-    border:1px solid #323d4c;
+    background: #1a222b !important;
 
-    border-radius:8px;
+    border: 1px solid #384552 !important;
+    border-radius: 7px !important;
 
-    overflow:hidden;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55) !important;
 
-    z-index:100;
+    z-index: 99999 !important;
 
-    box-shadow:0 8px 24px rgba(0,0,0,.4);
-
+    overflow: hidden !important;
 }
 
-.environment-menu button{
+.environment-menu button {
+    display: block !important;
 
-    width:100%;
+    width: 100% !important;
+    height: 30px !important;
+    min-height: 30px !important;
 
-    padding:12px 16px;
+    box-sizing: border-box !important;
 
-    background:none;
+    padding: 0 10px !important;
+    margin: 0 !important;
 
-    border:none;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 5px !important;
 
-    color:white;
+    color: #d9e2eb !important;
 
-    text-align:left;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
 
-    cursor:pointer;
+    line-height: 30px !important;
+    text-align: left !important;
 
+    cursor: pointer !important;
+    white-space: nowrap !important;
 }
 
-.environment-menu button:hover{
-
-    background:#2d3948;
-
+.environment-menu button:hover,
+.environment-menu button:focus-visible {
+    background: #303c48 !important;
+    color: #ffffff !important;
+    outline: none !important;
 }
 
-.environment-menu .danger{
-
-    color:#ff6b6b;
-
+.environment-menu .danger {
+    color: #f09a9f !important;
 }
+
+.environment-menu .danger:hover,
+.environment-menu .danger:focus-visible {
+    color: #ffc0c4 !important;
+    background: #422a30 !important;
+}
+
 
 
 .header-environment-group{
@@ -2400,3 +2396,1754 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   min-height: 0;
 }
 
+/* =========================================================
+   ENVIRONMENT PANEL HEADER
+   ========================================================= */
+
+.environment-panel-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 52px;
+    min-height: 52px;
+    padding: 6px 8px;
+    gap: 4px;
+    box-sizing: border-box;
+}
+
+
+/* Environment selector */
+
+.environment-panel-header > :first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* =========================================================
+   THREE DOT MENU BUTTON
+   ========================================================= */
+
+.environment-panel-menu {
+    flex: 0 0 32px;
+
+    width: 32px;
+    height: 40px;
+
+    padding: 0;
+    margin: 0;
+
+    border: 1px solid #303a45;
+    border-radius: 6px;
+
+    background: #11161c;
+    color: #6ee7b7;
+
+    font-family: Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+}
+
+.environment-panel-menu:hover {
+    background: #202830;
+    border-color: #465563;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   ENVIRONMENT DROPDOWN
+   ========================================================= */
+
+.environment-panel-dropdown {
+    position: absolute;
+
+    top: calc(100% - 2px);
+    right: 0;
+
+    width: 100%;
+    min-width: 0;
+
+    padding: 4px;
+
+    margin: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #171c22;
+    border: 1px solid #39444f;
+    border-radius: 7px;
+
+    box-sizing: border-box;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+    z-index: 999999;
+}
+
+
+/* =========================================================
+   DROPDOWN OPTIONS
+   ========================================================= */
+
+.environment-panel-dropdown button {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: 34px;
+    min-height: 34px;
+
+    padding: 0 10px;
+    margin: 0;
+
+    border: 0;
+    border-radius: 5px;
+
+    background: transparent;
+    color: #e6edf5;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    text-align: left;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+}
+
+
+/* Dropdown hover */
+
+.environment-panel-dropdown button:hover {
+    background: #293541;
+    color: #6ee7b7;
+}
+
+
+/* Remove browser focus appearance */
+
+.environment-panel-dropdown button:focus {
+    outline: none;
+}
+
+
+/* Optional separator */
+
+.environment-panel-dropdown hr {
+    width: 100%;
+    height: 1px;
+
+    padding: 0;
+    margin: 4px 0;
+
+    border: 0;
+
+    background: #303a45;
+}
+
+
+/* =========================================================
+   ENVIRONMENT SELECTOR
+   ========================================================= */
+
+.environment-selector {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+
+/* Main selector row */
+
+.environment-selector-control {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: 48px;
+
+    background: #151b21;
+    border: 1px solid #34404c;
+    border-radius: 10px;
+
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+/* Environment name button */
+
+.environment-selector-button {
+    flex: 1;
+    min-width: 0;
+
+    height: 100%;
+    padding: 0 12px 0 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+    color: #edf3f8;
+
+    cursor: pointer;
+    text-align: left;
+}
+
+
+/* Environment name */
+
+.environment-selector-name {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* Dropdown arrow */
+
+.environment-selector-arrow {
+    flex-shrink: 0;
+
+    margin-left: 10px;
+
+    color: #dce5ed;
+    font-size: 20px;
+    line-height: 1;
+}
+
+
+/* Search button */
+
+.environment-search-button {
+    width: 42px;
+    height: 100%;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-left: 1px solid #34404c;
+
+    background: transparent;
+    color: #9ba8b5;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+
+.environment-search-button:hover {
+    background: #202832;
+    color: #6ee7b7;
+}
+
+
+/* Search mode */
+
+.environment-selector-control.searching {
+    border-color: #6ee7b7;
+}
+
+
+/* Search input */
+
+.environment-search-input {
+    width: 100%;
+    height: 100%;
+
+    padding: 0 14px;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+    color: #edf3f8;
+
+    font-size: 15px;
+}
+
+
+.environment-search-input::placeholder {
+    color: #74808c;
+}
+
+
+/* =========================================================
+   ENVIRONMENT DROPDOWN
+   ========================================================= */
+
+.environment-dropdown {
+    position: absolute;
+
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+
+    width: 100%;
+    max-height: 420px;
+
+    overflow-y: auto;
+
+    padding: 4px;
+
+    box-sizing: border-box;
+
+    background: #151b21;
+    border: 1px solid #46515d;
+    border-radius: 6px;
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+
+    z-index: 999999;
+}
+
+
+/* Dropdown option */
+
+.environment-dropdown-item {
+    display: block;
+
+    width: 100%;
+    min-height: 36px;
+
+    padding: 7px 10px;
+
+    border: 0;
+    border-radius: 4px;
+
+    background: transparent;
+    color: #e6edf3;
+
+    font-size: 14px;
+
+    text-align: left;
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    cursor: pointer;
+}
+
+
+.environment-dropdown-item:hover {
+    background: #293541;
+}
+
+
+.environment-dropdown-item.active {
+    background: #1769d1;
+    color: white;
+}
+
+
+/* No result */
+
+.environment-no-results {
+    padding: 12px 10px;
+
+    color: #7f8b97;
+
+    font-size: 14px;
+}
+
+
+.environment-selector {
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
+
+.environment-selector-control {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: 46px;
+
+    margin: 0;
+    padding: 0 12px;
+
+    box-sizing: border-box;
+
+    background: #171c22;
+    border: 1px solid #34404c;
+    border-radius: 8px;
+
+    color: #edf3f8;
+
+    cursor: pointer;
+}
+
+
+.environment-selector.is-open
+.environment-selector-control {
+    border-color: #6ee7b7;
+}
+
+/* Normal environment name */
+
+/* =========================================================
+   NORMAL ENVIRONMENT NAME
+   ========================================================= */
+
+.environment-current-name {
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Search icon */
+
+.environment-search-icon {
+    flex: 0 0 auto;
+
+    width: 20px;
+
+    margin: 0 7px 0 0;
+
+    font-size: 15px;
+
+    line-height: 1;
+
+    text-align: center;
+}
+
+
+/* Search input */
+/* =========================================================
+   SEARCH INPUT
+   ========================================================= */
+
+.environment-search-input {
+    flex: 1 1 auto;
+
+    width: 0;
+    min-width: 0;
+
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    outline: 0;
+
+    box-sizing: border-box;
+
+    background: transparent;
+
+    color: #edf3f8;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 46px;
+}
+
+
+.environment-search-input::placeholder {
+    color: #8d99a6;
+    opacity: 1;
+}
+
+
+/* Dropdown arrow */
+
+/* =========================================================
+   ARROW
+   ========================================================= */
+
+.environment-chevron {
+    flex: 0 0 20px;
+
+    width: 20px;
+
+    margin: 0;
+
+    color: #cbd5df;
+
+    font-size: 12px;
+
+    line-height: 1;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   ENVIRONMENT DROPDOWN
+   ========================================================= */
+
+.environment-dropdown {
+    position: absolute;
+
+    /*
+     * EXACTLY aligned with the control
+     */
+    top: 46px;
+    left: 0;
+
+    width: 100%;
+
+    margin: 0;
+    padding: 4px 0;
+
+    box-sizing: border-box;
+
+    max-height: 360px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    background: #171c22;
+
+    border: 1px solid #46515d;
+    border-top: 0;
+
+    border-radius: 0 0 7px 7px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    z-index: 999999;
+}
+
+
+/* Dropdown options */
+
+.environment-option {
+    display: block;
+
+    width: 100%;
+
+    min-height: 36px;
+
+    padding: 8px 12px;
+
+    margin: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #e9edf2;
+
+    font-size: 14px;
+
+    font-weight: 400;
+
+    line-height: 20px;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.environment-option:hover {
+    background: #26313c;
+}
+
+.environment-option.active {
+    background: #1769c2;
+    color: #ffffff;
+}
+
+
+/* No results */
+
+.environment-no-results {
+    padding: 10px 12px;
+
+    color: #8d99a6;
+
+    font-size: 13px;
+}
+
+
+
+/* Environment dropdown scrollbar */
+.environment-dropdown,
+.environment-dropdown::-webkit-scrollbar {
+    scrollbar-color: #151b22 #151b22;
+    scrollbar-width: thin;
+}
+
+.environment-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.environment-dropdown::-webkit-scrollbar-track {
+    background: #151b22;
+    border-radius: 10px;
+}
+
+.environment-dropdown::-webkit-scrollbar-thumb {
+    background: #252d35;
+    border: 1px solid #151b22;
+    border-radius: 10px;
+}
+
+.environment-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #3d4b5a;
+}
+
+
+.app-header {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: #151b22;
+  border-bottom: 1px solid #303b47;
+  -webkit-app-region: drag;
+}
+
+.window-close-button {
+  -webkit-app-region: no-drag;
+
+  width: 42px;
+  height: 32px;
+
+  border: none;
+  background: transparent;
+
+  color: #9aa7b5;
+  font-size: 24px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 5px;
+}
+
+.window-close-button:hover {
+  background: #e81123;
+  color: white;
+}
+
+
+/* =========================================================
+   PARAMS + HEADERS EDITOR
+   ========================================================= */
+
+.params-editor,
+.headers-editor {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+/* Table wrapper */
+.params-table,
+.headers-table {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER ROW
+   ========================================================= */
+
+.params-table-header,
+.headers-table-header {
+  display: grid;
+  grid-template-columns: 90px minmax(180px, 1fr) minmax(250px, 2fr) 42px;
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 42px;
+
+  padding: 0 10px;
+
+  box-sizing: border-box;
+
+  border-bottom: 1px solid #2c3743;
+
+  color: #9baabd;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================================
+   PARAMETER / HEADER DATA ROW
+   ========================================================= */
+
+.parameter-row,
+.header-row {
+  display: grid;
+
+  grid-template-columns:
+    90px
+    minmax(180px, 1fr)
+    minmax(250px, 2fr)
+    42px;
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 64px;
+
+  padding: 7px 10px;
+
+  box-sizing: border-box;
+
+  gap: 10px;
+}
+
+/* =========================================================
+   KEY INPUT
+   ========================================================= */
+
+.parameter-row > input[type="text"],
+.header-row > input[type="text"],
+.parameter-row > input:not([type]),
+.header-row > input:not([type]) {
+  width: 100%;
+  height: 52px;
+
+  box-sizing: border-box;
+
+  padding: 0 14px;
+
+  border: 1px solid #2d3a47;
+  border-radius: 7px;
+
+  background: #151b22;
+
+  color: #e5edf5;
+
+  font-size: 16px;
+
+  outline: none;
+}
+
+/* =========================================================
+   VARIABLE FIELD / VALUE INPUT
+   ========================================================= */
+
+.parameter-row .variable-field,
+.header-row .variable-field {
+  width: 100%;
+}
+
+/*
+   VariableField may render an input directly.
+   This makes sure the value field fills the grid cell.
+*/
+
+.parameter-row > input,
+.header-row > input {
+  box-sizing: border-box;
+}
+
+.parameter-row > :nth-child(3),
+.header-row > :nth-child(3) {
+  width: 100%;
+  min-width: 0;
+}
+
+/* If VariableField renders input */
+.parameter-row > :nth-child(3) input,
+.header-row > :nth-child(3) input {
+  width: 100%;
+  height: 52px;
+
+  box-sizing: border-box;
+
+  padding: 0 14px;
+
+  border: 1px solid #2d3a47;
+  border-radius: 7px;
+
+  background: #151b22;
+
+  color: #e5edf5;
+
+  font-size: 16px;
+
+  outline: none;
+}
+
+/* =========================================================
+   INPUT FOCUS
+   ========================================================= */
+
+.parameter-row input:focus,
+.header-row input:focus {
+  border-color: #69e2b0;
+  box-shadow: 0 0 0 1px rgba(105, 226, 176, 0.15);
+}
+
+/* =========================================================
+   CHECKBOX
+   ========================================================= */
+
+.parameter-row > input[type="checkbox"],
+.header-row > input[type="checkbox"] {
+  width: 19px;
+  height: 19px;
+
+  margin: 0 auto;
+
+  accent-color: #69e2b0;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   DELETE BUTTON
+   ========================================================= */
+
+.delete-parameter-button,
+.delete-header-button {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto;
+
+  border: 1px solid #2d3a47;
+  border-radius: 6px;
+
+  background: #151b22;
+
+  color: #b7c3d0;
+
+  font-size: 24px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.delete-parameter-button:hover,
+.delete-header-button:hover {
+  background: #242d37;
+  border-color: #ef6b73;
+  color: #ff7b84;
+}
+
+/* =========================================================
+   PLACEHOLDER
+   ========================================================= */
+
+.parameter-row input::placeholder,
+.header-row input::placeholder {
+  color: #697585;
+  opacity: 1;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .params-table-header,
+  .headers-table-header,
+  .parameter-row,
+  .header-row {
+    grid-template-columns:
+      70px
+      minmax(130px, 1fr)
+      minmax(180px, 2fr)
+      38px;
+
+    gap: 7px;
+  }
+
+  .parameter-row > input,
+  .header-row > input,
+  .parameter-row > :nth-child(3) input,
+  .header-row > :nth-child(3) input {
+    font-size: 14px;
+  }
+}
+
+/* =========================================================
+   POSTMAN STYLE REQUEST TABLE
+   Used by Headers + Params
+   ========================================================= */
+
+.request-table-container {
+    width: 100%;
+    margin-top: 8px;
+    color: #d7dde5;
+}
+
+
+/* =========================
+   TOOLBAR
+   ========================= */
+
+.request-table-toolbar {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 14px;
+
+    border-bottom: 1px solid #29313a;
+
+    background: #11161b;
+}
+
+.request-table-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #d9e0e8;
+}
+
+.auto-generated-toggle {
+    border: none;
+    border-radius: 18px;
+
+    padding: 7px 12px;
+
+    background: #20262c;
+    color: #aeb7c2;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+.auto-generated-toggle:hover {
+    background: #292f36;
+    color: #e1e6eb;
+}
+
+
+/* =========================
+   TABLE WRAPPER
+   ========================= */
+
+.request-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+
+    background: #11161b;
+}
+
+
+/* =========================
+   TABLE
+   ========================= */
+
+.request-editor-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    background: #11161b;
+}
+
+
+/* =========================
+   HEADER
+   ========================= */
+
+.request-editor-table thead {
+    background: #171b20;
+}
+
+.request-editor-table th {
+    height: 48px;
+
+    padding: 0 14px;
+
+    border-right: 1px solid #292f35;
+    border-bottom: 1px solid #30363d;
+
+    text-align: left;
+
+    color: #9da7b3;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-transform: none;
+}
+
+
+/* =========================
+   COLUMN WIDTHS
+   ========================= */
+
+.request-editor-table .enabled-column {
+    width: 62px;
+    text-align: center;
+}
+
+.request-editor-table .key-column {
+    width: 30%;
+}
+
+.request-editor-table .value-column {
+    width: 35%;
+}
+
+.request-editor-table .description-column {
+    width: 25%;
+}
+
+.request-editor-table .actions-column {
+    width: 58px;
+    text-align: center;
+}
+
+
+/* =========================
+   ROW
+   ========================= */
+
+.request-editor-table tbody tr {
+    height: 64px;
+
+    border-bottom: 1px solid #292f35;
+}
+
+.request-editor-table tbody tr:hover {
+    background: #151a1f;
+}
+
+
+/* =========================
+   CELLS
+   ========================= */
+
+.request-editor-table td {
+    padding: 8px 10px;
+
+    border-right: 1px solid #292f35;
+
+    vertical-align: middle;
+}
+
+
+/* =========================
+   INPUT
+   ========================= */
+
+.request-table-input {
+    width: 100%;
+    height: 44px;
+
+    box-sizing: border-box;
+
+    padding: 0 12px;
+
+    border: 1px solid #34404c;
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #171e25;
+    color: #e3e8ed;
+
+    font-size: 15px;
+
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
+}
+
+.request-table-input::placeholder {
+    color: #687585;
+}
+
+.request-table-input:hover {
+    border-color: #465360;
+}
+
+.request-table-input:focus {
+    border-color: #63e6be;
+    background: #192129;
+}
+
+
+/* =========================
+   VARIABLE FIELD
+   ========================= */
+
+.request-editor-table
+.value-column input {
+    width: 100%;
+    height: 44px;
+
+    box-sizing: border-box;
+
+    padding: 0 12px;
+
+    border: 1px solid #34404c;
+    border-radius: 8px;
+
+    background: #171e25;
+    color: #e3e8ed;
+
+    font-size: 15px;
+
+    outline: none;
+}
+
+.request-editor-table
+.value-column input:focus {
+    border-color: #63e6be;
+}
+
+
+/* =========================
+   CHECKBOX
+   ========================= */
+
+.request-enable-checkbox {
+    width: 20px;
+    height: 20px;
+
+    margin: 0;
+
+    accent-color: #63e6be;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   DELETE BUTTON
+   ========================= */
+
+.request-delete-button {
+    width: 38px;
+    height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #34404c;
+    border-radius: 8px;
+
+    background: #171e25;
+    color: #b7c1cc;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.request-delete-button:hover {
+    border-color: #65717d;
+    background: #222a32;
+    color: #ffffff;
+}
+
+
+/* =========================
+   EMPTY / LAST ROW
+   ========================= */
+
+.request-editor-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+
+    .request-editor-table {
+        min-width: 700px;
+    }
+
+    .request-editor-table .key-column {
+        width: 28%;
+    }
+
+    .request-editor-table .value-column {
+        width: 32%;
+    }
+
+    .request-editor-table .description-column {
+        width: 25%;
+    }
+
+}
+
+/* =========================================================
+   PARAMS / HEADERS EDITOR
+   ========================================================= */
+
+.params-editor {
+    width: 100%;
+    box-sizing: border-box;
+    color: #d7e0ea;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.params-editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    height: 72px;
+    padding: 0 22px;
+
+    box-sizing: border-box;
+}
+
+
+.params-editor-title {
+    font-size: 21px;
+    font-weight: 600;
+    color: #dce5ef;
+}
+
+
+.auto-generated-toggle {
+    border: none;
+    border-radius: 22px;
+
+    background: #202832;
+    color: #aebdce;
+
+    padding: 9px 18px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.auto-generated-toggle:hover {
+    background: #29343f;
+    color: #dce5ef;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.params-table {
+    width: calc(100% - 20px);
+    margin: 0 10px;
+
+    border: 1px solid #293440;
+    border-radius: 2px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.params-table-header {
+    display: grid;
+
+    grid-template-columns:
+        70px
+        minmax(250px, 1fr)
+        minmax(350px, 1.35fr)
+        minmax(220px, 0.8fr)
+        88px;
+
+    min-height: 74px;
+
+    background: #171d23;
+
+    border-bottom: 1px solid #293440;
+
+    align-items: center;
+}
+
+
+.params-table-header > div {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 20px;
+
+    box-sizing: border-box;
+
+    font-size: 18px;
+    font-weight: 500;
+
+    color: #aebdce;
+
+    border-right: 1px solid #293440;
+}
+
+
+.params-table-header > div:last-child {
+    border-right: none;
+}
+
+
+/* =========================================================
+   ROW
+   ========================================================= */
+
+.params-table-row {
+    display: grid;
+
+    grid-template-columns:
+        70px
+        minmax(250px, 1fr)
+        minmax(350px, 1.35fr)
+        minmax(220px, 0.8fr)
+        88px;
+
+    min-height: 96px;
+
+    align-items: center;
+
+    background: #10161c;
+
+    border-bottom: 1px solid #293440;
+}
+
+
+.params-table-row:last-child {
+    border-bottom: none;
+}
+
+
+.params-table-row > div {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 12px 16px;
+
+    box-sizing: border-box;
+
+    border-right: 1px solid #293440;
+}
+
+
+.params-table-row > div:last-child {
+    border-right: none;
+}
+
+
+/* =========================================================
+   COLUMNS
+   ========================================================= */
+
+.params-checkbox-column {
+    justify-content: center;
+}
+
+
+.params-key-column {
+    min-width: 0;
+}
+
+
+.params-value-column {
+    min-width: 0;
+}
+
+
+.params-description-column {
+    min-width: 0;
+}
+
+
+.params-action-column {
+    justify-content: center;
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.params-cell-input {
+    width: 100%;
+    height: 64px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #344252;
+    border-radius: 10px;
+
+    background: #171e26;
+
+    color: #dbe5ef;
+
+    padding: 0 18px;
+
+    font-size: 19px;
+
+    outline: none;
+
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.params-cell-input::placeholder {
+    color: #64758a;
+}
+
+
+.params-cell-input:hover {
+    border-color: #405064;
+}
+
+
+.params-cell-input:focus {
+    border-color: #5b7088;
+
+    background: #19212a;
+
+    box-shadow: 0 0 0 1px rgba(91, 112, 136, 0.15);
+}
+
+
+/* =========================================================
+   VARIABLE FIELD
+   ========================================================= */
+
+.params-value-column .variable-field,
+.params-value-column textarea,
+.params-value-column input {
+    width: 100%;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.params-description-input {
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   CHECKBOX
+   ========================================================= */
+
+.params-enable-checkbox {
+    appearance: none;
+
+    width: 28px;
+    height: 28px;
+
+    margin: 0;
+
+    border: 1px solid #435364;
+    border-radius: 4px;
+
+    background: #171e26;
+
+    cursor: pointer;
+
+    position: relative;
+}
+
+
+.params-enable-checkbox:checked {
+    background: #61e5ba;
+    border-color: #61e5ba;
+}
+
+
+.params-enable-checkbox:checked::after {
+    content: "";
+
+    position: absolute;
+
+    left: 8px;
+    top: 3px;
+
+    width: 7px;
+    height: 14px;
+
+    border: solid #10201d;
+    border-width: 0 3px 3px 0;
+
+    transform: rotate(45deg);
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+   ========================================================= */
+
+.params-delete-button {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #344252;
+    border-radius: 9px;
+
+    background: #171e26;
+
+    color: #b9c8d8;
+
+    font-size: 34px;
+    font-weight: 300;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.params-delete-button:hover {
+    background: #202a34;
+
+    border-color: #53667a;
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   SCROLLING
+   ========================================================= */
+
+.params-table {
+    max-height: 450px;
+
+    overflow-y: auto;
+}
+
+
+.params-table::-webkit-scrollbar {
+    width: 9px;
+}
+
+
+.params-table::-webkit-scrollbar-track {
+    background: #10161c;
+}
+
+
+.params-table::-webkit-scrollbar-thumb {
+    background: #344252;
+    border-radius: 10px;
+}
+
+
+.params-table::-webkit-scrollbar-thumb:hover {
+    background: #45576b;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .params-table-header,
+    .params-table-row {
+        grid-template-columns:
+            55px
+            minmax(180px, 1fr)
+            minmax(220px, 1fr)
+            minmax(150px, 0.7fr)
+            65px;
+    }
+
+    .params-table-header > div {
+        padding: 0 12px;
+        font-size: 15px;
+    }
+
+    .params-table-row > div {
+        padding: 10px;
+    }
+
+    .params-cell-input {
+        height: 52px;
+        font-size: 16px;
+        padding: 0 12px;
+    }
+
+    .params-delete-button {
+        width: 42px;
+        height: 42px;
+        font-size: 28px;
+    }
+
+}
+
+
+/* =========================================================
+   PARAMS / HEADERS SCROLL CONTAINER
+   ========================================================= */
+
+.params-editor,
+.headers-editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+
+/* Main table area */
+.params-table,
+.headers-table {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+
+/* Keep column headings fixed */
+.params-table-header,
+.headers-table-header {
+  flex-shrink: 0;
+}
+
+
+/* ONLY rows scroll */
+.params-table-body,
+.headers-table-body {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.params-table-body::-webkit-scrollbar,
+.headers-table-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.params-table-body::-webkit-scrollbar-track,
+.headers-table-body::-webkit-scrollbar-track {
+  background: #0f1419;
+}
+
+.params-table-body::-webkit-scrollbar-thumb,
+.headers-table-body::-webkit-scrollbar-thumb {
+  background: #34404c;
+  border-radius: 6px;
+}
+
+.params-table-body::-webkit-scrollbar-thumb:hover,
+.headers-table-body::-webkit-scrollbar-thumb:hover {
+  background: #4b5967;
+}
+
+/* =========================================================
+   BOUNDED EDITOR HEIGHT
+   ========================================================= */
+
+.params-editor,
+.headers-editor {
+  height: 430px;
+  max-height: 430px;
+}

@@ -1,55 +1,328 @@
-const supportedMethods = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+const supportedMethods = new Set([
+  'GET',
+  'POST',
+  'PUT',
+  'PATCH',
+  'DELETE',
+])
 
 function applyAuthorization(headers, parsedUrl, authorization) {
-  if (!authorization || authorization.type === 'None') return
 
-  if (authorization.type === 'Bearer Token' && authorization.bearerToken) {
+  if (!authorization || authorization.type === 'None') {
+    return
+  }
+
+  if (
+    authorization.type === 'Bearer Token' &&
+    authorization.bearerToken
+  ) {
     headers.Authorization = `Bearer ${authorization.bearerToken}`
   }
 
-  if (authorization.type === 'Basic Auth' && (authorization.username || authorization.password)) {
-    headers.Authorization = `Basic ${Buffer.from(`${authorization.username}:${authorization.password}`).toString('base64')}`
+  if (
+    authorization.type === 'Basic Auth' &&
+    (authorization.username || authorization.password)
+  ) {
+    headers.Authorization =
+      `Basic ${Buffer.from(
+        `${authorization.username}:${authorization.password}`
+      ).toString('base64')}`
   }
 
-  if (authorization.type === 'API Key' && authorization.apiKey) {
+  if (
+    authorization.type === 'API Key' &&
+    authorization.apiKey
+  ) {
+
     if (authorization.apiKeyLocation === 'Query Parameter') {
-      parsedUrl.searchParams.set(authorization.apiKey, authorization.apiValue ?? '')
+
+      parsedUrl.searchParams.set(
+        authorization.apiKey,
+        authorization.apiValue ?? ''
+      )
+
     } else {
-      headers[authorization.apiKey] = authorization.apiValue ?? ''
+
+      headers[authorization.apiKey] =
+        authorization.apiValue ?? ''
+
     }
   }
 }
 
-export async function execute(request) {
-  const { method, url, headers = {}, body = '', authorization } = request ?? {}
 
-  if (!supportedMethods.has(method)) throw new Error('Unsupported HTTP method.')
+/**
+ * Convert HeadersEditor data into a real
+ * fetch-compatible headers object.
+ *
+ * UI format:
+ *
+ * [
+ *   {
+ *     id: 1,
+ *     enabled: true,
+ *     key: "Content-Type",
+ *     value: "application/json"
+ *   }
+ * ]
+ *
+ * becomes:
+ *
+ * {
+ *   "Content-Type": "application/json"
+ * }
+ */
+function buildHeaders(headers) {
 
-  let parsedUrl
-  try {
-    parsedUrl = new URL(url)
-  } catch {
-    throw new Error('Please enter a valid request URL.')
+  const result = {}
+
+  // Your UI stores headers as an array
+  if (Array.isArray(headers)) {
+
+    for (const header of headers) {
+
+      if (!header) {
+        continue
+      }
+
+      // Ignore disabled headers
+      if (header.enabled === false) {
+        continue
+      }
+
+      const key = String(header.key ?? '').trim()
+
+      if (!key) {
+        continue
+      }
+
+      const value = String(header.value ?? '')
+
+      result[key] = value
+    }
+
+    return result
   }
 
-  if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error('Only HTTP and HTTPS URLs are supported.')
+  // Fallback in case some older request was saved
+  // using an object instead of an array.
+  if (headers && typeof headers === 'object') {
 
-  const requestHeaders = { ...headers }
-  applyAuthorization(requestHeaders, parsedUrl, authorization)
+    for (const [key, value] of Object.entries(headers)) {
 
-  const requestOptions = { method, headers: requestHeaders }
-  if (body && method !== 'GET') requestOptions.body = body
+      if (!key) {
+        continue
+      }
+
+      result[key] = String(value ?? '')
+    }
+  }
+
+  return result
+}
+
+
+export async function execute(request) {
+
+  const {
+    method,
+    url,
+    headers = [],
+    body = '',
+    authorization,
+  } = request ?? {}
+
+  console.log('================================')
+  console.log('API REQUEST')
+  console.log('METHOD:', method)
+  console.log('URL:', url)
+  console.log('RAW HEADERS:', headers)
+  console.log('BODY:', body)
+  console.log('AUTHORIZATION:', authorization)
+  console.log('================================')
+
+
+  // ---------------------------------------
+  // Validate method
+  // ---------------------------------------
+
+  if (!supportedMethods.has(method)) {
+    throw new Error(`Unsupported HTTP method: ${method}`)
+  }
+
+
+  // ---------------------------------------
+  // Validate URL
+  // ---------------------------------------
+
+  let parsedUrl
+
+  try {
+
+    parsedUrl = new URL(url)
+
+  } catch (error) {
+
+    console.error('INVALID URL:', url)
+
+    throw new Error(
+      `Please enter a valid request URL: ${url}`
+    )
+  }
+
+
+  if (
+    !['http:', 'https:'].includes(
+      parsedUrl.protocol
+    )
+  ) {
+
+    throw new Error(
+      'Only HTTP and HTTPS URLs are supported.'
+    )
+  }
+
+
+  // ---------------------------------------
+  // Build proper headers
+  // ---------------------------------------
+
+  const requestHeaders = buildHeaders(headers)
+
+
+  // ---------------------------------------
+  // Apply Authorization
+  // ---------------------------------------
+
+  applyAuthorization(
+    requestHeaders,
+    parsedUrl,
+    authorization
+  )
+
+
+  console.log('FINAL URL:', parsedUrl.toString())
+  console.log('FINAL HEADERS:', requestHeaders)
+
+
+  // ---------------------------------------
+  // Build fetch options
+  // ---------------------------------------
+
+  const requestOptions = {
+    method,
+    headers: requestHeaders,
+  }
+
+
+  // ---------------------------------------
+  // Add body
+  // ---------------------------------------
+
+  if (
+    body &&
+    method !== 'GET'
+  ) {
+
+    requestOptions.body = body
+  }
+
+
+  console.log(
+    'FETCH OPTIONS:',
+    requestOptions
+  )
+
+
+  // ---------------------------------------
+  // Execute request
+  // ---------------------------------------
 
   const startedAt = performance.now()
-  const response = await fetch(parsedUrl, requestOptions)
-  const responseBody = await response.text()
+
+  let response
+
+  try {
+
+    response = await fetch(
+      parsedUrl,
+      requestOptions
+    )
+
+  } catch (error) {
+
+    console.error(
+      '================================'
+    )
+
+    console.error(
+      'FETCH FAILED'
+    )
+
+    console.error(
+      'Error name:',
+      error?.name
+    )
+
+    console.error(
+      'Error message:',
+      error?.message
+    )
+
+    console.error(
+      'Error cause:',
+      error?.cause
+    )
+
+    console.error(
+      'Error stack:',
+      error?.stack
+    )
+
+    console.error(
+      '================================'
+    )
+
+    throw new Error(
+      `Request failed: ${
+        error?.cause?.message ||
+        error?.message ||
+        'Unknown network error'
+      }`
+    )
+  }
+
+
+  // ---------------------------------------
+  // Read response
+  // ---------------------------------------
+
+  const responseBody =
+    await response.text()
+
 
   return {
+
     status: response.status,
+
     statusText: response.statusText,
-    headers: Object.fromEntries(response.headers.entries()),
+
+    headers:
+      Object.fromEntries(
+        response.headers.entries()
+      ),
+
     responseBody,
-    responseTime: Math.round(performance.now() - startedAt),
-    responseSize: Buffer.byteLength(responseBody, 'utf8'),
+
+    responseTime:
+      Math.round(
+        performance.now() - startedAt
+      ),
+
+    responseSize:
+      Buffer.byteLength(
+        responseBody,
+        'utf8'
+      ),
   }
 }

@@ -80,30 +80,51 @@ if (!request) {
           <button className={`tab-button${activeTab === tab ? ' active' : ''}`} key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)}>{tab}</button>
         ))}
       </div>
+
+<div className="request-tab-content">
+
+
        {activeTab === "Params" && (
   <ParamsEditor
     environment={environment}
-    parameters={request.params}
+    parameters={
+      request.params?.length
+        ? request.params
+        : [
+            {
+              id: 1,
+              enabled: true,
+              key: '',
+              value: '',
+              description: '',
+            },
+          ]
+    }
     onChange={handleParametersChange}
   />
 )}
 
 {activeTab === "Headers" && (
-  <HeadersEditor
-    environment={environment}
-    headers={request.headers}
-    onChange={(headers) => updateRequest({ headers })}
-  />
+  <div className="request-tab-scroll headers-tab-scroll">
+    <HeadersEditor
+      environment={environment}
+      headers={request.headers ?? []}
+      onChange={(headers) => updateRequest({ headers })}
+    />
+  </div>
 )}
 
+
 {activeTab === "Authorization" && (
-  <AuthorizationEditor
-    environment={environment}
-    authorization={request.authorization}
-    onChange={(authorization) =>
-      updateRequest({ authorization })
-    }
-  />
+  <div className="request-tab-scroll authorization-tab-scroll">
+    <AuthorizationEditor
+      environment={environment}
+      authorization={request.authorization}
+      onChange={(authorization) =>
+        updateRequest({ authorization })
+      }
+    />
+  </div>
 )}
 
 
@@ -198,8 +219,7 @@ if (!request) {
   </div>
 )}
 
-{activeTab === "Scripts" && (
-  <div className="scripts-editor">
+
     {activeTab === "Scripts" && (
 
 <div className="script-container">
@@ -271,8 +291,9 @@ if (!request) {
 
 )}
   </div>
-)}   </section>
-  )
-}
 
+ 
+
+</section>
+ )}
 export default RequestPanel

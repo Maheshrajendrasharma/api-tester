@@ -776,8 +776,6 @@ margin:0;
 .params-table input:not([type='checkbox']), .headers-table input:not([type='checkbox']) { height: 34px; padding: 0 10px; color: #dbe5ee; background: #151b21; border: 1px solid #2c3640; border-radius: 5px; outline: none; }
 .params-table input:not([type='checkbox']):focus, .headers-table input:not([type='checkbox']):focus { border-color: #4e8f77; }
 .params-table input[type='checkbox'], .headers-table input[type='checkbox'] { accent-color: #6ee7b7; cursor: pointer; }
-.add-parameter-button, .delete-parameter-button, .add-header-button, .delete-header-button { border: 0; cursor: pointer; font: inherit; }
-.add-parameter-button, .add-header-button { margin-top: 12px; padding: 8px 10px; color: #9be8c5; background: #1d3029; border-radius: 5px; font-size: 12px; }
 .delete-parameter-button, .delete-header-button { width: 26px; height: 26px; color: #a6b1bd; background: transparent; border-radius: 4px; font-size: 19px; line-height: 1; }
 .delete-parameter-button:hover, .delete-header-button:hover { color: #f3a0a0; background: #352529; }
 

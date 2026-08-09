@@ -348,11 +348,15 @@ onRenameEnvironment={handleRenameEnvironment}
   onToggleHistoryFavorite={historyState.toggleFavorite}
   onClearHistory={handleClearHistory}
 />} environmentPanel={<EnvironmentPanel
-  environments={environments}
-  onEnvironmentChange={handleEnvironmentChange}
-  onEnvironmentsChange={handleEnvironmentsChange}
-  onImportEnvironment={handleImportEnvironment}
-  onExportEnvironment={handleExportEnvironment}
+    environments={environments}
+    onEnvironmentChange={handleEnvironmentChange}
+    onEnvironmentsChange={setEnvironments}
+    onImportEnvironment={handleImportEnvironment}
+    onExportEnvironment={handleExportEnvironment}
+    onRenameEnvironment={handleRenameEnvironment}
+    onDuplicateEnvironment={handleDuplicateEnvironment}
+    onExportAllEnvironments={handleExportAllEnvironments}
+    onDeleteEnvironment={handleDeleteEnvironment}
 />}>
         <Workspace environment={activeEnvironment} isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} />
       </AppLayout>

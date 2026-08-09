@@ -46,6 +46,21 @@ function Header({
                 <span>API Tester</span>
             </div>
 
+<button
+  className="window-close-button"
+  onClick={() => {
+    console.log("REACT CLOSE CLICKED");
+    console.log("apiTester:", window.apiTester);
+    console.log("closeWindow:", window.apiTester?.closeWindow);
+
+    window.apiTester?.closeWindow();
+  }}
+>
+  ×
+</button>
+
+
+{/*
             <div
     className="header-environment-group"
     ref={menuRef}
@@ -143,7 +158,7 @@ function Header({
                     </div>
                 )}
 
-            </div>
+            </div> */}
 
         </header>
     );

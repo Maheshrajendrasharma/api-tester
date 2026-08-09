@@ -24,18 +24,38 @@ ipcMain.handle("api-tester:show-save-dialog", (_event, options) => {
 ipcMain.handle("api-tester:read-file", async (_event, filePath) => readFile(filePath, "utf8"));
 ipcMain.handle("api-tester:write-file", async (_event, filePath, content) => writeFile(filePath, content, "utf8"));
 
+ipcMain.handle("api-tester:close-window", (event) => {
+  console.log("MAIN: CLOSE IPC RECEIVED");
+
+  const window = BrowserWindow.fromWebContents(event.sender);
+
+  console.log("MAIN: WINDOW =", !!window);
+
+  if (window) {
+    window.close();
+  }
+});
+
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 900,
     minHeight: 600,
+
+    frame: false,
+
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
+
+  console.log(
+    "PRELOAD PATH:",
+    path.join(__dirname, "preload.cjs")
+  );
 
   mainWindow.loadURL("http://localhost:5173");
 }
@@ -56,8 +76,10 @@ function buildMenu() {
     },
   ];
 
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+// const menu = Menu.buildFromTemplate(template);
+// Menu.setApplicationMenu(menu);
+
+Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(() => {
