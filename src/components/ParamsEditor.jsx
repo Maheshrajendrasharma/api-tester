@@ -69,16 +69,7 @@ function ParamsEditor({
     <div className="params-editor">
 
       {/* Top section */}
-      <div className="params-toolbar">
-        <h3>Params</h3>
 
-        <button
-          type="button"
-          className="auto-generated-toggle"
-        >
-          ◉ Hide auto-generated parameters
-        </button>
-      </div>
 
       {/* Table */}
       <div className="params-table">

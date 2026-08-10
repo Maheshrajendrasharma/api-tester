@@ -1159,13 +1159,6 @@ font-weight: 800;
 .input-error { margin: 8px 0 0; color: #f39a9a; font-size: 12px; }
 
 
-.authorization-editor { max-width: 800px; padding-top: 18px; }
-.authorization-fields { display: grid; gap: 9px; margin-top: 20px; }
-.authorization-label { color: #9ba8b7; font-size: 12px; }
-.authorization-select, .authorization-input { width: 100%; height: 38px; margin-top: 8px; padding: 0 11px; color: #dbe5ee; background: #151b21; border: 1px solid #2c3640; border-radius: 6px; outline: none; font: inherit; font-size: 13px; }
-.authorization-select:focus, .authorization-input:focus { border-color: #4e8f77; }
-.authorization-note { margin: 18px 0 0; color: #758393; font-size: 13px; }
-.authorization-hint { margin: -2px 0 0; color: #758393; font-size: 11px; }
 
 .response-panel { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: #12171d; }
 .response-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
@@ -1980,12 +1973,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 /* Reduce spacing around children */
-.tree-children {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
 
 /* Reduce vertical gap between every tree item */
 .tree-node {
@@ -2614,53 +2601,14 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 /* Environment name */
 
-.environment-selector-name {
-    min-width: 0;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    font-size: 16px;
-    font-weight: 700;
-}
 
 
 /* Dropdown arrow */
 
-.environment-selector-arrow {
-    flex-shrink: 0;
-
-    margin-left: 10px;
-
-    color: #dce5ed;
-    font-size: 20px;
-    line-height: 1;
-}
 
 
 /* Search button */
 
-.environment-search-button {
-    width: 42px;
-    height: 100%;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 0;
-    border-left: 1px solid #34404c;
-
-    background: transparent;
-    color: #9ba8b5;
-
-    font-size: 16px;
-
-    cursor: pointer;
-}
 
 
 .environment-search-button:hover {
@@ -3107,8 +3055,8 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
   align-items: center;
 
-  width: 100%;
-  min-height: 42px;
+  width: 5  0%;
+  min-height: 22px;
 
   padding: 0 10px;
 
@@ -3156,7 +3104,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    ========================================================= */
 
 .parameter-row > input[type="text"],
-.header-row > input[type="text"],
 .parameter-row > input:not([type]),
 .header-row > input:not([type]) {
   width: 100%;
@@ -3199,14 +3146,14 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 .parameter-row > :nth-child(3),
 .header-row > :nth-child(3) {
-  width: 100%;
+  width: 50%;
   min-width: 0;
 }
 
 /* If VariableField renders input */
 .parameter-row > :nth-child(3) input,
 .header-row > :nth-child(3) input {
-  width: 100%;
+  width: 50%;
   height: 52px;
 
   box-sizing: border-box;
@@ -3356,25 +3303,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     background: #11161b;
 }
 
-.request-table-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #d9e0e8;
-}
 
-.auto-generated-toggle {
-    border: none;
-    border-radius: 18px;
-
-    padding: 7px 12px;
-
-    background: #20262c;
-    color: #aeb7c2;
-
-    font-size: 13px;
-
-    cursor: pointer;
-}
 
 .auto-generated-toggle:hover {
     background: #292f36;
@@ -3386,25 +3315,12 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    TABLE WRAPPER
    ========================= */
 
-.request-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-
-    background: #11161b;
-}
 
 
 /* =========================
    TABLE
    ========================= */
 
-.request-editor-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-
-    background: #11161b;
-}
 
 
 /* =========================
@@ -3722,22 +3638,24 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    ========================================================= */
 
 .params-table-header {
-    display: grid;
+  display: grid;
 
-    grid-template-columns:
-        70px
-        minmax(250px, 1fr)
-        minmax(350px, 1.35fr)
-        minmax(220px, 0.8fr)
-        88px;
+  grid-template-columns:
+    56px
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    58px;
 
-    min-height: 74px;
+  height: 24px;
+  min-height: 24px;
 
-    background: #171d23;
+  align-items: center;
 
-    border-bottom: 1px solid #293440;
+  background: #171e25;
+  border-bottom: 1px solid #2c3945;
 
-    align-items: center;
+  box-sizing: border-box;
 }
 
 
@@ -4146,4 +4064,1293 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .headers-editor {
   height: 430px;
   max-height: 430px;
+}
+
+
+/* =========================================================
+   PARAMS EDITOR
+   ========================================================= */
+
+.params-editor {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.params-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+
+  padding: 18px 0 18px 0;
+}
+
+.params-toolbar h3 {
+  margin: 0;
+
+  font-size: 24px;
+  font-weight: 600;
+
+  color: #e7edf5;
+}
+
+.auto-generated-toggle {
+  border: none;
+  border-radius: 30px;
+
+  padding: 13px 22px;
+
+  background: #202b36;
+  color: #b9c8da;
+
+  font-size: 18px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.auto-generated-toggle:hover {
+  background: #283541;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.params-table {
+  width: 100%;
+  overflow: hidden;
+  background: #10161c;
+  border: 1px solid #273440;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   FIXED - DOES NOT SCROLL
+   ========================================================= */
+
+.params-table-header {
+  display: grid;
+
+  /*
+     Enabled | Key | Value | Description | Delete
+  */
+  grid-template-columns:
+    9%
+    30%
+    30%
+    24%
+    7%;
+
+  min-height: 14px;
+
+  align-items: center;
+
+  background: #171d23;
+
+  border-bottom: 1px solid #2b3743;
+
+  color: #aebbd0;
+
+  font-size: 18px;
+  font-weight: 500;
+
+  box-sizing: border-box;
+}
+
+
+.params-table-header > span:nth-child(1) {
+  justify-content: center;
+}
+
+.params-table-header > span:nth-child(2),
+.params-table-header > span:nth-child(3),
+.params-table-header > span:nth-child(4) {
+  justify-content: flex-start;
+}
+
+.params-table-header > span:nth-child(5) {
+  justify-content: center;
+}
+
+
+/* =========================================================
+   TABLE BODY
+   THIS IS THE SCROLLABLE AREA
+   ========================================================= */
+
+.params-table-body {
+  height: 360px;
+     width: 100%;
+  max-height: 360px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  box-sizing: border-box;
+
+  scrollbar-width: thin;
+  scrollbar-color: #455563 #10151a;
+}
+
+
+/* =========================================================
+   CHROME / EDGE SCROLLBAR
+   ========================================================= */
+
+.params-table-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.params-table-body::-webkit-scrollbar-track {
+  background: #10151a;
+}
+
+.params-table-body::-webkit-scrollbar-thumb {
+  background: #455563;
+
+  border-radius: 8px;
+
+  border: 2px solid #10151a;
+}
+
+.params-table-body::-webkit-scrollbar-thumb:hover {
+  background: #5b6d7c;
+}
+
+
+/* =========================================================
+   PARAMETER ROW
+   ========================================================= */
+
+.param-row {
+  display: grid;
+
+  grid-template-columns:
+    56px
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    58px;
+
+  min-height: 58px;
+  height: 58px;
+
+  align-items: center;
+
+  background: #10161c;
+
+  border-bottom: 1px solid #202b35;
+
+  box-sizing: border-box;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.param-row:last-child {
+  border-bottom: none;
+}
+
+.param-row > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.param-row:hover {
+  background: #131b22;
+}
+
+/* =========================================================
+   ENABLED CHECKBOX
+   ========================================================= */
+
+.param-enabled {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+}
+
+
+.param-enabled input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+
+  margin: 0;
+
+  cursor: pointer;
+
+  accent-color: #63e6be;
+}
+
+
+/* =========================================================
+   FIELD
+   ========================================================= */
+
+.param-field {
+  width: 100%;
+  min-width: 0;
+
+  padding: 6px 7px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+.param-field > input {
+  display: block;
+
+  width: 100%;
+  height: 40px;
+
+  box-sizing: border-box;
+
+  padding: 0 12px;
+
+  background: #151c23;
+
+  border: 1px solid #30404e;
+  border-radius: 7px;
+
+  color: #dce6f5;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+.param-field input::placeholder {
+  color: #6f8094;
+}
+
+.param-field input:focus {
+  border-color: #5fe3bd;
+}
+
+
+/* =========================================================
+   VARIABLE FIELD
+   ========================================================= */
+
+.param-field .variable-field,
+.param-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   DELETE
+   ========================================================= */
+
+.param-delete {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-param-button {
+  width: 48px;
+  height: 48px;
+
+  border: 1px solid #344250;
+
+  border-radius: 10px;
+
+  background: #151c23;
+
+  color: #b9c9dc;
+
+  font-size: 28px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.delete-param-button:hover {
+  background: #202a33;
+
+  color: #ffffff;
+
+  border-color: #536575;
+}
+
+.params-table-input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  box-sizing: border-box;
+
+  padding: 8px 12px;
+
+  border: 1px solid #33404d;
+  border-radius: 8px;
+
+  background: #111820;
+  color: #ffffff;
+
+  font-size: 14px;
+  line-height: 1.4;
+
+  outline: none;
+
+  position: relative;
+  z-index: 2;
+}
+
+.params-table-input::placeholder {
+  color: #8b9bb0;
+  opacity: 1;
+}
+
+.params-table-input:focus {
+  border-color: #62e6c1;
+  box-shadow: 0 0 0 1px rgba(98, 230, 193, 0.25);
+}
+
+
+/* =========================================================
+   PARAMS - VARIABLE VALUE FIELD
+   ========================================================= */
+
+.params-table-body .param-field .variable-field {
+  position: relative;
+  display: block;
+
+  width: 100%;
+  height: 42px;
+  min-width: 0;
+
+  box-sizing: border-box;
+
+  padding: 0;
+
+  background: #151c23;
+
+  border: 1px solid #344250;
+  border-radius: 8px;
+
+  overflow: visible;
+}
+
+
+/* Actual editable input inside VariableField */
+.params-table-body .param-field .variable-field-input {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 0 12px;
+
+  color: #dce6f5;
+  caret-color: #63e6be;
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 8px;
+
+  outline: none;
+
+  font-size: 16px;
+  line-height: 42px;
+
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+
+/* Normal values must remain visible */
+.params-table-body
+.param-field
+.variable-field-input:not(.has-variables) {
+  color: #dce6f5 !important;
+}
+
+
+/* Placeholder */
+.params-table-body
+.param-field
+.variable-field-input::placeholder {
+  color: #6f8094;
+  opacity: 1;
+}
+
+
+/* Focus */
+.params-table-body
+.param-field
+.variable-field:focus-within {
+  border-color: #5fe3bd;
+}
+
+
+/* Variable overlay */
+.params-table-body
+.param-field
+.variable-field-overlay {
+  position: absolute;
+  z-index: 0;
+
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  box-sizing: border-box;
+
+  padding: 0 12px;
+
+  display: flex;
+  align-items: center;
+
+  color: #dbe5ee;
+
+  font-size: 16px;
+  line-height: 1.3;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  pointer-events: none;
+}
+
+
+/* Variable tokens */
+.params-table-body
+.param-field
+.variable-token.enabled {
+  color: #63e6be;
+}
+
+
+.params-table-body
+.param-field
+.variable-token.disabled {
+  color: #8b97a4;
+}
+
+
+.params-table-body
+.param-field
+.variable-token.undefined {
+  color: #f38b91;
+}
+
+
+.param-field input {
+  width: 100%;
+  height: 42px;
+
+  box-sizing: border-box;
+  padding: 0 12px;
+
+  background: #151c23;
+  border: 1px solid #344250;
+  border-radius: 9px;
+
+  color: #dce6f5;
+  font-size: 16px;
+
+  outline: none;
+}
+
+.param-field input::placeholder {
+  color: #6f8094;
+}
+
+.param-field input:focus {
+  border-color: #5fe3bd;
+}
+
+/* =========================================================
+   HEADERS EDITOR
+   Compact layout matching Params
+   ========================================================= */
+
+.headers-editor {
+  width: 100%;
+  padding-top: 2px;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADER TABLE HEADER
+   Enabled | Key | Value | Delete
+   ========================================================= */
+
+.headers-table-header {
+  display: grid;
+
+  grid-template-columns:
+    80px
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    56px;
+
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+
+  align-items: center;
+
+  box-sizing: border-box;
+
+  padding: 0 8px;
+
+  background: #171d23;
+  border-bottom: 1px solid #2b3743;
+
+  color: #aebbd0;
+
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+
+/* Header labels */
+
+.headers-table-header span {
+  display: flex;
+  align-items: center;
+
+  height: 100%;
+
+  padding: 0 8px;
+
+  box-sizing: border-box;
+}
+
+
+/* Enabled */
+
+.headers-table-header span:nth-child(1) {
+  justify-content: center;
+}
+
+
+/* Key */
+
+.headers-table-header span:nth-child(2) {
+  justify-content: flex-start;
+}
+
+
+/* Value */
+
+.headers-table-header span:nth-child(3) {
+  justify-content: flex-start;
+}
+
+
+/* Delete */
+
+.headers-table-header span:nth-child(4) {
+  justify-content: center;
+}
+
+
+/* =========================================================
+   HEADER DATA ROW
+   ========================================================= */
+
+.header-row {
+  display: grid;
+
+  grid-template-columns:
+    80px
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    56px;
+
+  width: 100%;
+
+  min-height: 56px;
+  height: 56px;
+
+  align-items: center;
+
+  box-sizing: border-box;
+
+  padding: 6px 8px;
+
+  border-bottom: 1px solid #202a33;
+}
+
+
+/* =========================================================
+   ENABLE CHECKBOX
+   ========================================================= */
+
+.header-row > input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+
+  margin: 0 auto;
+
+  accent-color: #63e6be;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   KEY INPUT
+   ========================================================= */
+
+.header-row > input[type='text'] {
+  width: 100%;
+  height: 42px;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+
+  margin: 0;
+
+  padding: 0 14px;
+
+  color: #dce6f5;
+  caret-color: #63e6be;
+
+  background: #151c23;
+
+  border: 1px solid #344250;
+  border-radius: 9px;
+
+  outline: none;
+
+  font-size: 16px;
+  line-height: 42px;
+}
+
+
+.header-row > input[type='text']:focus {
+  border-color: #63e6be;
+}
+
+
+.header-row > input[type='text']::placeholder {
+  color: #718197;
+  opacity: 1;
+}
+
+
+/* =========================================================
+   VARIABLE FIELD
+   Outer field and inner input MUST have same dimensions
+   ========================================================= */
+
+.header-row .variable-field {
+  position: relative;
+
+  display: block;
+
+  width: 100% !important;
+  min-width: 0;
+
+  height: 42px;
+
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 0;
+
+  background: #151c23;
+
+  border: 1px solid #344250;
+  border-radius: 9px;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   VARIABLE FIELD INPUT
+   ========================================================= */
+
+.header-row .variable-field .variable-field-input {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+
+  height: 100%;
+
+  box-sizing: border-box;
+
+  margin: 0;
+
+  padding: 0 14px;
+
+  color: #dce6f5;
+  caret-color: #63e6be;
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 9px;
+
+  outline: none;
+
+  font-size: 16px;
+  line-height: 42px;
+
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+
+/* Normal value must remain visible */
+
+.header-row
+.variable-field
+.variable-field-input:not(.has-variables) {
+  color: #dce6f5 !important;
+}
+
+
+/* Placeholder */
+
+.header-row
+.variable-field
+.variable-field-input::placeholder {
+  color: #718197;
+  opacity: 1;
+}
+
+
+/* =========================================================
+   VARIABLE FIELD OVERLAY
+   ========================================================= */
+
+.header-row .variable-field .variable-field-overlay {
+  position: absolute;
+
+  z-index: 0;
+
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  color: #dbe5ee;
+
+  font-size: 16px;
+  line-height: 1.3;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   VARIABLE TOKENS
+   ========================================================= */
+
+.header-row .variable-token.enabled {
+  color: #63e6be;
+}
+
+.header-row .variable-token.disabled {
+  color: #8b97a4;
+}
+
+.header-row .variable-token.undefined {
+  color: #f38b91;
+}
+
+
+/* =========================================================
+   VARIABLE FIELD FOCUS
+   ========================================================= */
+
+.header-row .variable-field:focus-within {
+  border-color: #63e6be;
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+   ========================================================= */
+
+.header-row .delete-header-button {
+  width: 42px;
+  height: 42px;
+
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  color: #b8c9dc;
+
+  background: #151c23;
+
+  border: 1px solid #344250;
+  border-radius: 9px;
+
+  font-size: 25px;
+  font-weight: 300;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+
+.header-row .delete-header-button:hover {
+  color: #ff9b9b;
+
+  background: #2d2025;
+
+  border-color: #70434b;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .headers-table-header,
+  .header-row {
+    grid-template-columns:
+      60px
+      minmax(160px, 1fr)
+      minmax(160px, 1fr)
+      50px;
+  }
+
+  .headers-table-header {
+    height: 30px;
+    min-height: 30px;
+
+    font-size: 13px;
+  }
+
+  .header-row {
+    height: 52px;
+    min-height: 52px;
+
+    padding: 5px 6px;
+  }
+
+  .header-row > input[type='text'],
+  .header-row .variable-field {
+    height: 40px;
+  }
+
+  .header-row .delete-header-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .header-row > input[type='checkbox'] {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+
+/* =========================================================
+   FIX: HEADER KEY + VALUE MUST HAVE IDENTICAL HEIGHT
+   ========================================================= */
+
+.header-row {
+  align-items: center;
+}
+
+
+
+
+/* VariableField outer container */
+.header-row .variable-field {
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: block !important;
+
+  border: 1px solid #344250;
+  border-radius: 9px;
+}
+
+
+/* Actual input inside VariableField */
+.header-row .variable-field .variable-field-input {
+  width: 100% !important;
+
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+
+  box-sizing: border-box !important;
+
+  margin: 0 !important;
+  padding: 0 14px !important;
+
+  line-height: 40px !important;
+}
+
+
+/* Variable overlay */
+.header-row .variable-field .variable-field-overlay {
+  height: 40px !important;
+
+  box-sizing: border-box !important;
+
+  padding: 0 14px !important;
+
+  display: flex;
+  align-items: center;
+}
+
+
+/* Key input */
+.header-row .header-key-input {
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 0 14px;
+
+  background: #151c23;
+  border: 1px solid #344250;
+  border-radius: 9px;
+
+  color: #dce6f5;
+  font-size: 16px;
+  line-height: normal;
+  outline: none;
+}
+
+
+/* =========================================================
+   AUTHORIZATION EDITOR
+   ========================================================= */
+
+.authorization-editor {
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+
+  /*
+   * LEFT  = Authorization Type
+   * RIGHT = Generated authorization fields
+   */
+  grid-template-columns: 340px minmax(0, 1fr);
+
+  column-gap: 48px;
+
+  box-sizing: border-box;
+
+  padding: 18px 28px 28px 18px;
+
+  background: #0f151b;
+}
+
+
+/* =========================================================
+   LEFT SIDE - AUTHORIZATION TYPE
+   ========================================================= */
+
+.authorization-type-section {
+  width: 50%;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: stretch;
+
+  box-sizing: border-box;
+}
+
+
+/* Authorization Type label */
+
+.authorization-type-section .authorization-label {
+  display: block;
+
+  margin: 0 0 8px 0;
+
+  color: #aebbd0;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  line-height: 20px;
+}
+
+
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+.authorization-select {
+  width: 100%;
+  height: 48px;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 0 40px 0 14px;
+
+  color: #dce6f5;
+
+  background-color: #151c23;
+
+  border: 1px solid #344250;
+  border-radius: 8px;
+
+  outline: none;
+
+  font-size: 16px;
+  line-height: 48px;
+
+  cursor: pointer;
+}
+
+
+.authorization-select:focus {
+  border-color: #63e6be;
+}
+
+
+.authorization-select:hover {
+  border-color: #465768;
+}
+
+
+/* =========================================================
+   RIGHT SIDE - GENERATED AUTHORIZATION FIELDS
+   ========================================================= */
+
+.authorization-content {
+  width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+
+/* Each conditional group */
+
+.authorization-fields {
+  width: 100%;
+  max-width: 760px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: stretch;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.authorization-fields .authorization-label {
+  display: block;
+
+  margin: 0 0 7px 0;
+
+  color: #aebbd0;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  line-height: 20px;
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.authorization-input {
+  display: block;
+
+  width: 100%;
+  height: 48px;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+
+  margin: 0 0 18px 0;
+
+  padding: 0 14px;
+
+  color: #dce6f5;
+  caret-color: #63e6be;
+
+  background: #151c23;
+
+  border: 1px solid #344250;
+  border-radius: 8px;
+
+  outline: none;
+
+  font-size: 16px;
+  line-height: 48px;
+}
+
+
+.authorization-input:focus {
+  border-color: #63e6be;
+}
+
+
+.authorization-input::placeholder {
+  color: #718197;
+  opacity: 1;
+}
+
+
+/* =========================================================
+   SELECT INSIDE GENERATED FIELDS
+   ========================================================= */
+
+.authorization-fields .authorization-select {
+  margin: 0 0 18px 0;
+}
+
+
+/* =========================================================
+   HINT
+   ========================================================= */
+
+.authorization-hint {
+  margin: -8px 0 16px 0;
+
+  color: #718197;
+
+  font-size: 13px;
+  line-height: 18px;
+}
+
+
+/* =========================================================
+   NONE AUTHORIZATION MESSAGE
+   ========================================================= */
+
+.authorization-note {
+  margin: 4px 0 0 0;
+
+  color: #718197;
+
+  font-size: 14px;
+  line-height: 20px;
+}
+
+
+/* =========================================================
+   API KEY / BASIC AUTH SPACING
+   ========================================================= */
+
+.authorization-fields > .authorization-label + .authorization-input {
+  margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  .authorization-editor {
+    grid-template-columns: 260px minmax(0, 1fr);
+
+    column-gap: 28px;
+
+    padding: 16px;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .authorization-editor {
+    grid-template-columns: 1fr;
+
+    row-gap: 20px;
+
+    padding: 16px;
+  }
+
+  .authorization-fields {
+    max-width: none;
+  }
+
 }

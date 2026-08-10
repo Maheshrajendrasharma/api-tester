@@ -129,17 +129,18 @@ function HeadersEditor({
           />
 
           <input
-            aria-label="Header key"
-            value={header.key}
-            onChange={(event) =>
-              updateHeader(
-                header.id,
-                'key',
-                event.target.value
-              )
-            }
-            placeholder="Key"
-          />
+  className="header-key-input"
+  aria-label="Header key"
+  value={header.key}
+  onChange={(event) =>
+    updateHeader(
+      header.id,
+      'key',
+      event.target.value
+    )
+  }
+  placeholder="Key"
+/>
 
           <VariableField
             environment={environment}
