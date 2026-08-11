@@ -166,7 +166,6 @@ function AuthorizationEditor({
               className="authorization-label"
               htmlFor="api-key-name"
             >
-              Key
             </label>
 
             <input
@@ -187,7 +186,6 @@ function AuthorizationEditor({
               className="authorization-label"
               htmlFor="api-key-value"
             >
-              Value
             </label>
 
             <input
@@ -208,7 +206,7 @@ function AuthorizationEditor({
               className="authorization-label"
               htmlFor="api-key-location"
             >
-              Add To
+
             </label>
 
             <select
