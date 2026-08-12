@@ -1,100 +1,331 @@
 console.log("electron/main.js started");
+
 import path from "node:path";
-import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
+import {
+    app,
+    BrowserWindow,
+    ipcMain,
+    Menu,
+    dialog
+} from "electron";
+
 import { fileURLToPath } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
+
 import * as requestService from "./services/requestService.js";
 import * as storageService from "./services/storageService.js";
+
 console.log("Registering IPC handlers...");
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-ipcMain.handle("api-tester:send-request", (_event, request) => requestService.execute(request));
-ipcMain.handle("api-tester:load-collections", () => storageService.load());
-ipcMain.handle("api-tester:save-collections", (_event, collections) => storageService.save(collections));
-ipcMain.handle("api-tester:show-open-dialog", (_event, options) => {
-  const window = BrowserWindow.getFocusedWindow();
-  return dialog?.showOpenDialog(window,options);
-});
+
+// =====================================================
+// MAIN WINDOW
+// =====================================================
+
+let mainWindow = null;
+
+
+// =====================================================
+// API REQUEST
+// =====================================================
+
+ipcMain.handle(
+    "api-tester:send-request",
+    (_event, request) =>
+        requestService.execute(request)
+);
+
+
+// =====================================================
+// COLLECTIONS
+// =====================================================
+
+ipcMain.handle(
+    "api-tester:load-collections",
+    () => storageService.load()
+);
+
+ipcMain.handle(
+    "api-tester:save-collections",
+    (_event, collections) =>
+        storageService.save(collections)
+);
+
+
+// =====================================================
+// FILE DIALOGS
+// =====================================================
+
+ipcMain.handle(
+    "api-tester:show-open-dialog",
+    (_event, options) => {
+
+        const window =
+            BrowserWindow.getFocusedWindow();
+
+        return dialog.showOpenDialog(
+            window,
+            options
+        );
+    }
+);
+
+
+ipcMain.handle(
+    "api-tester:show-save-dialog",
+    (_event, options) => {
+
+        const window =
+            BrowserWindow.getFocusedWindow();
+
+        return dialog.showSaveDialog(
+            window,
+            options
+        );
+    }
+);
+
+
+ipcMain.handle(
+    "api-tester:read-file",
+    async (_event, filePath) => {
+
+        return readFile(
+            filePath,
+            "utf8"
+        );
+    }
+);
+
+
+ipcMain.handle(
+    "api-tester:write-file",
+    async (_event, filePath, content) => {
+
+        return writeFile(
+            filePath,
+            content,
+            "utf8"
+        );
+    }
+);
+
+
+// =====================================================
+// WINDOW - MINIMIZE
+// =====================================================
+
+ipcMain.handle(
+    "api-tester:minimize-window",
+    (event) => {
+
+        console.log(
+            "MAIN: MINIMIZE IPC RECEIVED"
+        );
+
+        const window =
+            BrowserWindow.fromWebContents(
+                event.sender
+            );
+
+        console.log(
+            "MAIN: WINDOW =",
+            !!window
+        );
+
+        if (window) {
+            window.minimize();
+        }
+    }
+);
+
+
+// =====================================================
+// WINDOW - MAXIMIZE / RESTORE
+// =====================================================
+
+ipcMain.handle(
+    "api-tester:maximize-window",
+    (event) => {
+
+        console.log(
+            "MAIN: MAXIMIZE IPC RECEIVED"
+        );
+
+        const window =
+            BrowserWindow.fromWebContents(
+                event.sender
+            );
+
+        console.log(
+            "MAIN: WINDOW =",
+            !!window
+        );
+
+        if (!window) {
+            return;
+        }
+
+        if (window.isMaximized()) {
+
+            console.log(
+                "MAIN: RESTORING WINDOW"
+            );
+
+            window.unmaximize();
+
+        } else {
+
+            console.log(
+                "MAIN: MAXIMIZING WINDOW"
+            );
+
+            window.maximize();
+        }
+    }
+);
+
+
+// =====================================================
+// WINDOW - CLOSE
+// =====================================================
+
+ipcMain.handle(
+    "api-tester:close-window",
+    (event) => {
+
+        console.log(
+            "MAIN: CLOSE IPC RECEIVED"
+        );
+
+        const window =
+            BrowserWindow.fromWebContents(
+                event.sender
+            );
+
+        console.log(
+            "MAIN: WINDOW =",
+            !!window
+        );
+
+        if (window) {
+            window.close();
+        }
+    }
+);
+
 
 console.log("IPC handlers registered");
-ipcMain.handle("api-tester:show-save-dialog", (_event, options) => {
-  const window = BrowserWindow.getFocusedWindow();
-  return dialog?.showSaveDialog(window,options);
-});
-ipcMain.handle("api-tester:read-file", async (_event, filePath) => readFile(filePath, "utf8"));
-ipcMain.handle("api-tester:write-file", async (_event, filePath, content) => writeFile(filePath, content, "utf8"));
 
-ipcMain.handle("api-tester:close-window", (event) => {
-  console.log("MAIN: CLOSE IPC RECEIVED");
 
-  const window = BrowserWindow.fromWebContents(event.sender);
-
-  console.log("MAIN: WINDOW =", !!window);
-
-  if (window) {
-    window.close();
-  }
-});
+// =====================================================
+// CREATE WINDOW
+// =====================================================
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+
+    mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+
     minWidth: 900,
     minHeight: 600,
 
     frame: false,
 
     webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
+        preload: path.join(
+            __dirname,
+            "preload.cjs"
+        ),
+
+        contextIsolation: true,
+        nodeIntegration: false,
     },
-  });
+});
 
-  console.log(
-    "PRELOAD PATH:",
-    path.join(__dirname, "preload.cjs")
-  );
+    console.log(
+        "PRELOAD PATH:",
+        path.join(__dirname, "preload.cjs")
+    );
 
-  mainWindow.loadURL("http://localhost:5173");
+    mainWindow.loadURL(
+        "http://localhost:5173"
+    );
+
+    mainWindow.on(
+        "closed",
+        () => {
+            mainWindow = null;
+        }
+    );
 }
+
+
+
+
+// =====================================================
+// MENU
+// =====================================================
 
 function buildMenu() {
-  const template = [
-    {
-      label: "File",
-      submenu: [
-        { label: "New Collection", click: () => BrowserWindow.getFocusedWindow()?.webContents.send("api-tester:menu-action", "menu:new-collection") },
-        { label: "Import Collection", click: () => BrowserWindow.getFocusedWindow()?.webContents.send("api-tester:menu-action", "menu:import-collection") },
-        { label: "Import Environment", click: () => BrowserWindow.getFocusedWindow()?.webContents.send("api-tester:menu-action", "menu:import-environment") },
-        { label: "Export Collection", click: () => BrowserWindow.getFocusedWindow()?.webContents.send("api-tester:menu-action", "menu:export-collection") },
-        { label: "Export Environment", click: () => BrowserWindow.getFocusedWindow()?.webContents.send("api-tester:menu-action", "menu:export-environment") },
-        { label: "Settings", enabled: false },
-        { role: "quit" },
-      ],
-    },
-  ];
 
-// const menu = Menu.buildFromTemplate(template);
-// Menu.setApplicationMenu(menu);
-
-Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(null);
 }
 
+
+// =====================================================
+// APP READY
+// =====================================================
+
 app.whenReady().then(() => {
-  buildMenu();
-  createWindow();
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+    console.log(
+        "ELECTRON APP READY"
+    );
+
+    buildMenu();
+
+    createWindow();
+
+
+    app.on(
+        "activate",
+        () => {
+
+            if (
+                BrowserWindow
+                    .getAllWindows()
+                    .length === 0
+            ) {
+
+                createWindow();
+
+            }
+
+        }
+    );
+
+});
+
+
+// =====================================================
+// ALL WINDOWS CLOSED
+// =====================================================
+
+app.on(
+    "window-all-closed",
+    () => {
+
+        if (
+            process.platform !== "darwin"
+        ) {
+
+            app.quit();
+
+        }
+
     }
-  });
-});
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
+);

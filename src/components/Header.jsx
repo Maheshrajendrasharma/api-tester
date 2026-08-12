@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import EnvironmentSelector from "./EnvironmentSelector";
 
 function Header({
     environments,
@@ -9,156 +8,268 @@ function Header({
     onDuplicateEnvironment,
     onDeleteEnvironment,
     onExportAllEnvironments,
-}) {
 
-    const [showEnvironmentMenu, setShowEnvironmentMenu] = useState(false);
+    workspaceName = "Workspace",
+    workspaces = [],
+    selectedWorkspace,
+    onWorkspaceChange,
+
+    sidebarOpen,
+    setSidebarOpen,
+}) {
+    const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
+
     const menuRef = useRef(null);
 
     useEffect(() => {
-
-    function handleClickOutside(event) {
-
-        if (
-            menuRef.current &&
-            !menuRef.current.contains(event.target)
-        ) {
-            setShowEnvironmentMenu(false);
+        function handleClickOutside(event) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target)
+            ) {
+                setShowWorkspaceMenu(false);
+            }
         }
 
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-        document.removeEventListener(
+        document.addEventListener(
             "mousedown",
             handleClickOutside
         );
-    };
 
-}, []);
+        return () => {
+            document.removeEventListener(
+                "mousedown",
+                handleClickOutside
+            );
+        };
+    }, []);
 
     return (
-        <header className="app-header">
-
-            <div className="app-header-brand">
-                <span className="app-header-mark">A</span>
-                <span>API Tester</span>
-            </div>
-
-<button
-  className="window-close-button"
-  onClick={() => {
-    console.log("REACT CLOSE CLICKED");
-    console.log("apiTester:", window.apiTester);
-    console.log("closeWindow:", window.apiTester?.closeWindow);
-
-    window.apiTester?.closeWindow();
-  }}
->
-  ×
-</button>
-
-
-{/*
-            <div
-    className="header-environment-group"
-    ref={menuRef}
+        <header
+    className="app-header"
+    style={{
+        WebkitAppRegion: "drag",
+    }}
 >
 
-                <EnvironmentSelector
-                    environments={environments}
-                    onChange={onEnvironmentChange}
-                />
+            {/* =================================================
+                LEFT SIDE
+                Sidebar + Workspace + Options
+               ================================================= */}
+
+            <div className="app-header-left">
+
+                {/* SIDEBAR TOGGLE */}
 
                 <button
-                    className="header-environment-menu"
-                    onClick={() =>
-                        setShowEnvironmentMenu(!showEnvironmentMenu)
+                    type="button"
+                    className="sidebar-toggle-button"
+                    title={
+                        sidebarOpen
+                            ? "Hide sidebar"
+                            : "Show sidebar"
                     }
+                    aria-label={
+                        sidebarOpen
+                            ? "Hide sidebar"
+                            : "Show sidebar"
+                    }
+                    onClick={() => {
+                        setSidebarOpen?.(!sidebarOpen);
+                    }}
+                >
+                    <span className="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+
+
+                {/* WORKSPACE SELECTOR */}
+
+                <div
+                    className="workspace-selector-wrapper"
+                    ref={menuRef}
+                >
+
+                    <button
+                        type="button"
+                        className="workspace-selector-button"
+                        onClick={() =>
+                            setShowWorkspaceMenu(
+                                (previous) => !previous
+                            )
+                        }
+                        title="Select workspace"
+                    >
+
+                        <span className="workspace-selector-name">
+                            {selectedWorkspace || workspaceName}
+                        </span>
+
+                        <span className="workspace-selector-arrow">
+                            ▼
+                        </span>
+
+                    </button>
+
+
+                    {/* WORKSPACE DROPDOWN */}
+
+                    {showWorkspaceMenu && (
+                        <div className="workspace-dropdown">
+
+                            {workspaces.length > 0 ? (
+
+                                workspaces.map((workspace) => {
+
+                                    const workspaceValue =
+                                        workspace.name || workspace;
+
+                                    return (
+                                        <button
+                                            key={
+                                                workspace.id ||
+                                                workspaceValue
+                                            }
+                                            type="button"
+                                            className={
+                                                "workspace-dropdown-item" +
+                                                (
+                                                    selectedWorkspace ===
+                                                    workspaceValue
+                                                        ? " active"
+                                                        : ""
+                                                )
+                                            }
+                                            onClick={() => {
+
+                                                onWorkspaceChange?.(
+                                                    workspace
+                                                );
+
+                                                setShowWorkspaceMenu(
+                                                    false
+                                                );
+                                            }}
+                                        >
+                                            {workspaceValue}
+                                        </button>
+                                    );
+                                })
+
+                            ) : (
+
+                                <div className="workspace-dropdown-empty">
+                                    No workspaces available
+                                </div>
+
+                            )}
+
+                        </div>
+                    )}
+
+                </div>
+
+
+                {/* WORKSPACE OPTIONS */}
+
+                <button
+                    type="button"
+                    className="workspace-menu-button"
+                    title="Workspace options"
+                    aria-label="Workspace options"
                 >
                     ⋮
                 </button>
 
-                {showEnvironmentMenu && (
-                    <div className="environment-menu">
+            </div>
 
-                        <button
-    onClick={() => {
 
-        setShowEnvironmentMenu(false);
+            {/* =================================================
+                CENTER
+                API TESTER BRAND
+               ================================================= */}
 
-        onImportEnvironment();
+            <div className="app-header-brand">
 
+                <span className="app-header-mark">
+                    A
+                </span>
+
+                <span className="app-header-title">
+                    API Tester
+                </span>
+
+            </div>
+
+
+{/* =================================================
+    RIGHT SIDE - WINDOW CONTROLS
+   ================================================= */}
+<div
+    className="app-header-right"
+    style={{
+        WebkitAppRegion: "no-drag",
     }}
 >
-                            Import Environment
-                        </button>
-
-                        <button
-    onClick={() => {
-
-        setShowEnvironmentMenu(false);
-
-        onExportEnvironment();
-
-    }}
->
-                            Export Environment
-                        </button>
-
+{/* MINIMIZE */}
 <button
-    onClick={() => {
-        setShowEnvironmentMenu(false)
-        onRenameEnvironment()
+    type="button"
+    className="window-minimize-button"
+    title="Minimize"
+    onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log("HEADER: MINIMIZE CLICK");
+
+        window.apiTester?.minimizeWindow();
     }}
 >
-    Rename Environment
+    −
 </button>
 
-                        <button
-    onClick={() => {
 
-        setShowEnvironmentMenu(false);
+{/* MAXIMIZE */}
 
-        onDuplicateEnvironment();
+<button
+    type="button"
+    className="window-maximize-button"
+    title="Maximize / Restore"
+    onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
+        console.log("HEADER: MAXIMIZE CLICK");
+
+        window.apiTester?.maximizeWindow();
     }}
 >
-                            Duplicate Environment
-                        </button>
+    □
+</button>
 
-                        <button
-    onClick={() => {
 
-        setShowEnvironmentMenu(false);
+{/* CLOSE */}
 
-        onExportAllEnvironments();
+<button
+    type="button"
+    className="window-close-button"
+    title="Close"
+    onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
+        console.log("HEADER: CLOSE CLICK");
+
+        window.apiTester?.closeWindow();
     }}
 >
-                            Export All Environments
-                        </button>
+    ×
+</button>
 
-                        <hr />
-
-                        <button
-    className="danger"
-    onClick={() => {
-
-        setShowEnvironmentMenu(false);
-
-        onDeleteEnvironment();
-
-    }}
->
-                            Delete Environment
-                        </button>
-
-                    </div>
-                )}
-
-            </div> */}
+</div>
 
         </header>
     );

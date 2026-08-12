@@ -1,42 +1,75 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("apiTester", {
-  version: "0.1.0",
+    version: "0.1.0",
 
-  sendRequest: (request) =>
-    ipcRenderer.invoke("api-tester:send-request", request),
+    // ---------------------------------------
+    // API REQUEST
+    // ---------------------------------------
 
-  loadCollections: () =>
-    ipcRenderer.invoke("api-tester:load-collections"),
+    sendRequest: (request) =>
+        ipcRenderer.invoke("api-tester:send-request", request),
 
-  saveCollections: (collections) =>
-    ipcRenderer.invoke("api-tester:save-collections", collections),
+    // ---------------------------------------
+    // COLLECTIONS
+    // ---------------------------------------
 
-  showOpenDialog: (options) =>
-    ipcRenderer.invoke("api-tester:show-open-dialog", options),
+    loadCollections: () =>
+        ipcRenderer.invoke("api-tester:load-collections"),
 
-  showSaveDialog: (options) =>
-    ipcRenderer.invoke("api-tester:show-save-dialog", options),
+    saveCollections: (collections) =>
+        ipcRenderer.invoke("api-tester:save-collections", collections),
 
-  readFile: (filePath) =>
-    ipcRenderer.invoke("api-tester:read-file", filePath),
+    // ---------------------------------------
+    // FILE DIALOGS
+    // ---------------------------------------
 
-  writeFile: (filePath, content) =>
-    ipcRenderer.invoke("api-tester:write-file", filePath, content),
+    showOpenDialog: (options) =>
+        ipcRenderer.invoke("api-tester:show-open-dialog", options),
 
-  // CLOSE ELECTRON WINDOW
- closeWindow: () => {
-  console.log("PRELOAD CLOSE CALLED");
-  return ipcRenderer.invoke("api-tester:close-window");
-},
+    showSaveDialog: (options) =>
+        ipcRenderer.invoke("api-tester:show-save-dialog", options),
 
-  onMenuAction: (callback) => {
-    const channel = "api-tester:menu-action";
+    readFile: (filePath) =>
+        ipcRenderer.invoke("api-tester:read-file", filePath),
 
-    const listener = (_event, action) => callback(action);
+    writeFile: (filePath, content) =>
+        ipcRenderer.invoke("api-tester:write-file", filePath, content),
 
-    ipcRenderer.on(channel, listener);
+    // ---------------------------------------
+    // WINDOW CONTROLS
+    // ---------------------------------------
 
-    return () => ipcRenderer.removeListener(channel, listener);
-  },
+    minimizeWindow: () => {
+        console.log("PRELOAD: MINIMIZE");
+        return ipcRenderer.invoke("api-tester:minimize-window");
+    },
+
+    maximizeWindow: () => {
+        console.log("PRELOAD: MAXIMIZE");
+        return ipcRenderer.invoke("api-tester:maximize-window");
+    },
+
+    closeWindow: () => {
+        console.log("PRELOAD: CLOSE");
+        return ipcRenderer.invoke("api-tester:close-window");
+    },
+
+    // ---------------------------------------
+    // MENU ACTION
+    // ---------------------------------------
+
+    onMenuAction: (callback) => {
+        const channel = "api-tester:menu-action";
+
+        const listener = (_event, action) => {
+            callback(action);
+        };
+
+        ipcRenderer.on(channel, listener);
+
+        return () => {
+            ipcRenderer.removeListener(channel, listener);
+        };
+    },
 });

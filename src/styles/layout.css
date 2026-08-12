@@ -1,13 +1,14 @@
 ﻿.app-shell {
-  display: grid;
-  grid-template-rows: 42px minmax(0, 1fr);
-  height: 100vh;
-  min-height: 0;
-  overflow: hidden;
+    width: 100%;
+    height: 100vh;
 
-  background: #101418;
-  color: #e9edf2;
+    display: grid;
+    grid-template-rows: 54px minmax(0, 1fr);
+
+    overflow: hidden;
 }
+
+
 
 .app-layout {
   position: relative;
@@ -18,22 +19,8 @@
   transition: grid-template-columns var(--panel-transition-duration) ease, grid-template-rows var(--panel-transition-duration) ease;
 }
 
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 
-  width: 100%;
-  height: 42px;
-  min-height: 42px;
-  min-width: 0;
 
-  padding: 0 14px;
-  box-sizing: border-box;
-
-  background: #171c22;
-  border-bottom: 1px solid #29323c;
-}
 
 .app-header-brand {
   display: flex;
@@ -153,7 +140,7 @@
    ========================================================= */
 
 .environment-variables-table {
-    width: 100%;
+    width: 80%;
     min-width: 0;
     table-layout: fixed;
     border-collapse: collapse;
@@ -1242,10 +1229,11 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 
-.script-container{
-    display:flex;
-    height:200%;
-    min-height:420px;
+.script-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
 }
 
 .script-sidebar{
@@ -1272,15 +1260,18 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     background:#182128;
 }
 
-.script-main{
-    flex:1;
-    padding:4px;
+.script-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .script-editor{
     width:100%;
     height:100%;
-    min-height:400px;
 
     background:#11161c;
     color:#dbe5ee;
@@ -1289,6 +1280,9 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     border-radius:6px;
 
     resize:none;
+
+    overflow: auto;
+    box-sizing: border-box;
 
     padding:14px;
 
@@ -1943,10 +1937,173 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   line-height: 30px !important;
 }
 
+
+
+
 /* Method badge */
 .request-row .method-badge {
   margin-right: 8px !important;
 }
+
+
+/* =========================================================
+   COLLECTION SEARCH
+   ========================================================= */
+
+.sidebar-collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: fit-content;
+  min-height: 48px;
+
+  margin-bottom: 8px;
+
+  box-sizing: border-box;
+}
+
+.sidebar-collection-title {
+  color: #99a5b4;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+}
+
+
+.sidebar-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+
+  margin-left: 8px;
+
+  padding: 0;
+
+  color: #99a5b4;
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 17px;
+}
+
+
+.sidebar-search-button:hover {
+  color: #6ee7b7;
+  background: #222a33;
+}
+
+
+.sidebar-search-container {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  height: 34px;
+
+  box-sizing: border-box;
+
+  background: #11161c;
+
+  border: 1px solid #35404c;
+  border-radius: 7px;
+}
+
+
+.sidebar-search-container:focus-within {
+  border-color: #5fa98b;
+  box-shadow: 0 0 0 2px rgb(110 231 183 / 10%);
+}
+
+
+.sidebar-search-icon {
+  flex: 0 0 auto;
+
+  padding-left: 9px;
+  padding-right: 6px;
+
+  color: #8290a0;
+
+  font-size: 13px;
+}
+
+
+.sidebar-search-input {
+  flex: 1;
+
+  min-width: 0;
+
+  height: 100%;
+
+  padding: 0 4px;
+
+  color: #dbe5ee;
+
+  background: transparent;
+
+  border: 0;
+
+  outline: none;
+
+  font: inherit;
+  font-size: 12px;
+}
+
+
+.sidebar-search-input::placeholder {
+  color: #667483;
+}
+
+
+.sidebar-search-close {
+  flex: 0 0 auto;
+
+  width: 28px;
+  height: 28px;
+
+  margin-right: 2px;
+
+  padding: 0;
+
+  color: #8290a0;
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  font-size: 18px;
+}
+
+
+.sidebar-search-close:hover {
+  color: #ffffff;
+  background: #29333e;
+}
+
+
+.sidebar-search-empty {
+  padding: 18px 8px;
+
+  color: #718096;
+
+  font-size: 12px;
+
+  text-align: center;
+}
+
 
 
 /* =========================================================
@@ -2063,9 +2220,10 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 
 .request-panel {
+    min-height: 0;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 0;
     overflow: hidden;
 }
 
@@ -2869,43 +3027,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 
-.app-header {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  background: #151b22;
-  border-bottom: 1px solid #303b47;
-  -webkit-app-region: drag;
-}
 
-.window-close-button {
-  -webkit-app-region: no-drag;
-
-  width: 42px;
-  height: 32px;
-
-  border: none;
-  background: transparent;
-
-  color: #9aa7b5;
-  font-size: 24px;
-  line-height: 1;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 5px;
-}
-
-.window-close-button:hover {
-  background: #e81123;
-  color: white;
-}
 
 
 /* =========================================================
@@ -3290,6 +3412,14 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     background: #192129;
 }
 
+
+.request-tab-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
 /* =========================
    VARIABLE FIELD
@@ -5016,4 +5146,839 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   color: #dbe5ee !important;
   -webkit-text-fill-color: #dbe5ee;
 }
+
+.sidebar-collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 38px;
+
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.sidebar-collection-title {
+  display: block;
+
+  color: #99a5b4;
+
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.sidebar-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  margin: 0;
+  padding: 0;
+
+  color: #99a5b4;
+  background: transparent;
+
+  border: 0;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 17px;
+}
+
+.sidebar-search-button:hover {
+  color: #6ee7b7;
+  background: #222a33;
+}
+
+
+/* =========================================================
+   COLLECTION SEARCH HEADER
+   ========================================================= */
+
+.sidebar-collection-search-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  height: 38px;
+
+  padding: 0;
+
+  color: #99a5b4;
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  text-align: right;
+}
+
+
+.sidebar-collection-search-trigger:hover {
+  color: #6ee7b7;
+}
+
+
+/* Search icon */
+
+.sidebar-search-icon {
+  flex: 0 0 auto;
+
+  margin-right: 8px;
+
+  color: #99a5b4;
+
+  font-size: 17px;
+}
+
+
+/* COLLECTIONS */
+
+.sidebar-collection-title {
+  color: #99a5b4;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+}
+
+
+/* =========================================================
+   OPEN SEARCH
+   ========================================================= */
+
+.sidebar-search-container {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  height: 38px;
+
+  box-sizing: border-box;
+
+  background: transparent;
+
+  border: 0;
+}
+
+
+.sidebar-search-container .sidebar-search-icon {
+  flex: 0 0 auto;
+
+  margin-right: 8px;
+
+  color: #99a5b4;
+
+  font-size: 17px;
+}
+
+
+.sidebar-search-input {
+  flex: 1;
+
+  min-width: 0;
+
+  height: 32px;
+
+  padding: 0;
+
+  color: #dbe5ee;
+
+  background: transparent;
+
+  border: 0;
+  outline: none;
+
+  font: inherit;
+  font-size: 13px;
+}
+
+
+.sidebar-search-input::placeholder {
+  color: #99a5b4;
+}
+
+
+.sidebar-search-close {
+  flex: 0 0 auto;
+
+  width: 28px;
+  height: 28px;
+
+  margin-left: 6px;
+
+  padding: 0;
+
+  color: #99a5b4;
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  font-size: 18px;
+}
+
+
+.sidebar-search-close:hover {
+  color: #ffffff;
+  background: #29333e;
+}
+
+
+/* =========================================================
+   MAIN HEADER
+   ========================================================= */
+
+
+/* =========================================================
+   LEFT SIDE
+   ========================================================= */
+.app-header-left {
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    flex: 0 0 auto;
+
+    min-width: 0;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIDEBAR / HAMBURGER BUTTON
+   ========================================================= */
+
+.sidebar-toggle-button {
+    width: 34px;
+    height: 34px;
+
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+}
+
+
+/* Hamburger */
+
+.hamburger-icon {
+    width: 27px;
+    height: 22px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    pointer-events: none;
+}
+
+.hamburger-icon span {
+    display: block;
+
+    width: 27px;
+    height: 3px;
+
+    border-radius: 3px;
+
+    background: #9eafc1;
+}
+
+
+/* =========================================================
+   WORKSPACE SELECTOR
+   ========================================================= */
+
+.workspace-selector-wrapper {
+    position: relative;
+
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+
+    flex-shrink: 0;
+}
+
+
+/* Workspace button */
+
+.workspace-selector-button {
+    height: 40px;
+
+    min-width: 205px;
+    max-width: 305px;
+
+    padding: 0 20px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    border: 1px solid #334252;
+    border-radius: 5px;
+
+    background: #151b21;
+
+    color: #f0f3f7;
+
+    font-size: 21px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+}
+
+
+/* Workspace name */
+
+.workspace-selector-name {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* Dropdown arrow */
+
+.workspace-selector-arrow {
+    flex: 0 0 auto;
+
+    color: #b7c8da;
+
+    font-size: 17px;
+}
+
+
+/* Hover */
+
+.workspace-selector-button:hover {
+    border-color: #4b5d70;
+    background: #192129;
+}
+
+
+/* =========================================================
+   WORKSPACE DROPDOWN
+   ========================================================= */
+
+.workspace-dropdown {
+    position: absolute;
+
+    top: calc(100% + 6px);
+    left: 0;
+
+    width: 405px;
+
+    max-height: 320px;
+
+    overflow-y: auto;
+
+    padding: 6px;
+
+    box-sizing: border-box;
+
+    background: #171d23;
+
+    border: 1px solid #354454;
+    border-radius: 10px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+
+    z-index: 2000;
+}
+
+
+/* Dropdown item */
+
+.workspace-dropdown-item {
+    width: 100%;
+
+    min-height: 42px;
+
+    padding: 8px 12px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: #dce5ee;
+
+    font-size: 15px;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+
+/* Hover */
+
+.workspace-dropdown-item:hover {
+    background: #26323d;
+}
+
+
+/* Selected */
+
+.workspace-dropdown-item.active {
+    background: #263d45;
+    color: #65e5bf;
+}
+
+
+/* Empty */
+
+.workspace-dropdown-empty {
+    padding: 15px;
+
+    color: #8d9baa;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   THREE DOTS
+   ========================================================= */
+
+.workspace-menu-button {
+    width: 22px;
+    height: 40px;
+
+    flex: 0 0 24px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0px solid #334252;
+    border-radius: 1px;
+
+    background: #151b21;
+
+    color: #61e5bb;
+
+    font-size: 30px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.workspace-menu-button:hover {
+    background: #1c252d;
+    border-color: #4a5b6d;
+}
+
+
+/* =========================================================
+   CENTER API TESTER BRAND
+   ========================================================= */
+
+.app-header-brand {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    height: 52px;
+
+    color: #f4f6f8;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
+
+
+/* A logo */
+
+.app-header-mark {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #63e5bb;
+
+    color: #09231c;
+
+    font-size: 25px;
+    font-weight: 800;
+}
+
+
+/* API Tester text */
+
+.app-header-title {
+    display: block;
+}
+
+
+/* =========================================================
+   RIGHT SIDE
+   ========================================================= */
+
+
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+
+/* =================================================
+   RIGHT SIDE WINDOW CONTROLS
+   ================================================= */
+
+
+
+/* Base window button */
+
+;
+
+
+
+/* =================================================
+   MAXIMIZE ICON
+   ================================================= */
+
+.maximize-icon {
+    width: 13px;
+    height: 13px;
+
+    border: 2px solid currentColor;
+
+    display: block;
+
+    box-sizing: border-box;
+}
+
+
+/* =================================================
+   CLOSE BUTTON
+   ================================================= */
+
+
+
+
+/* Close hover should be red */
+
+
+
+
+/* =================================================
+   CLOSE X
+   ================================================= */
+
+
+
+
+/* =========================================================
+   APP HEADER
+   ========================================================= */
+
+
+
+
+
+
+.close-button:hover {
+    background: #e81123;
+    color: white;
+}
+
+
+
+/* =====================================================
+   WINDOW CONTROL BUTTONS
+   ===================================================== */
+
+
+
+/* Minimize + Maximize */
+.window-minimize-button,
+.window-maximize-button {
+  width: 54px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  margin: 0;
+
+  border: 1px solid #303b47;
+  border-radius: 8px;
+
+  background: #151b22;
+  color: #9fb0c0;
+
+  font-size: 18px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  -webkit-app-region: no-drag;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+}
+
+
+/* Hover */
+.window-minimize-button:hover,
+.window-maximize-button:hover {
+  background: #202934;
+  color: #ffffff;
+}
+
+
+/* Minimize symbol */
+.window-minimize-button {
+  font-size: 22px;
+  line-height: 1;
+}
+
+
+/* Maximize symbol */
+.window-maximize-button {
+  font-size: 18px;
+  line-height: 1;
+}
+
+
+/* =========================================================
+   APP HEADER
+   ========================================================= */
+
+.app-header {
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    max-height: 54px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    position: relative;
+
+    padding: 0 10px;
+
+    background: #10151b;
+    border-bottom: 1px solid #303b47;
+
+    z-index: 1000;
+
+    -webkit-app-region: drag;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   HEADER INTERACTIVE ELEMENTS
+   ========================================================= */
+
+.app-header button,
+.app-header input,
+.app-header select,
+.app-header a {
+    -webkit-app-region: no-drag;
+}
+
+
+/* =========================================================
+   RIGHT SIDE WINDOW CONTROLS
+   ========================================================= */
+
+.app-header-right {
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 4px;
+
+    flex-shrink: 0;
+
+    margin-left: auto;
+
+    -webkit-app-region: no-drag;
+}
+
+
+/* =========================================================
+   MINIMIZE + MAXIMIZE
+   ========================================================= */
+
+.window-minimize-button,
+.window-maximize-button {
+
+    width: 44px;
+    height: 40px;
+
+    min-width: 44px;
+    min-height: 40px;
+    max-height: 40px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0;
+
+    border: 1px solid #303b47;
+    border-radius: 7px;
+
+    background: #151b22;
+    color: #9fb0c0;
+
+    cursor: pointer;
+
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+
+    line-height: 1;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    -webkit-app-region: no-drag;
+}
+
+
+/* Hover */
+
+.window-minimize-button:hover,
+.window-maximize-button:hover {
+
+    background: #202934;
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   CLOSE
+   ========================================================= */
+
+.window-close-button {
+
+    width: 44px;
+    height: 40px;
+
+    min-width: 44px;
+    min-height: 40px;
+    max-height: 40px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 0;
+
+    border: 1px solid transparent;
+    border-radius: 7px;
+
+    background: transparent;
+    color: #9fb0c0;
+
+    cursor: pointer;
+
+    font-family: Arial, sans-serif;
+    font-size: 27px;
+    font-weight: 300;
+
+    line-height: 1;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    -webkit-app-region: no-drag;
+}
+
+
+/* Close hover */
+
+.window-close-button:hover {
+
+    background: #e81123;
+    color: #ffffff;
+
+}
+
+
+
+
+
 

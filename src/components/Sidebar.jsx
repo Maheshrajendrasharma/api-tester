@@ -1,4 +1,4 @@
-  import { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
   import {
   findNode,
@@ -566,9 +566,7 @@ collectionId={collectionId}
     )
   }
 
-    // src/components/Sidebar.jsx
-import React from 'react'
-// ... (other imports)
+    // src/components/Sidebar.jsx// ... (other imports)
 
 function Sidebar({ 
   collections,
@@ -607,6 +605,25 @@ function Sidebar({
 }) {
       const [sidebarView, setSidebarView] =
         useState('collections')
+
+const [collectionSearchOpen, setCollectionSearchOpen] =
+  useState(false)
+
+const [collectionSearch, setCollectionSearch] =
+  useState('')
+
+const collectionSearchInputRef = useRef(null)
+
+
+useEffect(() => {
+  if (
+    collectionSearchOpen &&
+    collectionSearchInputRef.current
+  ) {
+    collectionSearchInputRef.current.focus()
+  }
+}, [collectionSearchOpen])
+
 
     /*
     * Track expansion locally only when needed.
@@ -655,6 +672,89 @@ const [dropPosition, setDropPosition] =
 
       return node.expanded !== false
     }
+
+  function filterTreeForSearch(node, searchText) {
+  if (!node) {
+    return null
+  }
+
+  const query = searchText.trim().toLowerCase()
+
+  // Search is not active
+  if (!query) {
+    return node
+  }
+
+  // ============================================
+  // REQUEST
+  // SEARCH ONLY REQUEST NAME
+  // ============================================
+
+  if (node.type === 'request') {
+    const requestName =
+      String(node.name ?? '').toLowerCase()
+
+    const matches =
+      requestName.includes(query)
+
+    if (!matches) {
+      return null
+    }
+
+    return {
+      ...node,
+      expanded: true,
+    }
+  }
+
+  // ============================================
+  // COLLECTION / FOLDER
+  // ============================================
+
+  const children = Array.isArray(node.children)
+    ? node.children
+    : []
+
+  const matchingChildren = children
+    .map((child) =>
+      filterTreeForSearch(
+        child,
+        searchText
+      )
+    )
+    .filter(Boolean)
+
+  // Nothing inside this folder/collection matched
+  if (matchingChildren.length === 0) {
+    return null
+  }
+
+  // Keep parent and automatically expand it
+  return {
+    ...node,
+    expanded: true,
+    children: matchingChildren,
+  }
+}
+
+
+function getCollectionsForDisplay() {
+  if (!collectionSearch.trim()) {
+    return collections
+  }
+
+  return collections
+    .map((collection) => {
+      const normalized =
+        normalizeCollectionForDisplay(collection)
+
+      return filterTreeForSearch(
+        normalized,
+        collectionSearch
+      )
+    })
+    .filter(Boolean)
+}
 
 
    function handleDragStart(event, node) {
@@ -921,8 +1021,10 @@ function handleDrop(
     }
 
     function renderCollection(collection) {
-      const treeCollection =
-        normalizeCollectionForDisplay(collection)
+  const treeCollection =
+    collectionSearch.trim()
+      ? collection
+      : normalizeCollectionForDisplay(collection)
 
       if (!treeCollection) return null
 
@@ -944,7 +1046,9 @@ function handleDrop(
 
         return {
   ...currentNode,
-  expanded: isNodeExpanded(currentNode),
+  expanded: collectionSearch.trim()
+  ? true
+  : isNodeExpanded(currentNode),
 
    __onExportCollection: onExportCollection,
    __onRenameFolder: onRenameFolder,
@@ -1028,15 +1132,73 @@ onCreateFolder={(parentId) =>
       )
     }
 
-    return (
+return (
+  <div className="sidebar">
 
-     
+    {/* =========================================
+        COLLECTION HEADER
+        ========================================= */}
 
-      <div className="sidebar">
-        <div className="sidebar-section-header">
-  COLLECTIONS
-</div>
-        <div className="collection-tabs">
+    <div className="sidebar-collection-header">
+
+{!collectionSearchOpen ? (
+  <button
+    type="button"
+    className="sidebar-collection-search-trigger"
+    title="Search requests"
+    aria-label="Search requests"
+    onClick={() => {
+      setSidebarView('collections')
+      setCollectionSearchOpen(true)
+    }}
+  >
+    <span className="sidebar-search-icon">
+      🔍
+    </span>
+
+    <span className="sidebar-collection-title">
+      COLLECTIONS
+    </span>
+  </button>
+) : (
+  <div className="sidebar-search-container">
+
+    <span className="sidebar-search-icon">
+      🔍
+    </span>
+
+    <input
+      ref={collectionSearchInputRef}
+      type="text"
+      className="sidebar-search-input"
+      value={collectionSearch}
+      onChange={(event) =>
+        setCollectionSearch(event.target.value)
+      }
+      placeholder="Search requests..."
+      aria-label="Search requests"
+    />
+
+    <button
+      type="button"
+      className="sidebar-search-close"
+      title="Close search"
+      aria-label="Close search"
+      onClick={() => {
+        setCollectionSearch('')
+        setCollectionSearchOpen(false)
+      }}
+    >
+      ×
+    </button>
+
+  </div>
+)}
+
+    </div>
+
+
+    <div className="collection-tabs">
           <button
             className="collection-tab active"
             type="button"
@@ -1079,10 +1241,20 @@ onCreateFolder={(parentId) =>
         </div>
 
         {sidebarView === 'collections' && (
-          <div className="collections-tree">
-            {collections.map(renderCollection)}
-          </div>
-        )}
+  <div className="collections-tree">
+
+    {getCollectionsForDisplay().length > 0 ? (
+      getCollectionsForDisplay().map(
+        renderCollection
+      )
+    ) : collectionSearch.trim() ? (
+      <div className="sidebar-search-empty">
+        No matching requests
+      </div>
+    ) : null}
+
+  </div>
+)}
 
         {sidebarView === 'history' && (
           <HistoryView

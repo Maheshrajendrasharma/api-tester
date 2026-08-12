@@ -6,6 +6,8 @@ import ParamsEditor from './ParamsEditor'
 import { getActiveParameters, removeGeneratedParameters } from '../utils/helpers'
 import { HTTP_METHODS } from '../utils/constants'
 import VariableField from './VariableField'
+import { api } from "../services/scriptApi"
+
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body','Scripts']
 
