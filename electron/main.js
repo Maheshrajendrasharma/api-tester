@@ -225,26 +225,38 @@ console.log("IPC handlers registered");
 // =====================================================
 
 function createWindow() {
-
     mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+        width: 1400,
+        height: 900,
 
-    minWidth: 900,
-    minHeight: 600,
+        minWidth: 900,
+        minHeight: 600,
 
-    frame: false,
+        // Keep the custom application UI,
+        // but allow Windows to provide native caption buttons.
+        frame: false,
 
-    webPreferences: {
-        preload: path.join(
-            __dirname,
-            "preload.cjs"
-        ),
+        titleBarStyle: "hidden",
 
-        contextIsolation: true,
-        nodeIntegration: false,
-    },
-});
+        titleBarOverlay: {
+            color: "#10151c",
+            symbolColor: "#9fb3c8",
+            height: 46,
+        },
+
+        webPreferences: {
+            preload: path.join(
+                __dirname,
+                "preload.cjs"
+            ),
+
+            contextIsolation: true,
+            nodeIntegration: false,
+        },
+    });
+
+
+    mainWindow.webContents.openDevTools();
 
     console.log(
         "PRELOAD PATH:",

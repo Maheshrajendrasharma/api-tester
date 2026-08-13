@@ -1,4 +1,3 @@
-import { api } from "./scriptRuntime"
-
-
-export { api }
+export {
+    api
+} from "./scriptRuntime"

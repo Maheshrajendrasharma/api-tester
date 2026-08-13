@@ -17,13 +17,23 @@ function ParamsEditor({
   parameters = [],
   onChange,
 }) {
-  // Always show at least one editable row
+
+  // =====================================================
+  // ALWAYS SHOW AT LEAST ONE EDITABLE ROW
+  // =====================================================
+
   const rows =
     parameters.length > 0
       ? parameters
       : [createEmptyParameter()]
 
+
+  // =====================================================
+  // UPDATE PARAMETER
+  // =====================================================
+
   function updateParameter(id, field, value) {
+
     const updatedParameters = rows.map((parameter) =>
       parameter.id === id
         ? {
@@ -46,57 +56,104 @@ function ParamsEditor({
 
     // Automatically add a new blank row
     if (lastIsFilled) {
-      updatedParameters.push(createEmptyParameter())
+      updatedParameters.push(
+        createEmptyParameter()
+      )
     }
 
     onChange(updatedParameters)
   }
 
+
+  // =====================================================
+  // DELETE PARAMETER
+  // =====================================================
+
   function deleteParameter(id) {
-    let updatedParameters = rows.filter(
-      (parameter) => parameter.id !== id
-    )
+
+    let updatedParameters =
+      rows.filter(
+        (parameter) =>
+          parameter.id !== id
+      )
 
     // Always keep one blank row
     if (updatedParameters.length === 0) {
-      updatedParameters = [createEmptyParameter()]
+      updatedParameters = [
+        createEmptyParameter()
+      ]
     }
 
     onChange(updatedParameters)
   }
 
+
+  // =====================================================
+  // RENDER
+  // =====================================================
+
   return (
+
     <div className="params-editor">
 
-      {/* Top section */}
+      {/* =================================================
+          PARAMS TABLE
+          ================================================= */}
 
-
-      {/* Table */}
       <div className="params-table">
 
-        {/* Header */}
+
+        {/* =================================================
+            TABLE HEADER
+            ================================================= */}
+
         <div className="params-table-header">
-          <span></span>
-          <span>Key</span>
-          <span>Value</span>
-          <span>Description</span>
-          <span>•••</span>
+
+          <div className="params-column-enabled">
+            <span>Enabled</span>
+          </div>
+
+          <div className="params-column-key">
+            <span>Key</span>
+          </div>
+
+          <div className="params-column-value">
+            <span>Value</span>
+          </div>
+
+          <div className="params-column-description">
+            <span>Description</span>
+          </div>
+
+          <div className="params-column-actions">
+            <span></span>
+          </div>
+
         </div>
 
-        {/* Rows */}
+
+        {/* =================================================
+            TABLE BODY
+            ================================================= */}
+
         <div className="params-table-body">
 
           {rows.map((parameter) => (
 
             <div
-              className="param-row"
+              className="params-data-row"
               key={parameter.id}
             >
 
-              {/* Enabled */}
-              <div className="param-enabled">
+
+              {/* =========================================
+                  ENABLED
+                  ========================================= */}
+
+              <div className="params-cell-enabled">
 
                 <input
+                  className="params-enable-checkbox"
                   type="checkbox"
                   checked={parameter.enabled}
                   aria-label={`Enable ${
@@ -113,10 +170,15 @@ function ParamsEditor({
 
               </div>
 
-              {/* Key */}
-              <div className="param-field">
+
+              {/* =========================================
+                  KEY
+                  ========================================= */}
+
+              <div className="params-cell-key">
 
                 <input
+                  className="params-key-input"
                   type="text"
                   value={parameter.key}
                   placeholder="Key"
@@ -132,10 +194,15 @@ function ParamsEditor({
 
               </div>
 
-              {/* Value */}
-              <div className="param-field">
+
+              {/* =========================================
+                  VALUE
+                  ========================================= */}
+
+              <div className="params-cell-value">
 
                 <VariableField
+                  className="params-value-field"
                   environment={environment}
                   value={parameter.value}
                   placeholder="Value"
@@ -151,13 +218,18 @@ function ParamsEditor({
 
               </div>
 
-              {/* Description */}
-              <div className="param-field">
+
+              {/* =========================================
+                  DESCRIPTION
+                  ========================================= */}
+
+              <div className="params-cell-description">
 
                 <input
+                  className="params-description-input"
                   type="text"
                   value={parameter.description}
-                  placeholder=""
+                  placeholder="Description"
                   aria-label="Parameter description"
                   onChange={(event) =>
                     updateParameter(
@@ -170,14 +242,20 @@ function ParamsEditor({
 
               </div>
 
-              {/* Delete */}
-              <div className="param-delete">
+
+              {/* =========================================
+                  DELETE
+                  ========================================= */}
+
+              <div className="params-cell-actions">
 
                 <button
                   type="button"
-                  className="delete-param-button"
+                  className="params-delete-button"
                   onClick={() =>
-                    deleteParameter(parameter.id)
+                    deleteParameter(
+                      parameter.id
+                    )
                   }
                   aria-label="Delete parameter"
                   data-tooltip="Delete Parameter"
@@ -196,8 +274,8 @@ function ParamsEditor({
       </div>
 
     </div>
+
   )
 }
 
 export default ParamsEditor
-

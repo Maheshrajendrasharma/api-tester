@@ -99,78 +99,150 @@ function HeadersEditor({
 
 
   return (
-    <div className="headers-table">
+    <div className="headers-editor">
 
-      <div className="headers-table-header">
-        <span>Enabled</span>
-        <span>Key</span>
-        <span>Value</span>
-        <span></span>
-      </div>
+      {/* =====================================================
+          HEADERS TABLE
+          ===================================================== */}
 
-      {headers.map((header) => (
+      <div className="headers-table">
 
-        <div
-          className="header-row"
-          key={header.id}
-        >
+        {/* ===================================================
+            TABLE HEADER
+            =================================================== */}
 
-          <input
-            aria-label={`Enable ${header.key || 'header'}`}
-            checked={header.enabled}
-            onChange={(event) =>
-              updateHeader(
-                header.id,
-                'enabled',
-                event.target.checked
-              )
-            }
-            type="checkbox"
-          />
+        <div className="headers-table-header">
 
-          <input
-  className="header-key-input"
-  aria-label="Header key"
-  value={header.key}
-  onChange={(event) =>
-    updateHeader(
-      header.id,
-      'key',
-      event.target.value
-    )
-  }
-  placeholder="Key"
-/>
+          <div className="headers-column-enabled">
+            <span>Enabled</span>
+          </div>
 
-          <VariableField
-            environment={environment}
-            aria-label="Header value"
-            value={header.value}
-            onChange={(event) =>
-              updateHeader(
-                header.id,
-                'value',
-                event.target.value
-              )
-            }
-            placeholder="Value"
-          />
+          <div className="headers-column-key">
+            <span>Key</span>
+          </div>
 
-          <button
-            className="delete-header-button"
-            type="button"
-            onClick={() =>
-              deleteHeader(header.id)
-            }
-            aria-label="Delete header"
-            data-tooltip="Delete Header"
-          >
-            ×
-          </button>
+          <div className="headers-column-value">
+            <span>Value</span>
+          </div>
+
+          <div className="headers-column-actions">
+            <span></span>
+          </div>
 
         </div>
 
-      ))}
+
+        {/* ===================================================
+            TABLE BODY
+            =================================================== */}
+
+        <div className="headers-table-body">
+
+          {headers.map((header) => (
+
+            <div
+              className="headers-data-row"
+              key={header.id}
+            >
+
+              {/* =============================================
+                  ENABLED
+                  ============================================= */}
+
+              <div className="headers-cell-enabled">
+
+                <input
+                  className="headers-enable-checkbox"
+                  aria-label={`Enable ${header.key || 'header'}`}
+                  checked={header.enabled}
+                  onChange={(event) =>
+                    updateHeader(
+                      header.id,
+                      'enabled',
+                      event.target.checked
+                    )
+                  }
+                  type="checkbox"
+                />
+
+              </div>
+
+
+              {/* =============================================
+                  KEY
+                  ============================================= */}
+
+              <div className="headers-cell-key">
+
+                <input
+                  className="headers-key-input"
+                  aria-label="Header key"
+                  value={header.key}
+                  onChange={(event) =>
+                    updateHeader(
+                      header.id,
+                      'key',
+                      event.target.value
+                    )
+                  }
+                  placeholder="Key"
+                  type="text"
+                />
+
+              </div>
+
+
+              {/* =============================================
+                  VALUE
+                  ============================================= */}
+
+              <div className="headers-cell-value">
+
+                <VariableField
+                  className="headers-value-field"
+                  environment={environment}
+                  aria-label="Header value"
+                  value={header.value}
+                  onChange={(event) =>
+                    updateHeader(
+                      header.id,
+                      'value',
+                      event.target.value
+                    )
+                  }
+                  placeholder="Value"
+                />
+
+              </div>
+
+
+              {/* =============================================
+                  DELETE
+                  ============================================= */}
+
+              <div className="headers-cell-actions">
+
+                <button
+                  className="headers-delete-button"
+                  type="button"
+                  onClick={() =>
+                    deleteHeader(header.id)
+                  }
+                  aria-label="Delete header"
+                  data-tooltip="Delete Header"
+                >
+                  ×
+                </button>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
 
     </div>
   )

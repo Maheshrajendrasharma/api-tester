@@ -1,3 +1,5 @@
+import { pm } from "./postmanCompat"
+
 // =====================================================
 // SCRIPT RUNTIME STORE
 // =====================================================
@@ -6,116 +8,130 @@ const scriptStore = new Map()
 
 
 // =====================================================
+// RUNTIME VARIABLE FUNCTIONS
+// =====================================================
+
+export function setRuntimeVariable(key, value) {
+
+    const normalizedKey = String(key)
+
+    scriptStore.set(
+        normalizedKey,
+        value
+    )
+
+    console.log(
+        `[SCRIPT RUNTIME] SET ${normalizedKey} =`,
+        value
+    )
+}
+
+
+export function getRuntimeVariable(key) {
+
+    const normalizedKey = String(key)
+
+    const value =
+        scriptStore.get(normalizedKey)
+
+    console.log(
+        `[SCRIPT RUNTIME] GET ${normalizedKey} =`,
+        value
+    )
+
+    return value
+}
+
+
+export function hasRuntimeVariable(key) {
+
+    const normalizedKey = String(key)
+
+    const exists =
+        scriptStore.has(normalizedKey)
+
+    console.log(
+        `[SCRIPT RUNTIME] HAS ${normalizedKey} =`,
+        exists
+    )
+
+    return exists
+}
+
+
+export function removeRuntimeVariable(key) {
+
+    const normalizedKey = String(key)
+
+    console.log(
+        `[SCRIPT RUNTIME] REMOVE ${normalizedKey}`
+    )
+
+    scriptStore.delete(
+        normalizedKey
+    )
+}
+
+
+export function clearRuntimeVariables() {
+
+    console.log(
+        '[SCRIPT RUNTIME] CLEAR ALL VARIABLES'
+    )
+
+    scriptStore.clear()
+}
+
+
+// =====================================================
 // API OBJECT AVAILABLE TO USER SCRIPTS
 // =====================================================
 
 export const api = {
 
-    // ---------------------------------------
-    // SET
-    // ---------------------------------------
-
     set(key, value) {
 
-        const normalizedKey = String(key)
-
-        scriptStore.set(
-            normalizedKey,
+        setRuntimeVariable(
+            key,
             value
         )
 
-        console.log(
-            `[API] SET ${normalizedKey} =`,
-            value
-        )
     },
 
-
-    // ---------------------------------------
-    // GET
-    // ---------------------------------------
 
     get(key) {
 
-        const normalizedKey = String(key)
-
-        const value =
-            scriptStore.get(normalizedKey)
-
-        console.log(
-            `[API] GET ${normalizedKey} =`,
-            value
+        return getRuntimeVariable(
+            key
         )
 
-        return value
     },
 
-
-    // ---------------------------------------
-    // HAS
-    // ---------------------------------------
 
     has(key) {
 
-        const normalizedKey = String(key)
-
-        const exists =
-            scriptStore.has(normalizedKey)
-
-        console.log(
-            `[API] HAS ${normalizedKey} =`,
-            exists
+        return hasRuntimeVariable(
+            key
         )
 
-        return exists
     },
 
-
-    // ---------------------------------------
-    // REMOVE
-    // ---------------------------------------
 
     remove(key) {
 
-        const normalizedKey = String(key)
-
-        console.log(
-            `[API] REMOVE ${normalizedKey}`
+        removeRuntimeVariable(
+            key
         )
 
-        scriptStore.delete(
-            normalizedKey
-        )
     },
 
-
-    // ---------------------------------------
-    // CLEAR
-    // ---------------------------------------
 
     clear() {
 
-        console.log(
-            '[API] CLEAR ALL VARIABLES'
-        )
+        clearRuntimeVariables()
 
-        scriptStore.clear()
     },
 
-}
-
-
-// =====================================================
-// CLEAR RUNTIME VARIABLES
-// =====================================================
-
-export function clearRuntimeVariables() {
-
-    console.log(
-        '[SCRIPT RUNTIME] CLEARING VARIABLES'
-    )
-
-    scriptStore.clear()
 }
 
 
@@ -135,6 +151,7 @@ export async function runPreRequestScript(script) {
         )
 
         return
+
     }
 
 
@@ -156,6 +173,7 @@ export async function runPreRequestScript(script) {
         const execute =
             new Function(
                 'api',
+                'pm',
                 'console',
                 `
                 "use strict";
@@ -167,13 +185,10 @@ export async function runPreRequestScript(script) {
 
         await execute(
             api,
+            pm,
             console
         )
 
-
-        console.log(
-            '================================'
-        )
 
         console.log(
             '[SCRIPT] PRE-REQUEST END'
@@ -193,7 +208,9 @@ export async function runPreRequestScript(script) {
         throw new Error(
             `Pre-request script failed: ${error.message}`
         )
+
     }
+
 }
 
 
@@ -216,6 +233,7 @@ export async function runPostResponseScript(
         )
 
         return
+
     }
 
 
@@ -237,6 +255,7 @@ export async function runPostResponseScript(
         const execute =
             new Function(
                 'api',
+                'pm',
                 'response',
                 'console',
                 `
@@ -249,14 +268,11 @@ export async function runPostResponseScript(
 
         await execute(
             api,
+            pm,
             response,
             console
         )
 
-
-        console.log(
-            '================================'
-        )
 
         console.log(
             '[SCRIPT] POST-RESPONSE END'
@@ -276,5 +292,7 @@ export async function runPostResponseScript(
         throw new Error(
             `Post-response script failed: ${error.message}`
         )
+
     }
+
 }
