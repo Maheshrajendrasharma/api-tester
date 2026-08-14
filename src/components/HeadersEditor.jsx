@@ -1,251 +1,477 @@
-import { useEffect } from 'react'
 import VariableField from './VariableField'
 
-let nextHeaderId = 2
 
-function createBlankHeader() {
-  return {
-    id: nextHeaderId++,
-    enabled: true,
-    key: '',
-    value: '',
-  }
+function createBlankHeader(){
+
+    return {
+
+        id: crypto.randomUUID(),
+
+        enabled:true,
+
+        key:"",
+
+        value:""
+
+    }
+
 }
 
+
+
+
+
+function normalizeHeaders(headers = []) {
+
+
+    const filledRows = headers.filter((header)=>{
+
+
+        return (
+
+            String(header?.key ?? '').trim() !== '' ||
+
+            String(header?.value ?? '').trim() !== ''
+
+        )
+
+
+    })
+
+
+
+
+    const emptyRows = headers.filter((header)=>{
+
+
+        return (
+
+            String(header?.key ?? '').trim() === '' &&
+
+            String(header?.value ?? '').trim() === ''
+
+        )
+
+
+    })
+
+
+
+
+    return [
+
+
+        ...filledRows,
+
+
+        emptyRows.length > 0
+
+            ?
+
+            emptyRows[0]
+
+            :
+
+            createBlankHeader()
+
+
+    ]
+
+
+
+}
+
+
+
+
+
+
+
 function HeadersEditor({
+
+
   environment,
+
+
   headers = [],
+
+
   onChange
+
+
+
 }) {
 
-  /*
-   * Always make sure there is one blank row
-   * at the bottom.
-   */
-  useEffect(() => {
 
-    if (headers.length === 0) {
-      onChange([createBlankHeader()])
-      return
+
+    const rows = normalizeHeaders(headers)
+
+
+
+
+
+
+    function updateHeader(
+
+        id,
+
+        field,
+
+        value
+
+    ){
+
+
+
+        const updated = headers.map((header)=>{
+
+
+            if(header.id === id){
+
+
+                return {
+
+
+                    ...header,
+
+
+                    [field]:value
+
+
+                }
+
+
+            }
+
+
+
+            return header
+
+
+        })
+
+
+
+
+
+        onChange(
+
+            normalizeHeaders(updated)
+
+        )
+
+
+
     }
 
-    const lastHeader = headers[headers.length - 1]
-
-    const lastIsBlank =
-      !lastHeader.key.trim() &&
-      !lastHeader.value.trim()
-
-    if (!lastIsBlank) {
-      onChange([
-        ...headers,
-        createBlankHeader()
-      ])
-    }
-
-  }, [headers, onChange])
 
 
-  function updateHeader(id, field, value) {
-
-    const updatedHeaders = headers.map((header) =>
-      header.id === id
-        ? {
-            ...header,
-            [field]: value
-          }
-        : header
-    )
-
-    const lastHeader =
-      updatedHeaders[updatedHeaders.length - 1]
-
-    const lastIsBlank =
-      lastHeader &&
-      !lastHeader.key.trim() &&
-      !lastHeader.value.trim()
-
-    if (!lastIsBlank) {
-      updatedHeaders.push(createBlankHeader())
-    }
-
-    onChange(updatedHeaders)
-  }
 
 
-  function deleteHeader(id) {
-
-    let updatedHeaders =
-      headers.filter(
-        (header) => header.id !== id
-      )
-
-    if (updatedHeaders.length === 0) {
-      updatedHeaders = [createBlankHeader()]
-    }
-
-    const lastHeader =
-      updatedHeaders[updatedHeaders.length - 1]
-
-    const lastIsBlank =
-      !lastHeader.key.trim() &&
-      !lastHeader.value.trim()
-
-    if (!lastIsBlank) {
-      updatedHeaders.push(createBlankHeader())
-    }
-
-    onChange(updatedHeaders)
-  }
 
 
   return (
+
+
     <div className="headers-editor">
 
-      {/* =====================================================
-          HEADERS TABLE
-          ===================================================== */}
+
 
       <div className="headers-table">
 
-        {/* ===================================================
-            TABLE HEADER
-            =================================================== */}
+
+
+
+
+
 
         <div className="headers-table-header">
 
+
+
           <div className="headers-column-enabled">
-            <span>Enabled</span>
+
+            Enabled
+
           </div>
+
+
+
 
           <div className="headers-column-key">
-            <span>Key</span>
+
+            Key
+
           </div>
+
+
+
 
           <div className="headers-column-value">
-            <span>Value</span>
+
+            Value
+
           </div>
 
-          <div className="headers-column-actions">
-            <span></span>
-          </div>
+
+
 
         </div>
 
 
-        {/* ===================================================
-            TABLE BODY
-            =================================================== */}
+
+
+
+
+
+
 
         <div className="headers-table-body">
 
-          {headers.map((header) => (
 
-            <div
-              className="headers-data-row"
-              key={header.id}
-            >
 
-              {/* =============================================
-                  ENABLED
-                  ============================================= */}
 
-              <div className="headers-cell-enabled">
 
-                <input
-                  className="headers-enable-checkbox"
-                  aria-label={`Enable ${header.key || 'header'}`}
-                  checked={header.enabled}
-                  onChange={(event) =>
-                    updateHeader(
-                      header.id,
-                      'enabled',
-                      event.target.checked
-                    )
-                  }
-                  type="checkbox"
-                />
+          {
+
+            rows.map((header)=>(
+
+
+
+              <div
+
+
+                className="headers-data-row"
+
+
+                key={header.id}
+
+
+
+              >
+
+
+
+
+
+
+
+                <div className="headers-cell-enabled">
+
+
+
+                  <input
+
+
+                    type="checkbox"
+
+
+                    checked={header.enabled}
+
+
+
+                    onChange={(event)=>
+
+
+                      updateHeader(
+
+
+                        header.id,
+
+
+                        'enabled',
+
+
+                        event.target.checked
+
+
+                      )
+
+                    }
+
+
+
+                  />
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="headers-cell-key">
+
+
+
+
+
+                  <VariableField
+
+
+
+                    environment={environment}
+
+
+
+                    value={header.key}
+
+
+
+                    placeholder="Key"
+
+
+
+                    className="headers-key-field"
+
+
+
+
+                    onChange={(event)=>
+
+
+
+                      updateHeader(
+
+
+                        header.id,
+
+
+                        'key',
+
+
+                        event.target.value
+
+
+
+                      )
+
+
+                    }
+
+
+
+                  />
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <div className="headers-cell-value">
+
+
+
+
+
+                  <VariableField
+
+
+
+                    environment={environment}
+
+
+
+                    value={header.value}
+
+
+
+                    placeholder="Value"
+
+
+
+                    className="headers-value-field"
+
+
+
+
+                    onChange={(event)=>
+
+
+
+                      updateHeader(
+
+
+                        header.id,
+
+
+                        'value',
+
+
+                        event.target.value
+
+
+
+                      )
+
+
+                    }
+
+
+
+                  />
+
+
+
+                </div>
+
+
+
+
+
+
+
+
 
               </div>
 
 
-              {/* =============================================
-                  KEY
-                  ============================================= */}
-
-              <div className="headers-cell-key">
-
-                <input
-                  className="headers-key-input"
-                  aria-label="Header key"
-                  value={header.key}
-                  onChange={(event) =>
-                    updateHeader(
-                      header.id,
-                      'key',
-                      event.target.value
-                    )
-                  }
-                  placeholder="Key"
-                  type="text"
-                />
-
-              </div>
 
 
-              {/* =============================================
-                  VALUE
-                  ============================================= */}
-
-              <div className="headers-cell-value">
-
-                <VariableField
-                  className="headers-value-field"
-                  environment={environment}
-                  aria-label="Header value"
-                  value={header.value}
-                  onChange={(event) =>
-                    updateHeader(
-                      header.id,
-                      'value',
-                      event.target.value
-                    )
-                  }
-                  placeholder="Value"
-                />
-
-              </div>
+            ))
 
 
-              {/* =============================================
-                  DELETE
-                  ============================================= */}
 
-              <div className="headers-cell-actions">
+          }
 
-                <button
-                  className="headers-delete-button"
-                  type="button"
-                  onClick={() =>
-                    deleteHeader(header.id)
-                  }
-                  aria-label="Delete header"
-                  data-tooltip="Delete Header"
-                >
-                  ×
-                </button>
 
-              </div>
 
-            </div>
 
-          ))}
 
         </div>
 
+
+
+
+
+
+
       </div>
 
+
+
+
+
     </div>
+
+
   )
+
 }
+
+
+
 
 export default HeadersEditor

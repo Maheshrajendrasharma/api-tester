@@ -86,22 +86,10 @@ if (!request) {
 <div className="request-tab-content">
 
 
-       {activeTab === "Params" && (
+{activeTab === "Params" && (
   <ParamsEditor
     environment={environment}
-    parameters={
-      request.params?.length
-        ? request.params
-        : [
-            {
-              id: 1,
-              enabled: true,
-              key: '',
-              value: '',
-              description: '',
-            },
-          ]
-    }
+    parameters={request.params ?? []}
     onChange={handleParametersChange}
   />
 )}

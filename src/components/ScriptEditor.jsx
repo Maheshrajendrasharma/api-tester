@@ -1,17 +1,24 @@
+import VariableField from './VariableField'
+
 function ScriptEditor({
-    value,
-    onChange,
-    placeholder,
+  environment,
+  value,
+  onChange,
+  placeholder = 'Write script here...',
 }) {
-    return (
-        <textarea
-            className="script-editor"
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            spellCheck={false}
-        />
-    )
+  return (
+    <div className="script-editor">
+
+      <VariableField
+        environment={environment}
+        value={value || ''}
+        multiline
+        placeholder={placeholder}
+        onChange={onChange}
+      />
+
+    </div>
+  )
 }
 
 export default ScriptEditor

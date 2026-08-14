@@ -1,4 +1,5 @@
 import { API_KEY_LOCATIONS, AUTH_TYPES } from '../utils/constants'
+import VariableField from './VariableField'
 
 function AuthorizationEditor({
   environment,
@@ -81,19 +82,20 @@ function AuthorizationEditor({
               Token
             </label>
 
-            <input
-              className="authorization-input"
-              id="bearer-token"
-              type="password"
-              value={authorization.bearerToken}
-              onChange={(event) =>
-                updateAuthorization(
-                  'bearerToken',
-                  event.target.value
-                )
-              }
-              placeholder="Enter Bearer Token"
-            />
+            <VariableField
+  className="authorization-input"
+  environment={environment}
+  id="bearer-token"
+  type="password"
+  value={authorization.bearerToken ?? ''}
+  onChange={(event) =>
+    updateAuthorization(
+      'bearerToken',
+      event.target.value
+    )
+  }
+  placeholder="Enter Bearer Token"
+/>
 
             <p className="authorization-hint">
               Example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
@@ -113,22 +115,23 @@ function AuthorizationEditor({
             <label
               className="authorization-label"
               htmlFor="basic-username"
-            >
+            > 
               Username
             </label>
 
-            <input
-              className="authorization-input"
-              id="basic-username"
-              value={authorization.username}
-              onChange={(event) =>
-                updateAuthorization(
-                  'username',
-                  event.target.value
-                )
-              }
-              placeholder="Enter username"
-            />
+            <VariableField
+  className="authorization-input"
+  environment={environment}
+  id="basic-username"
+  value={authorization.username ?? ''}
+  onChange={(event) =>
+    updateAuthorization(
+      'username',
+      event.target.value
+    )
+  }
+  placeholder="Enter username"
+/>
 
             <label
               className="authorization-label"
@@ -137,19 +140,20 @@ function AuthorizationEditor({
               Password
             </label>
 
-            <input
-              className="authorization-input"
-              id="basic-password"
-              type="password"
-              value={authorization.password}
-              onChange={(event) =>
-                updateAuthorization(
-                  'password',
-                  event.target.value
-                )
-              }
-              placeholder="Enter password"
-            />
+            <VariableField
+  className="authorization-input"
+  environment={environment}
+  id="basic-password"
+  type="password"
+  value={authorization.password ?? ''}
+  onChange={(event) =>
+    updateAuthorization(
+      'password',
+      event.target.value
+    )
+  }
+  placeholder="Enter password"
+/>
 
           </div>
         )}
@@ -168,18 +172,19 @@ function AuthorizationEditor({
             >
             </label>
 
-            <input
-              className="authorization-input"
-              id="api-key-name"
-              value={authorization.apiKey}
-              onChange={(event) =>
-                updateAuthorization(
-                  'apiKey',
-                  event.target.value
-                )
-              }
-              placeholder="Enter key"
-            />
+            <VariableField
+  className="authorization-input"
+  environment={environment}
+  id="api-key-name"
+  value={authorization.apiKey ?? ''}
+  onChange={(event) =>
+    updateAuthorization(
+      'apiKey',
+      event.target.value
+    )
+  }
+  placeholder="Enter key"
+/>
 
 
             <label
@@ -188,18 +193,19 @@ function AuthorizationEditor({
             >
             </label>
 
-            <input
-              className="authorization-input"
-              id="api-key-value"
-              value={authorization.apiValue}
-              onChange={(event) =>
-                updateAuthorization(
-                  'apiValue',
-                  event.target.value
-                )
-              }
-              placeholder="Enter value"
-            />
+            <VariableField
+  className="authorization-input"
+  environment={environment}
+  id="api-key-value"
+  value={authorization.apiValue ?? ''}
+  onChange={(event) =>
+    updateAuthorization(
+      'apiValue',
+      event.target.value
+    )
+  }
+  placeholder="Enter value"
+/>
 
 
             <label
