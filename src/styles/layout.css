@@ -15,7 +15,7 @@
   display: grid;
   grid-template-columns: var(--sidebar-width) var(--sidebar-divider-width) minmax(0, 1fr) var(--environment-divider-width) var(--environment-panel-width);
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   transition: grid-template-columns var(--panel-transition-duration) ease, grid-template-rows var(--panel-transition-duration) ease;
 }
 
@@ -34,6 +34,7 @@
   font-weight: 700;
 
   letter-spacing: -0.02em;
+
 }
 
 .app-header-mark {
@@ -1311,7 +1312,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .environment-menu {
     position: absolute !important;
 
-    top: calc(100% + 5px) !important;
+    top: calc(100% + 0px) !important;
     right: 0 !important;
 
     width: 230px !important;
@@ -1332,7 +1333,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
     z-index: 99999 !important;
 
-    overflow: hidden !important;
 }
 
 .environment-menu button {
@@ -1360,7 +1360,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     line-height: 30px !important;
     text-align: left !important;
 
-    cursor: pointer !important;
     white-space: nowrap !important;
 }
 
@@ -1375,11 +1374,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     color: #f09a9f !important;
 }
 
-.environment-menu .danger:hover,
-.environment-menu .danger:focus-visible {
-    color: #ffc0c4 !important;
-    background: #422a30 !important;
-}
+
 
 
 
@@ -2524,7 +2519,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     height: 34px;
     min-height: 34px;
 
-    padding: 0 10px;
+    padding: 0 0px;
     margin: 0;
 
     border: 0;
@@ -3459,6 +3454,8 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     align-items: center;
 
     flex-shrink: 0;
+
+    z-index: 10000;
 }
 
 
@@ -3535,29 +3532,33 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    ========================================================= */
 
 .workspace-dropdown {
+
     position: absolute;
 
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
+
     left: 0;
 
-    width: 405px;
+    width: 280px;
 
-    max-height: 320px;
 
-    overflow-y: auto;
+    background: #161b22;
 
-    padding: 6px;
+    border: 1px solid #30363d;
 
-    box-sizing: border-box;
-
-    background: #171d23;
-
-    border: 1px solid #354454;
     border-radius: 10px;
 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 
-    z-index: 2000;
+    padding: 8px;
+
+
+    z-index: 99999;
+
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.45);
+
+
 }
 
 
@@ -3868,11 +3869,11 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     background: #10151b;
     border-bottom: 1px solid #303b47;
 
-    z-index: 1000;
+    z-index: 5000;
 
     -webkit-app-region: drag;
 
-    overflow: hidden;
+    overflow: visible;
 
     
 }  
@@ -5106,5 +5107,203 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
     max-width:440px;
 
+
+}
+
+.workspace-actions-wrapper{
+    position:relative;
+}
+
+
+.workspace-actions-menu{
+
+    position:absolute;
+
+    top:35px;
+
+    right:0;
+
+    width:200px;
+
+    background:#1f2937;
+
+    border:1px solid #374151;
+
+    border-radius:8px;
+
+    padding:6px;
+
+    z-index:10000;
+
+}
+
+
+.workspace-actions-menu button{
+
+    width:100%;
+
+    padding:8px 10px;
+
+    background:none;
+
+    border:none;
+
+    color:white;
+
+    text-align:left;
+
+    cursor:pointer;
+
+}
+
+
+.workspace-actions-menu button:hover{
+
+    background:#374151;
+
+}
+
+
+.workspace-actions-menu hr{
+
+    border:none;
+
+    border-top:1px solid #4b5563;
+
+}
+
+
+.workspace-actions-wrapper {
+
+    position: relative;
+
+    z-index: 10001;
+
+}
+
+
+.workspace-actions-menu {
+
+
+    position: absolute;
+
+
+    top: calc(100% + 8px);
+
+
+    right: 0;
+
+
+    width: 240px;
+
+
+    background:#161b22;
+
+
+    border:1px solid #30363d;
+
+
+    border-radius:10px;
+
+
+    padding:8px;
+
+
+    z-index:99999;
+
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.45);
+
+}
+
+.workspace-menu-button {
+
+    position: relative;
+
+    z-index: 10002;
+
+    cursor: pointer;
+
+    -webkit-app-region: no-drag;
+
+}
+
+
+.workspace-actions-menu {
+
+    position: absolute;
+
+
+    top: 42px;
+
+
+    right: 0;
+
+
+    width: 230px;
+
+
+    background: #161b22;
+
+
+    border: 1px solid #30363d;
+
+
+    border-radius: 8px;
+
+
+    padding: 8px;
+
+
+    display: flex;
+
+
+    flex-direction: column;
+
+
+    gap: 4px;
+
+
+    z-index: 999999;
+
+
+    box-shadow:
+        0px 10px 30px rgba(0,0,0,0.6);
+
+}
+
+.workspace-actions-menu button {
+
+    width:100%;
+
+
+    text-align:left;
+
+
+    padding:10px 12px;
+
+
+    background:transparent;
+
+
+    border:none;
+
+
+    color:#d1d5db;
+
+
+    cursor:pointer;
+
+
+    border-radius:6px;
+
+
+}
+
+
+.workspace-actions-menu button:hover {
+
+    background:#263238;
 
 }

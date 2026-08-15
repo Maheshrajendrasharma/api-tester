@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import {
-  loadCollections,
-  saveCollections,
-} from '../services/storageService'
+
 
 import {
   buildRequestFromTemplate,
@@ -332,8 +329,27 @@ function findCollectionContainingRequest(
    MAIN HOOK
    ========================================================= */
 
-export function useCollections({ onShowDialog } = {}) {
-  const [collections, setCollections] = useState([])
+export function useCollections({
+    onShowDialog,
+    workspaceId,
+    workspaceCollections,
+    onCollectionsChange
+} = {}) {
+
+const collections = workspaceCollections || []
+
+function updateCollections(updater){
+
+    const updated =
+        typeof updater === "function"
+        ? updater(collections)
+        : updater
+
+    onCollectionsChange?.(
+        updated
+    )
+}
+
   const [selectedRequestId, setSelectedRequestId] =
     useState(null)
 
@@ -349,78 +365,96 @@ export function useCollections({ onShowDialog } = {}) {
     let isMounted = true
 
     async function restoreCollections() {
-      try {
-        const savedCollections =
-          await loadCollections()
+
+    try {
 
         const initialCollections =
-          savedCollections.length
-            ? savedCollections.map(
-                convertCollectionToTree
-              )
-            : [
-                convertCollectionToTree(
-                  createCollection()
-                ),
-              ]
+            workspaceCollections?.length
+                ? workspaceCollections
+                : []
+
 
         if (isMounted) {
-          setCollections(initialCollections)
 
-          const firstRequest =
-            findFirstRequest(
-              initialCollections[0]
+
+            updateCollections(
+                initialCollections
             )
 
-          setSelectedRequestId(
-            firstRequest?.id ?? null
-          )
+
+            const firstRequest =
+                initialCollections.length
+                    ? findFirstRequest(
+                        initialCollections[0]
+                    )
+                    : null
+
+
+
+            setSelectedRequestId(
+                firstRequest?.id ?? null
+            )
+
+
         }
-      } catch {
+
+
+    } catch {
+
         if (isMounted) {
-          const initialCollection =
-            convertCollectionToTree(
-              createCollection()
-            )
 
-          setCollections([
-            initialCollection,
-          ])
+            updateCollections([])
 
-          const firstRequest =
-            findFirstRequest(
-              initialCollection
-            )
+            setSelectedRequestId(null)
 
-          setSelectedRequestId(
-            firstRequest?.id ?? null
-          )
         }
-      } finally {
-        if (isMounted) {
-          setCollectionsReady(true)
-        }
-      }
+
     }
+    finally {
+
+        if (isMounted) {
+
+            setCollectionsReady(true)
+
+        }
+
+    }
+
+}
 
     restoreCollections()
 
     return () => {
       isMounted = false
     }
-  }, [])
+}, [
+    workspaceId,
+    workspaceCollections
+])
 
 
-  /* =======================================================
-     SAVE
-     ======================================================= */
+/*
+=======================================================
+ SAVE
+=======================================================
+*/
 
-  useEffect(() => {
-    if (collectionsReady) {
-      saveCollections(collections)
-        .catch(() => {})
+useEffect(() => {
+
+    if (!collectionsReady) {
+        return
     }
-  }, [collections, collectionsReady])
+
+
+    onCollectionsChange?.(
+        collections
+    )
+
+
+}, [
+    collections,
+    collectionsReady
+])
 
 
   /* =======================================================
@@ -560,7 +594,7 @@ export function useCollections({ onShowDialog } = {}) {
         createCollection(name)
       )
 
-    setCollections(
+    updateCollections(
       (current) => [
         ...current,
         collection,
@@ -623,11 +657,8 @@ export function useCollections({ onShowDialog } = {}) {
             if (
               existingNames.includes(name)
             ) {
-              showValidationError(
-                'A collection with that name already exists.'
-              )
 
-              return
+
             }
 
             const collection = {
@@ -638,7 +669,7 @@ export function useCollections({ onShowDialog } = {}) {
               expanded: true,
             }
 
-            setCollections(
+            updateCollections(
               (currentCollections) => [
                 ...currentCollections,
                 collection,
@@ -779,7 +810,7 @@ export function useCollections({ onShowDialog } = {}) {
             ? importedTree.children
             : []
 
-        setCollections(
+        updateCollections(
           (currentCollections) =>
             currentCollections.map(
               (collection) => {
@@ -864,7 +895,7 @@ function createNewRequest(parentId) {
     createRequest(name)
   )
 
-  setCollections((currentCollections) =>
+  updateCollections((currentCollections) =>
     currentCollections.map((collectionItem) => {
       if (
         collectionItem.id !==
@@ -908,7 +939,7 @@ function createNewRequest(parentId) {
   function toggleCollection(
     nodeId
   ) {
-    setCollections(
+    updateCollections(
       (currentCollections) =>
         currentCollections.map(
           (collection) =>
@@ -1055,7 +1086,7 @@ function duplicateFolder(
   const destinationId =
     parent?.id || collection.id
 
-  setCollections(
+  updateCollections(
     (currentCollections) =>
       currentCollections.map(
         (collectionItem) => {
@@ -1108,7 +1139,7 @@ function deleteFolder(folderId) {
         return
       }
 
-      setCollections((currentCollections) =>
+      updateCollections((currentCollections) =>
         currentCollections.map((collection) =>
           deleteNodeFromTree(collection, folderId)
         )
@@ -1144,7 +1175,7 @@ function renameFolder(folderId) {
     (name) => {
       if (!name || !String(name).trim()) return
 
-      setCollections((currentCollections) =>
+      updateCollections((currentCollections) =>
         currentCollections.map((collection) =>
           updateTreeNode(collection, folderId, {
             name: String(name).trim(),
@@ -1307,7 +1338,7 @@ async function exportFolder(folderId) {
           return
         }
 
-        setCollections(
+        updateCollections(
           (currentCollections) =>
             currentCollections.map(
               (item) =>
@@ -1394,7 +1425,7 @@ async function exportFolder(folderId) {
       expanded: true,
     }
 
-    setCollections(
+    updateCollections(
       (current) => [
         ...current,
         duplicate,
@@ -1429,13 +1460,7 @@ async function exportFolder(folderId) {
       return
     }
 
-    if (collections.length <= 1) {
-      showValidationError(
-        'You cannot delete the last collection.'
-      )
 
-      return
-    }
 
     promptForName(
       `Delete collection "${collection.name}" and all of its requests? Type DELETE to confirm.`,
@@ -1457,7 +1482,7 @@ async function exportFolder(folderId) {
               collectionId
           )
 
-        setCollections(
+        updateCollections(
           remainingCollections
         )
 
@@ -1538,7 +1563,7 @@ async function exportFolder(folderId) {
           return
         }
 
-        setCollections(
+        updateCollections(
           (currentCollections) =>
             currentCollections.map(
               (item) =>
@@ -1621,7 +1646,7 @@ async function exportFolder(folderId) {
       parent?.id ??
       collection.id
 
-    setCollections(
+    updateCollections(
       (currentCollections) =>
         currentCollections.map(
           (item) =>
@@ -1685,7 +1710,7 @@ async function exportFolder(folderId) {
           return
         }
 
-        setCollections(
+        updateCollections(
           (currentCollections) =>
             currentCollections.map(
               (item) =>
@@ -1733,7 +1758,7 @@ async function exportFolder(folderId) {
       return
     }
 
-    setCollections(
+    updateCollections(
       (currentCollections) =>
         currentCollections.map(
           (collection) =>
@@ -1788,7 +1813,7 @@ async function exportFolder(folderId) {
         )
       )
 
-    setCollections(
+    updateCollections(
       (currentCollections) =>
         currentCollections.map(
           (collection) =>
@@ -1821,7 +1846,7 @@ function moveCollectionNode(
   destinationId,
   index = null
 ) {
-  setCollections((currentCollections) =>
+  updateCollections((currentCollections) =>
     currentCollections.map((collection) => {
       if (collection.id !== collectionId) {
         return collection
@@ -1932,7 +1957,7 @@ function createFolder(parentId) {
 
   const folder = createFolderNode(name)
 
-  setCollections((currentCollections) =>
+  updateCollections((currentCollections) =>
     currentCollections.map((collection) => {
       if (collection.id !== parentCollection.id) {
         return collection

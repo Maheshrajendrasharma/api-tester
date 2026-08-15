@@ -7,58 +7,15 @@ import {
   generateId,
 } from '../utils/environmentHelpers'
 
+
 const STORAGE_KEY = 'apiTester.environments'
 
-function normalizeEnvironments(environments) {
-  const savedEnvironments = Array.isArray(environments) ? environments : []
-  const savedById = new Map(savedEnvironments.map((environment) => [environment.id, environment]))
-  const merged = DEFAULT_ENVIRONMENTS.map((environment) => (
-    savedById.has(environment.id) ? savedById.get(environment.id) : clone(environment)
-  ))
-  const customEnvironments = savedEnvironments.filter((environment) => !DEFAULT_ENVIRONMENTS.some((defaultEnvironment) => defaultEnvironment.id === environment.id))
-  const environmentsWithDefaults = [...merged, ...customEnvironments]
-  const activeEnvironment = environmentsWithDefaults.find((environment) => environment.active)
 
-  return environmentsWithDefaults.map((environment, index) => ({
-    ...environment,
-    active: activeEnvironment ? environment.id === activeEnvironment.id : index === 0,
-    variables:
-    Array.isArray(environment.variables) &&
-    environment.variables.length > 0
-        ? environment.variables
-        : [createVariableDraft()],
-  }))
-}
-
-export function loadEnvironments() {
-  const raw = localStorage.getItem(STORAGE_KEY)
-
-  if (!raw) {
-    return clone(DEFAULT_ENVIRONMENTS)
-  }
-
-  try {
-    const environments = normalizeEnvironments(JSON.parse(raw))
-    return clone(environments)
-  } catch {
-    return clone(DEFAULT_ENVIRONMENTS)
-  }
-}
-
-export function saveEnvironments(environments) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(environments))
-}
-
-export function createEnvironmentDraft(name) {
-  return {
-    id: generateId('env'),
-    name: name.trim(),
-    active: false,
-    variables: [
-    createVariableDraft(),
-],
-  }
-}
+/*
+=======================================================
+VARIABLE
+=======================================================
+*/
 
 export function createVariableDraft() {
   return {
@@ -69,166 +26,608 @@ export function createVariableDraft() {
   }
 }
 
-export function setActiveEnvironment(id) {
-  const environments = loadEnvironments()
 
-  if (!environments.some((environment) => environment.id === id)) return environments
+/*
+=======================================================
+ENVIRONMENT NORMALIZATION
+=======================================================
+*/
 
-  const updated = environments.map((environment) => ({
-    ...environment,
-    active: environment.id === id,
-  }))
+function normalizeEnvironments(environments) {
 
-  saveEnvironments(updated)
-  return updated
+  const savedEnvironments =
+    Array.isArray(environments)
+      ? environments
+      : []
+
+
+  const savedById =
+    new Map(
+      savedEnvironments.map(
+        (environment) => [
+          environment.id,
+          environment
+        ]
+      )
+    )
+
+
+  const merged =
+    DEFAULT_ENVIRONMENTS.map(
+      (environment) => (
+
+        savedById.has(environment.id)
+          ? savedById.get(environment.id)
+          : clone(environment)
+
+      )
+    )
+
+
+  const customEnvironments =
+    savedEnvironments.filter(
+      (environment) =>
+        !DEFAULT_ENVIRONMENTS.some(
+          (defaultEnvironment) =>
+            defaultEnvironment.id === environment.id
+        )
+    )
+
+
+  const environmentsWithDefaults = [
+    ...merged,
+    ...customEnvironments,
+  ]
+
+
+  const activeEnvironment =
+    environmentsWithDefaults.find(
+      (environment) =>
+        environment.active
+    )
+
+
+  return environmentsWithDefaults.map(
+    (environment, index) => ({
+
+      ...environment,
+
+      active:
+        activeEnvironment
+          ? environment.id === activeEnvironment.id
+          : index === 0,
+
+      variables:
+        Array.isArray(environment.variables) &&
+        environment.variables.length > 0
+          ? environment.variables
+          : [createVariableDraft()],
+
+    })
+  )
 }
+
+
+/*
+=======================================================
+LEGACY STORAGE FUNCTIONS
+=======================================================
+
+These are kept so we don't accidentally break any
+existing functionality that may still use them.
+
+Workspace-based code should NOT use these for the
+active workspace.
+=======================================================
+*/
+
+export function loadEnvironments() {
+
+  const raw =
+    localStorage.getItem(
+      STORAGE_KEY
+    )
+
+
+  if (!raw) {
+
+    return clone(
+      DEFAULT_ENVIRONMENTS
+    )
+
+  }
+
+
+  try {
+
+    const environments =
+      normalizeEnvironments(
+        JSON.parse(raw)
+      )
+
+
+    return clone(
+      environments
+    )
+
+  } catch {
+
+    return clone(
+      DEFAULT_ENVIRONMENTS
+    )
+
+  }
+
+}
+
+
+export function saveEnvironments(
+  environments
+) {
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(environments)
+  )
+
+}
+
+
+/*
+=======================================================
+CREATE ENVIRONMENT
+=======================================================
+*/
+
+export function createEnvironmentDraft(
+  name = ''
+) {
+
+  return {
+
+    id:
+      generateId('env'),
+
+    name:
+      String(name).trim(),
+
+    active:
+      false,
+
+    variables: [
+      createVariableDraft()
+    ],
+
+  }
+
+}
+
+
+/*
+=======================================================
+SET ACTIVE ENVIRONMENT
+=======================================================
+
+IMPORTANT:
+
+This function now works with the environments array
+provided by App.jsx.
+
+It DOES NOT load from localStorage.
+
+That is required for workspace isolation.
+=======================================================
+*/
+
+export function setActiveEnvironment(
+  environments,
+  environmentId
+) {
+
+  const safeEnvironments =
+    Array.isArray(environments)
+      ? environments
+      : []
+
+
+  if (
+    !safeEnvironments.some(
+      (environment) =>
+        environment.id === environmentId
+    )
+  ) {
+
+    return safeEnvironments
+
+  }
+
+
+  return safeEnvironments.map(
+    (environment) => ({
+
+      ...environment,
+
+      active:
+        environment.id === environmentId,
+
+    })
+  )
+
+}
+
+
+/*
+=======================================================
+GET ACTIVE ENVIRONMENT
+
+Legacy helper.
+
+Workspace code should preferably determine the
+active environment from its own environments array.
+=======================================================
+*/
 
 export function getActiveEnvironment() {
-  return loadEnvironments().find((environment) => environment.active) ?? null
+
+  return (
+    loadEnvironments().find(
+      (environment) =>
+        environment.active
+    )
+    ?? null
+  )
+
 }
 
-export function createEnvironment(name) {
-  const environments = loadEnvironments()
-  const newEnvironment = createEnvironmentDraft(name)
 
-  const updated = [...environments, newEnvironment]
+/*
+=======================================================
+CREATE ENVIRONMENT
 
-  saveEnvironments(updated)
+Legacy storage helper.
+
+Existing functionality is preserved.
+=======================================================
+*/
+
+export function createEnvironment(
+  name
+) {
+
+  const environments =
+    loadEnvironments()
+
+
+  const newEnvironment =
+    createEnvironmentDraft(name)
+
+
+  const updated = [
+    ...environments,
+    newEnvironment,
+  ]
+
+
+  saveEnvironments(
+    updated
+  )
+
 
   return newEnvironment
-}
-
-export function renameEnvironment(id, newName) {
-
-    const environments = loadEnvironments()
-
-    const updated = environments.map(environment =>
-
-        environment.id === id
-            ? {
-                ...environment,
-                name: newName.trim(),
-            }
-            : environment
-
-    )
-
-    saveEnvironments(updated)
-
-    return updated
 
 }
 
 
-export function deleteEnvironment(id) {
+/*
+=======================================================
+RENAME ENVIRONMENT
+=======================================================
 
-    const environments = loadEnvironments()
+NEW WORKSPACE-SAFE SIGNATURE:
 
-    const deletingIndex = environments.findIndex(
-        environment => environment.id === id
+renameEnvironment(
+    environments,
+    environmentId,
+    newName
+)
+=======================================================
+*/
+
+export function renameEnvironment(
+  environments,
+  environmentId,
+  newName
+) {
+
+  const safeEnvironments =
+    Array.isArray(environments)
+      ? environments
+      : []
+
+
+  return safeEnvironments.map(
+    (environment) => (
+
+      environment.id === environmentId
+
+        ? {
+            ...environment,
+
+            name:
+              String(newName).trim(),
+          }
+
+        : environment
+
+    )
+  )
+
+}
+
+
+/*
+=======================================================
+DELETE ENVIRONMENT
+=======================================================
+
+NEW WORKSPACE-SAFE SIGNATURE:
+
+deleteEnvironment(
+    environments,
+    environmentId
+)
+=======================================================
+*/
+
+export function deleteEnvironment(
+  environments,
+  environmentId
+) {
+
+  const safeEnvironments =
+    Array.isArray(environments)
+      ? environments
+      : []
+
+
+  /*
+  Do not allow the last environment
+  to be deleted.
+  */
+
+  if (
+    safeEnvironments.length <= 1
+  ) {
+
+    return safeEnvironments
+
+  }
+
+
+  const deletingIndex =
+    safeEnvironments.findIndex(
+      (environment) =>
+        environment.id === environmentId
     )
 
-    if (deletingIndex === -1)
-        return environments
 
-    if (environments.length === 1)
-        return environments
+  if (
+    deletingIndex === -1
+  ) {
 
-    let updated = environments.filter(
-        environment => environment.id !== id
+    return safeEnvironments
+
+  }
+
+
+  let updated =
+    safeEnvironments.filter(
+      (environment) =>
+        environment.id !== environmentId
     )
 
-    let nextIndex = deletingIndex - 1
 
-    if (nextIndex < 0)
-        nextIndex = 0
+  let nextIndex =
+    deletingIndex - 1
 
-    updated = updated.map((environment,index)=>({
+
+  if (nextIndex < 0) {
+    nextIndex = 0
+  }
+
+
+  updated =
+    updated.map(
+      (environment, index) => ({
 
         ...environment,
 
-        active:index===nextIndex
+        active:
+          index === nextIndex,
 
-    }))
+      })
+    )
 
-    saveEnvironments(updated)
 
-    return updated
+  return updated
 
 }
 
-function generateUniqueName(baseName, existingNames) {
 
-    // Remove ALL trailing " Copy", " Copy 1", " Copy 2"... parts
-    let cleanBase = baseName
+/*
+=======================================================
+GENERATE UNIQUE COPY NAME
+=======================================================
+*/
 
-    while (true) {
+function generateUniqueName(
+  baseName,
+  existingNames
+) {
 
-        const next = cleanBase.replace(/\sCopy(?:\s\d+)?$/, "")
+  let cleanBase =
+    String(baseName ?? '')
 
-        if (next === cleanBase)
-            break
 
-        cleanBase = next
+  /*
+  Remove ALL trailing:
 
-    }
+  Copy
+  Copy 1
+  Copy 2
+  Copy 3
+  etc.
+  */
 
-    const firstCopy = `${cleanBase} Copy`
+  while (true) {
 
-    if (!existingNames.includes(firstCopy))
-        return firstCopy
+    const next =
+      cleanBase.replace(
+        /\sCopy(?:\s\d+)?$/,
+        ''
+      )
 
-    let counter = 1
 
-    while (
-        existingNames.includes(`${cleanBase} Copy ${counter}`)
+    if (
+      next === cleanBase
     ) {
-        counter++
+
+      break
+
     }
 
-    return `${cleanBase} Copy ${counter}`
+
+    cleanBase = next
+
+  }
+
+
+  const firstCopy =
+    `${cleanBase} Copy`
+
+
+  if (
+    !existingNames.includes(
+      firstCopy
+    )
+  ) {
+
+    return firstCopy
+
+  }
+
+
+  let counter = 1
+
+
+  while (
+    existingNames.includes(
+      `${cleanBase} Copy ${counter}`
+    )
+  ) {
+
+    counter++
+
+  }
+
+
+  return `${cleanBase} Copy ${counter}`
 
 }
 
 
+/*
+=======================================================
+DUPLICATE ENVIRONMENT
+=======================================================
 
-export function duplicateEnvironment(id) {
-  const environments = loadEnvironments()
+NEW WORKSPACE-SAFE SIGNATURE:
 
-  const source = environments.find(
-    (environment) => environment.id === id,
-  )
+duplicateEnvironment(
+    environments,
+    environmentId
+)
+=======================================================
+*/
+
+export function duplicateEnvironment(
+  environments,
+  environmentId
+) {
+
+  const safeEnvironments =
+    Array.isArray(environments)
+      ? environments
+      : []
+
+
+  const source =
+    safeEnvironments.find(
+      (environment) =>
+        environment.id === environmentId
+    )
+
 
   if (!source) {
-    return environments
+
+    return safeEnvironments
+
   }
+
 
   const duplicated = {
+
     ...clone(source),
-    id: generateId('env'),
-    name: generateUniqueName(
-    source.name,
-    environments.map(environment => environment.name)
-),
-    active: false,
-    variables: source.variables.map((variable) => ({
-      ...clone(variable),
-      id: generateId('var'),
-    })),
+
+    id:
+      generateId('env'),
+
+    name:
+      generateUniqueName(
+        source.name,
+        safeEnvironments.map(
+          (environment) =>
+            environment.name
+        )
+      ),
+
+    active:
+      true,
+
+    variables:
+      Array.isArray(source.variables)
+        ? source.variables.map(
+            (variable) => ({
+
+              ...clone(variable),
+
+              id:
+                generateId('var'),
+
+            })
+          )
+        : [
+            createVariableDraft()
+          ],
+
   }
 
-const updated = environments.map(environment => ({
-    ...environment,
-    active: false,
-}))
 
-duplicated.active = true
+  return [
 
-updated.push(duplicated)
+    ...safeEnvironments.map(
+      (environment) => ({
 
-saveEnvironments(updated)
+        ...environment,
 
-return updated
+        active:
+          false,
 
+      })
+    ),
+
+    duplicated,
+
+  ]
 
 }

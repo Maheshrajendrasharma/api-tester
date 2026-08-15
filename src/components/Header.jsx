@@ -1,23 +1,53 @@
 import { useState, useEffect, useRef } from "react";
 
 function Header({
+
     environments,
+
     onEnvironmentChange,
+
     onImportEnvironment,
+
     onExportEnvironment,
+
     onDuplicateEnvironment,
+
     onDeleteEnvironment,
+
     onExportAllEnvironments,
 
+
     workspaceName = "Workspace",
+
     workspaces = [],
+
     selectedWorkspace,
+
     onWorkspaceChange,
 
+
+    onCreateWorkspace,
+
+    onRenameWorkspace,
+
+    onDeleteWorkspace,
+
+    onImportWorkspace,
+
+    onExportWorkspace,
+
+
     sidebarOpen,
+
     setSidebarOpen,
+
 }) {
-    const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
+
+const [showWorkspaceActions, setShowWorkspaceActions] =
+    useState(false);
+
+    const [showWorkspaceMenu, setShowWorkspaceMenu] =
+    useState(false);
 
     const menuRef = useRef(null);
 
@@ -28,6 +58,7 @@ function Header({
                 !menuRef.current.contains(event.target)
             ) {
                 setShowWorkspaceMenu(false);
+setShowWorkspaceActions(false);
             }
         }
 
@@ -175,14 +206,100 @@ function Header({
 
                 {/* WORKSPACE OPTIONS */}
 
-                <button
-                    type="button"
-                    className="workspace-menu-button"
-                    title="Workspace options"
-                    aria-label="Workspace options"
-                >
-                    ⋮
-                </button>
+<div className="workspace-actions-wrapper">
+
+<button
+    type="button"
+    className="workspace-menu-button"
+    title="Workspace options"
+    aria-label="Workspace options"
+
+    onClick={() =>
+        setShowWorkspaceActions(
+            previous => !previous
+        )
+    }
+>
+    ⋮
+</button>
+
+
+{
+showWorkspaceActions && (
+
+<div className="workspace-actions-menu">
+
+
+<button
+    type="button"
+    onClick={() =>
+    {
+        onCreateWorkspace?.();
+        setShowWorkspaceActions(false);
+    }}
+>
+    New Workspace
+</button>
+
+
+<button
+    type="button"
+    onClick={() =>
+    {
+        onRenameWorkspace?.();
+        setShowWorkspaceActions(false);
+    }}
+>
+    Rename Workspace
+</button>
+
+
+<button
+    type="button"
+    onClick={() =>
+    {
+        onDeleteWorkspace?.();
+        setShowWorkspaceActions(false);
+    }}
+>
+    Delete Workspace
+</button>
+
+
+<hr/>
+
+
+<button
+    type="button"
+    onClick={() =>
+    {
+        onImportWorkspace?.();
+        setShowWorkspaceActions(false);
+    }}
+>
+    Import Workspace
+</button>
+
+
+<button
+    type="button"
+    onClick={() =>
+    {
+        onExportWorkspace?.();
+        setShowWorkspaceActions(false);
+    }}
+>
+    Export Workspace
+</button>
+
+
+</div>
+
+)
+}
+
+
+</div>
 
             </div>
 

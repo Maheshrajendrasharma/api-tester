@@ -13,20 +13,36 @@ import { useRequest } from './hooks/useRequest'
 import Header from './components/Header'
 import SharedDialog from './components/SharedDialog'
 import {
-    loadEnvironments,
-    saveEnvironments,
     setActiveEnvironment,
     duplicateEnvironment,
     deleteEnvironment,
     renameEnvironment,
 } from './services/environmentService'
 
+
+
+import {
+    loadWorkspaces,
+    saveWorkspaces
+} from './services/workspaceService'
+
 import { exportEnvironment as exportEnvironmentData, importEnvironmentFromFile } from './services/importExportService'
 
+
+
+
 function App() {
+  const [sidebarOpen, setSidebarOpen] =useState(true)
+
   const [dialogState, setDialogState] = useState({ open: false, type: 'input', title: '', message: '', initialValue: '', options: [], onConfirm: null, onCancel: null })
 
-  const collectionState = useCollections({ onShowDialog: setDialogState })
+
+
+
+
+
+
+
   const historyState = useHistory({ onShowDialog: setDialogState })
   const { response, isSending, sendRequest } = useRequest(({ request, response: responseData, resolvedUrl }) => {
     historyState.addEntry({
@@ -46,36 +62,387 @@ function App() {
       responseBody: responseData.responseBody ?? '',
     })
   })
-  const [environments, setEnvironments] = useState(loadEnvironments)
-  
-  const activeEnvironment = environments.find((environment) => environment.active) ?? null
 
-  function handleEnvironmentChange(environmentId) {
-    setEnvironments(setActiveEnvironment(environmentId))
-  }
+ 
+const [workspaces,setWorkspaces] =
+useState(() => loadWorkspaces())
 
-  function handleEnvironmentsChange(updatedEnvironments) {
-    saveEnvironments(updatedEnvironments)
-    setEnvironments(updatedEnvironments)
-  }
 
-function handleDuplicateEnvironment() {
+const [activeWorkspaceId,setActiveWorkspaceId] =
+useState(
+    () => loadWorkspaces()[0]?.id
+)
 
-    if (!activeEnvironment) return
 
-    const updated = duplicateEnvironment(activeEnvironment.id)
+const activeWorkspace =
+    workspaces.find(
+        workspace =>
+        workspace.id === activeWorkspaceId
+    )
 
-    setEnvironments(updated)
+
+  function handleWorkspaceChange(workspace){
+
+    setActiveWorkspaceId(
+        workspace.id
+    )
 
 }
 
-function handleDeleteEnvironment() {
 
-    if (!activeEnvironment) return
 
-    const updated = deleteEnvironment(activeEnvironment.id)
+function handleCreateWorkspace(){
 
-    setEnvironments(updated)
+    const name =
+        window.prompt(
+            "Enter workspace name"
+        );
+
+
+    if(!name || !name.trim()){
+        return;
+    }
+
+
+    const newWorkspace = {
+
+        id: crypto.randomUUID(),
+
+        name:name.trim(),
+
+        collections:[],
+
+        environments:[]
+
+    };
+
+
+    const updated = [
+
+        ...workspaces,
+
+        newWorkspace
+
+    ];
+
+
+    setWorkspaces(updated);
+
+
+    setActiveWorkspaceId(
+        newWorkspace.id
+    );
+
+
+    saveWorkspaces(updated);
+
+}
+
+function handleRenameWorkspace(){
+
+    const current =
+        activeWorkspace;
+
+
+    if(!current){
+        return;
+    }
+
+
+    const newName =
+        window.prompt(
+            "Rename workspace",
+            current.name
+        );
+
+
+    if(!newName || !newName.trim()){
+        return;
+    }
+
+
+    const updated =
+        workspaces.map(workspace=>
+
+            workspace.id === current.id
+
+            ?
+
+            {
+                ...workspace,
+                name:newName.trim()
+            }
+
+            :
+
+            workspace
+
+        );
+
+
+    setWorkspaces(updated);
+
+
+    saveWorkspaces(updated);
+
+}
+
+
+
+
+function handleDeleteWorkspace(){
+
+    if(workspaces.length <= 1){
+
+        alert(
+            "At least one workspace is required"
+        );
+
+        return;
+
+    }
+
+
+    const confirmDelete =
+        window.confirm(
+            "Delete current workspace?"
+        );
+
+
+    if(!confirmDelete){
+        return;
+    }
+
+
+    const updated =
+        workspaces.filter(
+            workspace =>
+            workspace.id !== activeWorkspace.id
+        );
+
+
+    setWorkspaces(updated);
+
+
+    setActiveWorkspaceId(
+        updated[0].id
+    );
+
+
+    saveWorkspaces(updated);
+
+}
+
+
+
+function handleImportWorkspace(){
+
+    alert(
+        "Import workspace coming next"
+    );
+
+}
+
+
+function handleExportWorkspace(){
+
+    const data =
+        JSON.stringify(
+            activeWorkspace,
+            null,
+            2
+        );
+
+
+    const blob =
+        new Blob(
+            [data],
+            {
+                type:"application/json"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href=url;
+
+    a.download=
+        `${activeWorkspace.name}.json`;
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+
+
+
+
+
+
+
+    const environments =
+    activeWorkspace?.environments ?? []
+
+
+const collections =
+    activeWorkspace?.collections ?? []
+
+
+const collectionState =
+useCollections({
+
+    workspaceId:
+        activeWorkspace?.id,
+
+
+    workspaceCollections:
+        activeWorkspace?.collections || [],
+
+
+    onCollectionsChange:
+        handleWorkspaceCollectionsChange,
+
+
+    onShowDialog:
+        setDialogState
+
+})
+
+
+function handleWorkspaceCollectionsChange(
+    collections
+){
+
+    setWorkspaces(
+        previous =>
+        previous.map(
+            workspace =>
+
+            workspace.id === activeWorkspaceId
+
+            ?
+
+            {
+                ...workspace,
+                collections
+            }
+
+            :
+
+            workspace
+        )
+    )
+
+}
+
+
+
+  const activeEnvironment = environments.find((environment) => environment.active) ?? null
+
+  function handleEnvironmentChange(environmentId){
+
+const updated =
+    environments.map(env => ({
+        ...env,
+        active:
+            env.id === environmentId
+    }))
+
+
+ const next =
+ workspaces.map(ws=>{
+
+    if(ws.id!==activeWorkspaceId)
+        return ws
+
+
+    return {
+        ...ws,
+        environments:updated
+    }
+
+ })
+
+
+ setWorkspaces(next)
+
+ saveWorkspaces(next)
+
+}
+
+function handleEnvironmentsChange(updatedEnvironments) {
+
+
+    const updatedWorkspaces =
+        workspaces.map(workspace => {
+
+
+            if(workspace.id !== activeWorkspaceId){
+                return workspace
+            }
+
+
+            return {
+                ...workspace,
+
+                environments:
+                    updatedEnvironments
+            }
+
+
+        })
+
+
+    setWorkspaces(updatedWorkspaces)
+
+    saveWorkspaces(updatedWorkspaces)
+
+}
+
+function handleDuplicateEnvironment(){
+
+    if(!activeEnvironment) return
+
+
+const updated =
+    duplicateEnvironment(
+        environments,
+        activeEnvironment.id
+    )
+
+
+    handleEnvironmentsChange(updated)
+
+}
+
+function handleDeleteEnvironment(){
+
+
+    if(!activeEnvironment){
+        return
+    }
+
+
+const updated =
+    deleteEnvironment(
+        environments,
+        activeEnvironment.id
+    )
+
+
+    handleEnvironmentsChange(updated)
 
 }
 
@@ -99,12 +466,15 @@ function handleRenameEnvironment() {
                 open: false,
             }));
 
-            const updated = renameEnvironment(
-                activeEnvironment.id,
-                newName
-            );
+const updated =
+    renameEnvironment(
+        environments,
+        activeEnvironment.id,
+        newName
+    )
 
-            setEnvironments(updated);
+
+handleEnvironmentsChange(updated)
 
         },
 
@@ -291,18 +661,107 @@ function handleExportAllEnvironments() {
   return (
     <>
       <AppLayout header={
-  <Header
+<Header
+
+    /* =========================
+       ENVIRONMENT (KEEP FOR FUTURE)
+       ========================= */
+
     environments={environments}
-    onEnvironmentChange={handleEnvironmentChange}
-onRenameEnvironment={handleRenameEnvironment}
-    onImportEnvironment={handleImportEnvironment}
-    onExportEnvironment={handleExportEnvironment}
 
-    onDuplicateEnvironment={handleDuplicateEnvironment}
+    onEnvironmentChange={
+        handleEnvironmentChange
+    }
 
-    onDeleteEnvironment={handleDeleteEnvironment}
+    onRenameEnvironment={
+        handleRenameEnvironment
+    }
 
-    onExportAllEnvironments={handleExportAllEnvironments}
+    onImportEnvironment={
+        handleImportEnvironment
+    }
+
+    onExportEnvironment={
+        handleExportEnvironment
+    }
+
+    onDuplicateEnvironment={
+        handleDuplicateEnvironment
+    }
+
+    onDeleteEnvironment={
+        handleDeleteEnvironment
+    }
+
+    onExportAllEnvironments={
+        handleExportAllEnvironments
+    }
+
+
+
+    /* =========================
+       WORKSPACE
+       ========================= */
+
+    workspaces={
+        workspaces
+    }
+
+
+    selectedWorkspace={
+        activeWorkspace?.name
+    }
+
+
+    onWorkspaceChange={
+        handleWorkspaceChange
+    }
+
+
+
+    /* =========================
+       WORKSPACE ACTIONS
+       ========================= */
+
+    onCreateWorkspace={
+        handleCreateWorkspace
+    }
+
+
+    onRenameWorkspace={
+        handleRenameWorkspace
+    }
+
+
+    onDeleteWorkspace={
+        handleDeleteWorkspace
+    }
+
+
+    onImportWorkspace={
+        handleImportWorkspace
+    }
+
+
+    onExportWorkspace={
+        handleExportWorkspace
+    }
+
+
+
+    /* =========================
+       SIDEBAR
+       ========================= */
+
+    sidebarOpen={
+        sidebarOpen
+    }
+
+
+    setSidebarOpen={
+        setSidebarOpen
+    }
+
 />
 } sidebar={<Sidebar
   collections={collectionState.collections}
@@ -350,7 +809,7 @@ onRenameEnvironment={handleRenameEnvironment}
 />} environmentPanel={<EnvironmentPanel
     environments={environments}
     onEnvironmentChange={handleEnvironmentChange}
-    onEnvironmentsChange={setEnvironments}
+    onEnvironmentsChange={handleEnvironmentsChange}
     onImportEnvironment={handleImportEnvironment}
     onExportEnvironment={handleExportEnvironment}
     onRenameEnvironment={handleRenameEnvironment}
