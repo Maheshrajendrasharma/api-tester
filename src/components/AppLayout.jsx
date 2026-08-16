@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { cloneElement, useEffect, useRef, useState } from 'react'
 
 const defaultSidebarWidth = 280
 const minimumSidebarWidth = 220
@@ -92,11 +92,19 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
     setIsEnvironmentPanelCollapsed(false)
   }
 
+
+  function toggleEnvironmentPanel() {
+  setIsEnvironmentPanelCollapsed((collapsed) => !collapsed)
+}
+
   return (
     <main className="app-shell">
       {header}
       <div className="app-layout" ref={layoutRef} style={{ '--sidebar-width': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--sidebar-divider-width': isSidebarCollapsed ? '0px' : '6px', '--sidebar-handle-left': isSidebarCollapsed ? '0px' : `${sidebarWidth}px`, '--environment-panel-width': isEnvironmentPanelCollapsed ? '0px' : `${environmentPanelWidth}px`, '--environment-divider-width': isEnvironmentPanelCollapsed ? '0px' : '6px', '--panel-transition-duration': isResizing ? '0ms' : '225ms' }}>
-        {sidebar}
+{cloneElement(sidebar, {
+  onToggleEnvironmentPanel: toggleEnvironmentPanel,
+})}
+
 <div
   className="sidebar-divider"
   role="separator"

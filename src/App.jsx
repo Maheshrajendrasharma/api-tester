@@ -37,6 +37,12 @@ import { exportEnvironment as exportEnvironmentData, importEnvironmentFromFile }
 function App() {
   const [sidebarOpen, setSidebarOpen] =useState(true)
 
+  const [environmentPanelOpen, setEnvironmentPanelOpen] = useState(true)
+
+   const toggleEnvironmentPanel = () => {
+    setEnvironmentPanelOpen(prev => !prev)
+   }
+
   const [dialogState, setDialogState] = useState({ open: false, type: 'input', title: '', message: '', initialValue: '', options: [], onConfirm: null, onCancel: null })
 
 
@@ -949,7 +955,7 @@ function handleExportAllEnvironments() {
 } sidebar={<Sidebar
   collections={collectionState.collections}
   selectedRequestId={collectionState.selectedRequestId}
-
+onToggleEnvironmentPanel={toggleEnvironmentPanel}
   onCreateCollection={collectionState.createNewCollection}
   onCreateFolder={collectionState.createFolder}
   onImportCollection={collectionState.importCollection}
@@ -989,17 +995,24 @@ function handleExportAllEnvironments() {
   onDeleteHistoryEntry={historyState.deleteEntry}
   onToggleHistoryFavorite={historyState.toggleFavorite}
   onClearHistory={handleClearHistory}
-/>} environmentPanel={<EnvironmentPanel
-    environments={environments}
-    onEnvironmentChange={handleEnvironmentChange}
-    onEnvironmentsChange={handleEnvironmentsChange}
-    onImportEnvironment={handleImportEnvironment}
-    onExportEnvironment={handleExportEnvironment}
-    onRenameEnvironment={handleRenameEnvironment}
-    onDuplicateEnvironment={handleDuplicateEnvironment}
-    onExportAllEnvironments={handleExportAllEnvironments}
-    onDeleteEnvironment={handleDeleteEnvironment}
-/>}>
+/>} 
+
+environmentPanel={
+  environmentPanelOpen ? (
+    <EnvironmentPanel
+      environments={environments}
+      onEnvironmentChange={handleEnvironmentChange}
+      onEnvironmentsChange={handleEnvironmentsChange}
+      onImportEnvironment={handleImportEnvironment}
+      onExportEnvironment={handleExportEnvironment}
+      onRenameEnvironment={handleRenameEnvironment}
+      onDuplicateEnvironment={handleDuplicateEnvironment}
+      onExportAllEnvironments={handleExportAllEnvironments}
+      onDeleteEnvironment={handleDeleteEnvironment}
+    />
+  ) : null
+}
+>
         <Workspace environment={activeEnvironment} isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} />
       </AppLayout>
       <SharedDialog open={dialogState.open} type={dialogState.type} title={dialogState.title} message={dialogState.message} initialValue={dialogState.initialValue} options={dialogState.options} confirmLabel={dialogState.confirmLabel} cancelLabel={dialogState.cancelLabel} onConfirm={dialogState.onConfirm} onCancel={dialogState.onCancel} />

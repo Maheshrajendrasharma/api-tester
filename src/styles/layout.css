@@ -114,12 +114,78 @@
     color:#6ee7b7;
     border-bottom:2px solid #6ee7b7;
 }
+
+/* =========================================================
+   SIDEBAR / ENVIRONMENT COLLAPSE HANDLES
+   ========================================================= */
+
+.sidebar-collapse-handle,
+.environment-collapse-handle {
+    position: absolute;
+
+    display: grid;
+    place-items: center;
+
+    width: 22px;
+    height: 78px;
+
+    padding: 0;
+    margin: 0;
+
+    box-sizing: border-box;
+
+    color: #c7d0dc;
+    background: #202933;
+
+    border: 1px solid #3d4b5a;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 20px;
+    line-height: 1;
+
+    transform: translateY(-50%);
+
+    /* IMPORTANT:
+       Keep handles above request/body content,
+       but below global popups/dropdowns. */
+    z-index: 100;
+}
+
+/* Sidebar handle */
+.sidebar-collapse-handle {
+    left: var(--sidebar-handle-left);
+
+    border-left: 0;
+    border-radius: 0 7px 7px 0;
+}
+
+/* Environment handle */
+.environment-collapse-handle {
+    right: var(--environment-panel-width);
+
+    border-right: 0;
+    border-radius: 7px 0 0 7px;
+}
+
+/* Hover */
+.sidebar-collapse-handle:hover,
+.sidebar-collapse-handle:focus-visible,
+.environment-collapse-handle:hover,
+.environment-collapse-handle:focus-visible {
+    color: #6ee7b7;
+    background: #293842;
+
+    outline: none;
+}
+
+
 .environment-panel-expand-handle { position: absolute; z-index: 5; top: 50%; right: 0; display: grid; width: 24px; height: 82px; place-items: center; padding: 0; color: #c7d0dc; background: #202933; border: 1px solid #3d4b5a; border-right: 0; border-radius: 7px 0 0 7px; cursor: pointer; font: inherit; font-size: 22px; line-height: 1; transform: translateY(-50%); }
 .environment-panel-expand-handle:hover, .environment-panel-expand-handle:focus-visible { color: #6ee7b7; background: #293842; outline: none; }
-.environment-collapse-handle, .sidebar-collapse-handle { position: absolute; z-index: 5; top: 50%; display: grid; width: 22px; height: 78px; place-items: center; padding: 0; color: #c7d0dc; background: #202933; border: 1px solid #3d4b5a; cursor: pointer; font: inherit; font-size: 20px; line-height: 1; transform: translateY(-50%); }
-.sidebar-collapse-handle { left: var(--sidebar-handle-left); border-left: 0; border-radius: 0 7px 7px 0; }
 .environment-collapse-handle { right: var(--environment-panel-width); border-right: 0; border-radius: 7px 0 0 7px; }
-.environment-collapse-handle:hover, .environment-collapse-handle:focus-visible, .sidebar-collapse-handle:hover, .sidebar-collapse-handle:focus-visible { color: #6ee7b7; background: #293842; outline: none; }
+
+
 
 .environment-panel-body{
     display:flex;
@@ -1068,7 +1134,6 @@ font-weight: 800;
 .tab-button.active { color: #eaf0f6; }
 .tab-button.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: #6ee7b7; content: ''; }
 
-.body-editor-area { padding-top: 14px; }
 .body-label { display: block; margin-bottom: 9px; color: #9ba8b7; font-size: 12px; }
 
 .json-editor,
@@ -2090,13 +2155,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    REQUEST BODY TOOLBAR
    ========================================================= */
 
-.body-editor-area {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    flex: 1;
-    padding-top: 10px;
-}
 
 .body-toolbar {
     display: flex;
@@ -2170,11 +2228,26 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 .body-editor-area {
+    position: relative;
+
     display: flex;
     flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
     min-height: 0;
-    flex: 1;
+
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+
     overflow: hidden;
+
+    padding-top: 10px;
+
+    z-index: 1;
 }
 
 .json-editor {
@@ -5442,4 +5515,149 @@ border:1px solid #34404d;
 
 color:white;
 
+}
+
+
+
+
+.environment-panel-expand-handle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.sidebar-collapse-handle {
+    position: absolute;
+    top: 50%;
+    left: var(--sidebar-handle-left);
+    transform: translateY(-50%);
+}
+
+
+.environment-collapse-handle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+/* =========================================================
+   SIDEBAR MAIN LAYOUT
+   ========================================================= */
+
+.sidebar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   LEFT NAVIGATION RAIL
+   ========================================================= */
+
+.sidebar-navigation {
+    width: 72px;
+    min-width: 72px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 18px;
+    gap: 8px;
+
+    border-right: 1px solid #2d3742;
+
+    background: #151b21;
+}
+
+
+/* =========================================================
+   NAVIGATION BUTTON
+   ========================================================= */
+
+.sidebar-navigation-item {
+    width: 62px;
+    min-height: 62px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 7px 4px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+    color: #9aa6b2;
+
+    cursor: pointer;
+
+    font-family: inherit;
+}
+
+
+/* ICON */
+
+.sidebar-navigation-item svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+
+/* LABEL */
+
+.sidebar-navigation-label {
+    font-size: 11px;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+
+/* HOVER */
+
+.sidebar-navigation-item:hover {
+    background: #202932;
+    color: #dce4eb;
+}
+
+
+/* ACTIVE */
+
+.sidebar-navigation-item.active {
+    background: #26313b;
+    color: #69e3bb;
+}
+
+
+/* ACTIVE ICON */
+
+.sidebar-navigation-item.active svg {
+    color: #69e3bb;
+}
+
+
+/* =========================================================
+   SIDEBAR CONTENT
+   ========================================================= */
+
+.sidebar-content {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
 }

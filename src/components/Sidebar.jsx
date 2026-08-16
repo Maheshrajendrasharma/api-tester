@@ -104,6 +104,76 @@ function HistoryIcon() {
 
 
 
+function CollectionsIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="21"
+      height="21"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+
+      <path
+        d="M8 8h8M8 12h8M8 16h5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+
+function EnvironmentIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="21"
+      height="21"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+
+      <circle
+        cx="9"
+        cy="9"
+        r="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+
+      <path
+        d="M13 9h4M8 13h8M8 16h5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+
+
+
   function TreeGuide({ children }) {
     return (
       <div className="tree-node-children">
@@ -568,10 +638,166 @@ collectionId={collectionId}
 
     // src/components/Sidebar.jsx// ... (other imports)
 
-function Sidebar({ 
+function EnvironmentView({
+  environments = [],
+  activeEnvironmentId,
+  onSelectEnvironment,
+}) {
+  return (
+    <div className="sidebar-environments">
+
+      <div className="sidebar-environment-header">
+        ENVIRONMENTS
+      </div>
+
+      <div className="sidebar-environment-list">
+
+        {environments.length === 0 ? (
+          <div className="sidebar-environment-empty">
+            No environments
+          </div>
+        ) : (
+          environments.map((environment) => (
+            <button
+              key={environment.id}
+              type="button"
+              className={`sidebar-environment-row ${
+                environment.id === activeEnvironmentId
+                  ? 'active'
+                  : ''
+              }`}
+              onClick={() =>
+                onSelectEnvironment?.(environment.id)
+              }
+            >
+
+              <EnvironmentIcon />
+
+              <span>
+                {environment.name || 'Unnamed Environment'}
+              </span>
+
+              {environment.id === activeEnvironmentId && (
+                <span className="sidebar-environment-check">
+                  ✓
+                </span>
+              )}
+
+            </button>
+          ))
+        )}
+
+      </div>
+
+    </div>
+  )
+}
+
+
+function CollectionsNavIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M5 5h14v3H5z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M5 10h14v3H5z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M5 15h14v3H5z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
+
+function EnvironmentNavIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+
+      <path
+        d="M12 4v16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M4 12h16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+
+function HistoryNavIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 12a8 8 0 1 0 2.3-5.7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M4 5v5h5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M12 8v4l3 2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+
+function Sidebar({
   collections,
   selectedRequestId,
   onCreateCollection,
+  onToggleEnvironmentPanel,
   onCreateFolder,
   onImportCollection,
   onRenameFolder,
@@ -590,6 +816,7 @@ function Sidebar({
   onDuplicateRequest,
   onDeleteRequest,
   onMoveNode,
+
   historyEntries,
   favorites,
   historySearch,
@@ -1280,162 +1507,278 @@ onCreateFolder={(parentId) =>
         />
       )
     }
-
 return (
   <div className="sidebar">
 
     {/* =========================================
-        COLLECTION HEADER
+        LEFT SIDEBAR NAVIGATION
         ========================================= */}
+<div className="sidebar-navigation">
 
-    <div className="sidebar-collection-header">
+  {/* COLLECTIONS */}
 
-{!collectionSearchOpen ? (
   <button
     type="button"
-    className="sidebar-collection-search-trigger"
-    title="Search requests"
-    aria-label="Search requests"
-    onClick={() => {
+    className={`sidebar-navigation-item ${
+      sidebarView === 'collections'
+        ? 'active'
+        : ''
+    }`}
+    onClick={() =>
       setSidebarView('collections')
-      setCollectionSearchOpen(true)
-    }}
+    }
+    title="Collections"
+    aria-label="Collections"
   >
-    <span className="sidebar-search-icon">
-      🔍
-    </span>
+    <CollectionsNavIcon />
 
-    <span className="sidebar-collection-title">
-      COLLECTIONS
+    <span className="sidebar-navigation-label">
+      Collections
     </span>
   </button>
-) : (
-  <div className="sidebar-search-container">
 
-    <span className="sidebar-search-icon">
-      🔍
+
+  {/* ENVIRONMENT */}
+
+  <button
+    type="button"
+    className="sidebar-navigation-item"
+    onClick={() =>
+      onToggleEnvironmentPanel?.()
+    }
+    title="Toggle Environment Panel"
+    aria-label="Toggle Environment Panel"
+  >
+    <EnvironmentNavIcon />
+
+    <span className="sidebar-navigation-label">
+      Environment
     </span>
+  </button>
 
-    <input
-      ref={collectionSearchInputRef}
-      type="text"
-      className="sidebar-search-input"
-      value={collectionSearch}
-      onChange={(event) =>
-        setCollectionSearch(event.target.value)
-      }
-      placeholder="Search requests..."
-      aria-label="Search requests"
-    />
 
-    <button
-      type="button"
-      className="sidebar-search-close"
-      title="Close search"
-      aria-label="Close search"
-      onClick={() => {
-        setCollectionSearch('')
-        setCollectionSearchOpen(false)
-      }}
-    >
-      ×
-    </button>
+  {/* HISTORY */}
 
-  </div>
-)}
+  <button
+    type="button"
+    className={`sidebar-navigation-item ${
+      sidebarView === 'history'
+        ? 'active'
+        : ''
+    }`}
+    onClick={() =>
+      setSidebarView('history')
+    }
+    title="History"
+    aria-label="History"
+  >
+    <HistoryNavIcon />
+
+    <span className="sidebar-navigation-label">
+      History
+    </span>
+  </button>
+
+</div>
+
+    {/* =========================================
+        RIGHT SIDE SIDEBAR CONTENT
+        ========================================= */}
+
+    <div className="sidebar-content">
+
+
+      {/* =========================================
+          COLLECTION HEADER
+          ========================================= */}
+
+      {sidebarView === 'collections' && (
+
+        <div className="sidebar-collection-header">
+
+          {!collectionSearchOpen ? (
+
+            <button
+              type="button"
+              className="sidebar-collection-search-trigger"
+              title="Search requests"
+              aria-label="Search requests"
+              onClick={() => {
+                setSidebarView('collections')
+                setCollectionSearchOpen(true)
+              }}
+            >
+
+              <span className="sidebar-search-icon">
+                🔍
+              </span>
+
+              <span className="sidebar-collection-title">
+                COLLECTIONS
+              </span>
+
+            </button>
+
+          ) : (
+
+            <div className="sidebar-search-container">
+
+              <span className="sidebar-search-icon">
+                🔍
+              </span>
+
+              <input
+                ref={collectionSearchInputRef}
+                type="text"
+                className="sidebar-search-input"
+                value={collectionSearch}
+                onChange={(event) =>
+                  setCollectionSearch(
+                    event.target.value
+                  )
+                }
+                placeholder="Search requests..."
+                aria-label="Search requests"
+              />
+
+              <button
+                type="button"
+                className="sidebar-search-close"
+                title="Close search"
+                aria-label="Close search"
+                onClick={() => {
+                  setCollectionSearch('')
+                  setCollectionSearchOpen(false)
+                }}
+              >
+                ×
+              </button>
+
+            </div>
+
+          )}
+
+
+          {/* COLLECTION ACTIONS */}
+
+          {!collectionSearchOpen && (
+
+            <ActionMenu
+              label="Collection actions"
+              actions={[
+                {
+                  label: 'Import Collection',
+                  onClick: () =>
+                    onImportCollection?.(),
+                },
+              ]}
+            />
+
+          )}
+
+        </div>
+
+      )}
+
+
+      {/* =========================================
+          COLLECTION TREE
+          ========================================= */}
+
+      {sidebarView === 'collections' && (
+
+        <div className="collections-tree">
+
+          {getCollectionsForDisplay().length > 0 ? (
+
+            getCollectionsForDisplay().map(
+              renderCollection
+            )
+
+          ) : collectionSearch.trim() ? (
+
+            <div className="sidebar-search-empty">
+              No matching requests
+            </div>
+
+          ) : null}
+
+        </div>
+
+      )}
+
+
+      {/* =========================================
+          ENVIRONMENTS
+          ========================================= */}
+
+      {sidebarView === 'environments' && (
+
+        <EnvironmentView
+          environments={environments}
+          activeEnvironmentId={
+            activeEnvironmentId
+          }
+          onSelectEnvironment={
+            onSelectEnvironment
+          }
+        />
+
+      )}
+
+
+      {/* =========================================
+          HISTORY
+          ========================================= */}
+
+      {sidebarView === 'history' && (
+
+        <HistoryView
+          historyEntries={historyEntries}
+          historySearch={historySearch}
+          activeHistoryFilter={
+            activeHistoryFilter
+          }
+
+          onHistorySearchChange={
+            onHistorySearchChange
+          }
+
+          onHistoryFilterChange={
+            onHistoryFilterChange
+          }
+
+          onRestoreHistoryEntry={
+            onRestoreHistoryEntry
+          }
+
+          onRenameHistoryEntry={
+            onRenameHistoryEntry
+          }
+
+          onDuplicateHistoryEntry={
+            onDuplicateHistoryEntry
+          }
+
+          onDeleteHistoryEntry={
+            onDeleteHistoryEntry
+          }
+
+          onToggleHistoryFavorite={
+            onToggleHistoryFavorite
+          }
+
+          onClearHistory={
+            onClearHistory
+          }
+        />
+
+      )}
 
     </div>
 
-
-    <div className="collection-tabs">
-          <button
-            className="collection-tab active"
-            type="button"
-            onMouseEnter={() =>
-              setSidebarView('collections')
-            }
-            onClick={onCreateCollection}
-          >
-  <NewIcon />
-  <span className="tab-tooltip">
-  </span>
-</button>
-
-          <button
-            className="collection-tab"
-            type="button"
-            onMouseEnter={() =>
-              setSidebarView('collections')
-            }
-            onClick={onImportCollection}
-          >
-  <ImportIcon />
-  <span className="tab-tooltip">
-  </span>
-</button>
-
-
-
-          <button
-            className="collection-tab"
-            type="button"
-            onClick={() =>
-              setSidebarView('history')
-            }
-          >
-  <HistoryIcon />
-  <span className="tab-tooltip">
-  </span>
-</button>
-        </div>
-
-        {sidebarView === 'collections' && (
-  <div className="collections-tree">
-
-    {getCollectionsForDisplay().length > 0 ? (
-      getCollectionsForDisplay().map(
-        renderCollection
-      )
-    ) : collectionSearch.trim() ? (
-      <div className="sidebar-search-empty">
-        No matching requests
-      </div>
-    ) : null}
-
   </div>
-)}
+)
+}
 
-        {sidebarView === 'history' && (
-          <HistoryView
-            historyEntries={historyEntries}
-            historySearch={historySearch}
-            activeHistoryFilter={activeHistoryFilter}
-            onHistorySearchChange={
-              onHistorySearchChange
-            }
-            onHistoryFilterChange={
-              onHistoryFilterChange
-            }
-            onRestoreHistoryEntry={
-              onRestoreHistoryEntry
-            }
-            onRenameHistoryEntry={
-              onRenameHistoryEntry
-            }
-            onDuplicateHistoryEntry={
-              onDuplicateHistoryEntry
-            }
-            onDeleteHistoryEntry={
-              onDeleteHistoryEntry
-            }
-            onToggleHistoryFavorite={
-              onToggleHistoryFavorite
-            }
-            onClearHistory={onClearHistory}
-          />
-        )}
-      </div>
-    )
-  }
-
-  export default Sidebar
+export default Sidebar
