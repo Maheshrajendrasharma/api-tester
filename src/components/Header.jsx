@@ -51,6 +51,21 @@ const [showWorkspaceActions, setShowWorkspaceActions] =
 
     const menuRef = useRef(null);
 
+
+    console.log({
+
+    onCreateWorkspace,
+
+    onRenameWorkspace,
+
+    onDeleteWorkspace,
+
+    onImportWorkspace,
+
+    onExportWorkspace
+
+});
+
     useEffect(() => {
         function handleClickOutside(event) {
             if (
@@ -127,11 +142,15 @@ setShowWorkspaceActions(false);
                     <button
                         type="button"
                         className="workspace-selector-button"
-                        onClick={() =>
-                            setShowWorkspaceMenu(
-                                (previous) => !previous
-                            )
-                        }
+onClick={() => {
+
+    console.log("workspace clicked")
+
+    setShowWorkspaceMenu(
+        previous => !previous
+    )
+
+}}
                         title="Select workspace"
                     >
 
@@ -214,11 +233,17 @@ setShowWorkspaceActions(false);
     title="Workspace options"
     aria-label="Workspace options"
 
-    onClick={() =>
-        setShowWorkspaceActions(
-            previous => !previous
-        )
-    }
+onClick={() => {
+
+    console.log(
+        "three dot clicked"
+    )
+
+    setShowWorkspaceActions(
+        previous => !previous
+    )
+
+}}
 >
     ⋮
 </button>
@@ -227,43 +252,86 @@ setShowWorkspaceActions(false);
 {
 showWorkspaceActions && (
 
-<div className="workspace-actions-menu">
+<div
+    className="workspace-actions-menu"
+    onMouseDown={(e)=>{
+        e.stopPropagation()
+    }}
+>
 
 
 <button
     type="button"
-    onClick={() =>
-    {
-        onCreateWorkspace?.();
-        setShowWorkspaceActions(false);
+    onMouseDown={(e)=>{
+        e.stopPropagation()
+    }}
+    onClick={(e)=>{
+
+        e.stopPropagation()
+
+        console.log(
+            "NEW WORKSPACE CLICKED"
+        )
+
+        if(onCreateWorkspace){
+            onCreateWorkspace()
+        }
+
+        setShowWorkspaceActions(false)
+
     }}
 >
     New Workspace
 </button>
 
 
+
 <button
     type="button"
-    onClick={() =>
-    {
-        onRenameWorkspace?.();
-        setShowWorkspaceActions(false);
+    onMouseDown={(e)=>{
+        e.stopPropagation()
+    }}
+    onClick={(e)=>{
+
+        e.stopPropagation()
+
+        console.log(
+            "RENAME WORKSPACE CLICKED"
+        )
+
+        onRenameWorkspace?.()
+
+        setShowWorkspaceActions(false)
+
     }}
 >
     Rename Workspace
 </button>
 
 
+
 <button
     type="button"
-    onClick={() =>
-    {
-        onDeleteWorkspace?.();
-        setShowWorkspaceActions(false);
+    onMouseDown={(e)=>{
+        e.stopPropagation()
+    }}
+    onClick={(e)=>{
+
+        e.stopPropagation()
+
+        console.log(
+            "DELETE WORKSPACE CLICKED"
+        )
+
+        onDeleteWorkspace?.()
+
+        setShowWorkspaceActions(false)
+
     }}
 >
     Delete Workspace
 </button>
+
 
 
 <hr/>
@@ -271,22 +339,39 @@ showWorkspaceActions && (
 
 <button
     type="button"
-    onClick={() =>
-    {
-        onImportWorkspace?.();
-        setShowWorkspaceActions(false);
+    onClick={(e)=>{
+
+        e.stopPropagation()
+
+        console.log(
+            "IMPORT WORKSPACE CLICKED"
+        )
+
+        onImportWorkspace?.()
+
+        setShowWorkspaceActions(false)
+
     }}
 >
     Import Workspace
 </button>
 
 
+
 <button
     type="button"
-    onClick={() =>
-    {
-        onExportWorkspace?.();
-        setShowWorkspaceActions(false);
+    onClick={(e)=>{
+
+        e.stopPropagation()
+
+        console.log(
+            "EXPORT WORKSPACE CLICKED"
+        )
+
+        onExportWorkspace?.()
+
+        setShowWorkspaceActions(false)
+
     }}
 >
     Export Workspace

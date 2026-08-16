@@ -1,6 +1,9 @@
 const STORAGE_KEY = "api_tester_workspaces"
 
 
+const ACTIVE_WORKSPACE_KEY =
+    "api_tester_active_workspace"
+
 const OLD_COLLECTION_KEY =
     "apiTester.collections"
 
@@ -109,35 +112,28 @@ function migrateOldData(){
 function normalizeWorkspace(workspace){
 
     return {
+        id: workspace.id ?? crypto.randomUUID(),
 
-        id:
-            workspace.id ??
-            crypto.randomUUID(),
-
-        name:
-            workspace.name ??
-            "Unnamed Workspace",
-
+        name: workspace.name ?? "Unnamed Workspace",
 
         collections:
             Array.isArray(workspace.collections)
-            ?
-            workspace.collections
-            :
-            [],
-
+                ? workspace.collections
+                : [],
 
         environments:
             Array.isArray(workspace.environments)
-            ?
-            workspace.environments
-            :
-            []
+                ? workspace.environments
+                : [],
+                        selectedRequestId:
+            workspace.selectedRequestId ??
+            null,
+
+
+
 
     }
-
 }
-
 
 
 export function loadWorkspaces(){
@@ -239,4 +235,32 @@ export function createWorkspace(
 
     }
 
+}
+
+
+
+export function saveActiveWorkspaceId(
+    workspaceId
+){
+
+    if(!workspaceId){
+        localStorage.removeItem(
+            ACTIVE_WORKSPACE_KEY
+        )
+
+        return
+    }
+
+    localStorage.setItem(
+        ACTIVE_WORKSPACE_KEY,
+        workspaceId
+    )
+}
+
+
+export function loadActiveWorkspaceId(){
+
+    return localStorage.getItem(
+        ACTIVE_WORKSPACE_KEY
+    )
 }

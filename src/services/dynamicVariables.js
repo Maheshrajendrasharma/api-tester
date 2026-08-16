@@ -59,6 +59,29 @@ function generateRandomLastName() {
 
 }
 
+function generateRandomCountryCode() {
+
+    const countryCodes = [
+        "IN",
+        "US",
+        "GB",
+        "CA",
+        "AU",
+        "DE",
+        "FR",
+        "SG",
+        "AE",
+        "JP"
+    ]
+
+    return countryCodes[
+        Math.floor(
+            Math.random() * countryCodes.length
+        )
+    ]
+
+}
+
 
 export function resolveDynamicVariable(key) {
 
@@ -69,6 +92,9 @@ export function resolveDynamicVariable(key) {
         case "guid":
             return generateGuid()
 
+        case "randomUUID":
+            return generateGuid()
+        
 
         case "timestamp":
             return generateTimestamp()
@@ -84,6 +110,10 @@ export function resolveDynamicVariable(key) {
 
         case "randomLastName":
             return generateRandomLastName()
+
+
+        case "randomCountryCode":
+            return generateRandomCountryCode()
 
 
         default:

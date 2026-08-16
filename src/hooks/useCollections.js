@@ -156,22 +156,19 @@ function convertCollectionToTree(collection) {
   If the importer already returns children[],
   preserve it exactly.
 */
-function normalizeImportedCollection(collection) {
-  if (!collection) {
-    return collection
-  }
+function normalizeImportedCollection(
+    collection
+) {
 
-  if (Array.isArray(collection.children)) {
-    return {
-      ...collection,
-      type: 'collection',
-      expanded: true,
+    if (!collection) {
+        return collection
     }
-  }
 
-  return convertCollectionToTree(collection)
+
+    return convertCollectionToTree(
+        collection
+    )
 }
-
 
 /*
   Get every request recursively.
@@ -333,10 +330,21 @@ export function useCollections({
     onShowDialog,
     workspaceId,
     workspaceCollections,
+    initialSelectedRequestId,
+    onSelectedRequestChange,
     onCollectionsChange
 } = {}) {
 
-const collections = workspaceCollections || []
+
+
+const collections = Array.isArray(
+    workspaceCollections
+)
+    ? workspaceCollections.map(
+        convertCollectionToTree
+    )
+    : []
+
 
 function updateCollections(updater){
 
@@ -350,112 +358,153 @@ function updateCollections(updater){
     )
 }
 
-  const [selectedRequestId, setSelectedRequestId] =
-    useState(null)
-
-  const [collectionsReady, setCollectionsReady] =
-    useState(false)
-
-
-  /* =======================================================
-     LOAD
-     ======================================================= */
-
-  useEffect(() => {
-    let isMounted = true
-
-    async function restoreCollections() {
-
-    try {
-
-        const initialCollections =
-            workspaceCollections?.length
-                ? workspaceCollections
-                : []
+const [selectedRequestId, setSelectedRequestId] =
+    useState(
+        initialSelectedRequestId ?? null
+    )
 
 
-        if (isMounted) {
-
-
-            updateCollections(
-                initialCollections
-            )
-
-
-            const firstRequest =
-                initialCollections.length
-                    ? findFirstRequest(
-                        initialCollections[0]
-                    )
-                    : null
-
-
-
-            setSelectedRequestId(
-                firstRequest?.id ?? null
-            )
-
-
-        }
-
-
-    } catch {
-
-        if (isMounted) {
-
-            updateCollections([])
-
-            setSelectedRequestId(null)
-
-        }
-
-    }
-    finally {
-
-        if (isMounted) {
-
-            setCollectionsReady(true)
-
-        }
-
-    }
-
-}
-
-    restoreCollections()
-
-    return () => {
-      isMounted = false
-    }
-}, [
-    workspaceId,
-    workspaceCollections
-])
 
 
 /*
 =======================================================
- SAVE
+WORKSPACE CHANGE / INITIAL SELECTION
 =======================================================
 */
 
 useEffect(() => {
 
-    if (!collectionsReady) {
+    const currentCollections =
+        Array.isArray(workspaceCollections)
+            ? workspaceCollections
+            : []
+
+    console.log('================================')
+    console.log('[COLLECTIONS] RESTORE SELECTION')
+    console.log('[COLLECTIONS] workspaceId:', workspaceId)
+    console.log(
+        '[COLLECTIONS] initialSelectedRequestId:',
+        initialSelectedRequestId
+    )
+    console.log(
+        '[COLLECTIONS] collections count:',
+        currentCollections.length
+    )
+    console.log('================================')
+
+
+    // =====================================================
+    // CASE 1:
+    // We already have a saved request ID.
+    //
+    // NEVER replace it with the first request.
+    // =====================================================
+
+    if (initialSelectedRequestId) {
+
+        console.log(
+            '[COLLECTIONS] Saved request ID exists:',
+            initialSelectedRequestId
+        )
+
+
+        const savedRequest =
+            findRequestInCollections(
+                currentCollections,
+                initialSelectedRequestId
+            )
+
+
+        if (savedRequest) {
+
+            console.log(
+                '[COLLECTIONS] SAVED REQUEST FOUND:',
+                savedRequest.id,
+                savedRequest.name
+            )
+
+        } else {
+
+            console.log(
+                '[COLLECTIONS] Saved request not found yet.'
+            )
+
+            console.log(
+                '[COLLECTIONS] Keeping saved request ID:',
+                initialSelectedRequestId
+            )
+        }
+
+
+        // IMPORTANT:
+        // Keep the saved ID.
+        //
+        // Do NOT call onSelectedRequestChange here.
+        // Otherwise the parent can overwrite it.
+
+        setSelectedRequestId(
+            initialSelectedRequestId
+        )
+
         return
     }
 
 
-    onCollectionsChange?.(
-        collections
+    // =====================================================
+    // CASE 2:
+    // There is NO saved request.
+    //
+    // Only now choose the first request.
+    // =====================================================
+
+    if (currentCollections.length === 0) {
+
+        console.log(
+            '[COLLECTIONS] No collections available yet.'
+        )
+
+        return
+    }
+
+
+    const firstRequest =
+        findFirstRequest(
+            currentCollections[0]
+        )
+
+
+    const fallbackRequestId =
+        firstRequest?.id ?? null
+
+
+    console.log(
+        '[COLLECTIONS] NO SAVED REQUEST.'
+    )
+
+    console.log(
+        '[COLLECTIONS] USING FIRST REQUEST:',
+        fallbackRequestId
     )
 
 
-}, [
-    collections,
-    collectionsReady
-])
+    setSelectedRequestId(
+        fallbackRequestId
+    )
 
+
+    if (fallbackRequestId) {
+
+        onSelectedRequestChange?.(
+            fallbackRequestId
+        )
+    }
+
+}, [
+    workspaceId,
+    initialSelectedRequestId,
+    workspaceCollections
+])
+/*
 
   /* =======================================================
      SELECTED REQUEST
@@ -912,7 +961,13 @@ function createNewRequest(parentId) {
     })
   )
 
-  setSelectedRequestId(request.id)
+  setSelectedRequestId(
+    request.id
+)
+
+onSelectedRequestChange?.(
+    request.id
+)
 
   return request.id
 }
@@ -922,42 +977,68 @@ function createNewRequest(parentId) {
      SELECT REQUEST
      ======================================================= */
 
-  function selectRequest(
+function selectRequest(
     _collectionId,
     requestId
-  ) {
+) {
+
     setSelectedRequestId(
-      requestId
+        requestId
     )
-  }
+
+    onSelectedRequestChange?.(
+        requestId
+    )
+}
 
 
   /* =======================================================
      TOGGLE COLLECTION / FOLDER
      ======================================================= */
 
-  function toggleCollection(
+function toggleCollection(
     nodeId
-  ) {
-    updateCollections(
-      (currentCollections) =>
-        currentCollections.map(
-          (collection) =>
-            updateTreeNode(
-              collection,
-              nodeId,
-              {
-                expanded:
-                  !findNode(
-                    collection,
-                    nodeId
-                  )?.expanded,
-              }
-            )
-        )
-    )
-  }
+) {
 
+    if (!nodeId) {
+        return
+    }
+
+
+    updateCollections(
+        (currentCollections) => {
+
+            return currentCollections.map(
+                (collection) => {
+
+                    const node =
+                        findNode(
+                            collection,
+                            nodeId
+                        )
+
+
+                    if (!node) {
+                        return collection
+                    }
+
+
+                    return updateTreeNode(
+                        collection,
+                        nodeId,
+                        {
+                            expanded:
+                                node.expanded !== false
+                                    ? false
+                                    : true,
+                        }
+                    )
+                }
+            )
+
+        }
+    )
+}
 
 /* =======================================================
    DUPLICATE FOLDER

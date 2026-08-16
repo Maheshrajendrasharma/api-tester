@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 import { executeRequest } from '../services/requestService'
 
-import { getActiveEnvironment } from '../services/environmentService'
-
-import { resolveRequest } from '../utils/variableResolver'
+import {
+    resolveRequest,
+    findUnresolvedVariables,
+} from '../utils/variableResolver'
 
 import { getRequestHeaders } from '../utils/helpers'
 
@@ -14,7 +15,10 @@ import {
 } from '../services/scriptRuntime'
 
 
-export function useRequest(onRequestSuccess) {
+export function useRequest(
+    onRequestSuccess,
+    activeEnvironment
+) {
 
     const [response, setResponse] = useState(null)
 
@@ -51,18 +55,17 @@ export function useRequest(onRequestSuccess) {
             )
 
 
-            // =================================================
-            // 2. GET ACTIVE ENVIRONMENT
-            // =================================================
+// =================================================
+// 2. GET ACTIVE WORKSPACE ENVIRONMENT
+// =================================================
 
-            const environment =
-                getActiveEnvironment()
+const environment =
+    activeEnvironment
 
-
-            console.log(
-                '[REQUEST] ACTIVE ENVIRONMENT:',
-                environment
-            )
+console.log(
+    '[REQUEST] ACTIVE ENVIRONMENT:',
+    environment
+)
 
 
             // =================================================
@@ -86,6 +89,161 @@ export function useRequest(onRequestSuccess) {
                 resolvedRequest.url
             )
 
+    // =================================================
+// 3A. CHECK FOR UNRESOLVED VARIABLES
+// =================================================
+
+const unresolvedVariables = []
+
+
+/*
+ * Check URL
+ */
+
+const unresolvedUrl =
+    findUnresolvedVariables(
+        resolvedRequest.url
+    )
+
+unresolvedUrl.forEach(
+    (variable) => {
+
+        unresolvedVariables.push({
+            ...variable,
+            location: 'URL',
+        })
+
+    }
+)
+
+
+/*
+ * Check body
+ */
+
+const unresolvedBody =
+    findUnresolvedVariables(
+        resolvedRequest.body
+    )
+
+unresolvedBody.forEach(
+    (variable) => {
+
+        unresolvedVariables.push({
+            ...variable,
+            location: 'Body',
+        })
+
+    }
+)
+
+
+/*
+ * Check headers
+ */
+
+if (
+    Array.isArray(
+        resolvedRequest.headers
+    )
+) {
+
+    resolvedRequest.headers.forEach(
+        (header) => {
+
+            const unresolvedHeader =
+                findUnresolvedVariables(
+                    header?.value
+                )
+
+            unresolvedHeader.forEach(
+                (variable) => {
+
+                    unresolvedVariables.push({
+                        ...variable,
+                        location:
+                            `Header "${header.key}"`,
+                    })
+
+                }
+            )
+
+        }
+    )
+
+}
+
+
+/*
+ * Check authorization
+ */
+
+if (
+    resolvedRequest.authorization &&
+    typeof resolvedRequest.authorization === 'object'
+) {
+
+    Object.entries(
+        resolvedRequest.authorization
+    ).forEach(
+        ([field, value]) => {
+
+            const unresolvedAuth =
+                findUnresolvedVariables(
+                    value
+                )
+
+            unresolvedAuth.forEach(
+                (variable) => {
+
+                    unresolvedVariables.push({
+                        ...variable,
+                        location:
+                            `Authorization "${field}"`,
+                    })
+
+                }
+            )
+
+        }
+    )
+
+}
+
+
+/*
+ * STOP REQUEST IF VARIABLES ARE MISSING
+ */
+
+if (
+    unresolvedVariables.length > 0
+) {
+
+    const first =
+        unresolvedVariables[0]
+
+
+    const message =
+        `Unresolved variable "{{${first.key}}}" ` +
+        `in ${first.location} ` +
+        `at line ${first.line}, ` +
+        `column ${first.column}. ` +
+        `Please add "${first.key}" to the active environment.`
+
+
+    console.error(
+        '[REQUEST] UNRESOLVED VARIABLE:',
+        first
+    )
+
+
+    throw new Error(
+        message
+    )
+
+}        
+
+
 
             console.log(
                 '[REQUEST] RESOLVED HEADERS:',
@@ -97,6 +255,32 @@ export function useRequest(onRequestSuccess) {
                 '[REQUEST] RESOLVED BODY:',
                 resolvedRequest.body
             )
+
+
+            try {
+    JSON.parse(resolvedRequest.body)
+
+    console.log(
+        '[DEBUG] BODY JSON IS VALID'
+    )
+} catch (error) {
+
+    console.error(
+        '[DEBUG] BODY JSON IS INVALID'
+    )
+
+    console.error(
+        '[DEBUG] JSON ERROR:',
+        error.message
+    )
+
+    console.error(
+        '[DEBUG] BODY:',
+        resolvedRequest.body
+    )
+}
+
+
 
 
             // =================================================

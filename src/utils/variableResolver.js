@@ -95,7 +95,17 @@ if (dynamicValue !== undefined) {
           )
 
 
-      return variable?.value
+if (
+    !variable ||
+    variable.value === undefined ||
+    variable.value === null ||
+    String(variable.value).trim() === ''
+) {
+    return undefined
+}
+
+return variable.value
+
   }
 
   function resolveText(value, environment) {
@@ -107,6 +117,10 @@ if (dynamicValue !== undefined) {
     })
   }
 
+
+
+
+
   function resolveUrl(value, environment) {
     const resolvedUrl = resolveText(value, environment)
     if (typeof resolvedUrl !== 'string') return resolvedUrl
@@ -116,6 +130,75 @@ if (dynamicValue !== undefined) {
       return variableValue === undefined ? placeholder : encodeURIComponent(String(variableValue))
     })
   }
+
+
+/*
+=======================================================
+FIND UNRESOLVED VARIABLES
+=======================================================
+*/
+
+
+export function findUnresolvedVariables(text) {
+
+    if (typeof text !== 'string') {
+        return []
+    }
+
+    const unresolved = []
+
+    const pattern =
+        /(?<!\\)\{\{\s*([^{}]+?)\s*\}\}/g
+
+    const lines =
+        text.split('\n')
+
+
+    lines.forEach(
+        (line, lineIndex) => {
+
+            let match
+
+            while (
+                (match = pattern.exec(line)) !== null
+            ) {
+
+                const key =
+                    match[1].trim()
+
+
+                const startIndex =
+                    match.index
+
+
+                const column =
+                    startIndex + 1
+
+
+                unresolved.push({
+
+                    key,
+
+                    placeholder:
+                        match[0],
+
+                    line:
+                        lineIndex + 1,
+
+                    column,
+
+                })
+
+            }
+
+        }
+    )
+
+
+    return unresolved
+
+}
+
 
   function resolveHeaders(headers, environment) {
     if (Array.isArray(headers)) {

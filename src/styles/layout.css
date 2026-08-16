@@ -3447,17 +3447,9 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 .workspace-selector-wrapper {
     position: relative;
-
-    height: 52px;
-
-    display: flex;
-    align-items: center;
-
-    flex-shrink: 0;
-
+    display: inline-block;
     z-index: 10000;
 }
-
 
 /* Workspace button */
 
@@ -3491,7 +3483,7 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
     white-space: nowrap;
 
-    overflow: hidden;
+    overflow: visible;
 }
 
 
@@ -3532,83 +3524,116 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    ========================================================= */
 
 .workspace-dropdown {
-
     position: absolute;
 
-    top: calc(100% + 8px);
-
+    top: calc(100% + 6px);
     left: 0;
 
-    width: 280px;
+    width: 380px;
+    max-height: 420px;
 
+    overflow-y: auto;
+    overflow-x: hidden;
 
-    background: #161b22;
+    display: flex;
+    flex-direction: column;
 
-    border: 1px solid #30363d;
-
-    border-radius: 10px;
-
+    gap: 2px;
 
     padding: 8px;
 
+    background: #151b22;
 
-    z-index: 99999;
+    border: 1px solid #34404d;
+    border-radius: 10px;
 
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
 
-    box-shadow:
-        0 12px 30px rgba(0,0,0,0.45);
-
-
+    z-index: 999999;
 }
-
 
 /* Dropdown item */
 
 .workspace-dropdown-item {
+    display: block;
+
     width: 100%;
+    min-height: 48px;
 
-    min-height: 42px;
+    flex: none;
 
-    padding: 8px 12px;
+    padding: 12px 16px;
+
+    box-sizing: border-box;
 
     border: none;
     border-radius: 7px;
 
     background: transparent;
 
-    color: #dce5ee;
+    color: #d8dee9;
 
-    font-size: 15px;
+    font-size: 16px;
+    font-family: inherit;
 
     text-align: left;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     cursor: pointer;
 }
 
 
-/* Hover */
 
 .workspace-dropdown-item:hover {
-    background: #26323d;
+    background: #26343e;
+    color: #ffffff;
 }
 
+.workspace-dropdown-item.active {
+    background: #29424b;
+    color: #62e6bd;
+}
 
 /* Selected */
 
-.workspace-dropdown-item.active {
-    background: #263d45;
-    color: #65e5bf;
-}
 
 
 /* Empty */
 
 .workspace-dropdown-empty {
-    padding: 15px;
+    width: 100%;
 
-    color: #8d9baa;
+    padding: 14px 16px;
+
+    box-sizing: border-box;
+
+    color: #8994a3;
 
     font-size: 14px;
+
+    text-align: left;
+}
+
+
+
+.workspace-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.workspace-dropdown::-webkit-scrollbar-track {
+    background: #11161c;
+}
+
+.workspace-dropdown::-webkit-scrollbar-thumb {
+    background: #3b4854;
+    border-radius: 6px;
+}
+
+.workspace-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #536270;
 }
 
 
@@ -5173,11 +5198,11 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 
-.workspace-actions-wrapper {
+.workspace-actions-wrapper,
+.workspace-actions-wrapper *,
+.workspace-menu-button {
 
-    position: relative;
-
-    z-index: 10001;
+    -webkit-app-region:no-drag;
 
 }
 
@@ -5305,5 +5330,116 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .workspace-actions-menu button:hover {
 
     background:#263238;
+
+}
+
+.workspace-selector-button,
+.workspace-menu-button,
+.workspace-dropdown,
+.workspace-actions-menu,
+.workspace-dropdown-item,
+.workspace-actions-menu button {
+
+    -webkit-app-region:no-drag;
+
+}
+
+
+.workspace-selector-wrapper{
+
+    position:relative;
+
+    z-index:10000;
+
+}
+
+
+.workspace-dropdown{
+
+    position:absolute;
+
+    top:40px;
+
+    left:0;
+
+    z-index:999999;
+
+}
+
+.workspace-actions-menu {
+
+    position:absolute;
+
+    z-index:99999999 !important;
+
+    pointer-events:auto !important;
+
+}
+
+
+.workspace-actions-menu button {
+
+    position:relative;
+
+    z-index:99999999;
+
+    pointer-events:auto !important;
+
+    cursor:pointer;
+
+}
+
+.workspace-actions-menu {
+    position:absolute;
+    left:0;
+}
+
+.workspace-modal-overlay{
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.5);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+z-index:999999;
+
+}
+
+
+
+.workspace-modal{
+
+background:#151b22;
+
+padding:25px;
+
+border-radius:10px;
+
+width:350px;
+
+}
+
+
+
+.workspace-modal input{
+
+width:100%;
+
+padding:12px;
+
+margin:15px 0;
+
+background:#0f141a;
+
+border:1px solid #34404d;
+
+color:white;
 
 }

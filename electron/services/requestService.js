@@ -6,7 +6,66 @@ const supportedMethods = new Set([
   'DELETE',
 ])
 
-function applyAuthorization(headers, parsedUrl, authorization) {
+
+
+
+function resolveEnvironmentVariables(value, environment) {
+  if (value === null || value === undefined) {
+    return value
+  }
+
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  const variables =
+    Array.isArray(environment?.variables)
+      ? environment.variables
+      : []
+
+  return value.replace(
+    /\{\{\s*([^{}]+?)\s*\}\}/g,
+    (fullMatch, variableName) => {
+
+      const key =
+        String(variableName).trim()
+
+      const variable =
+        variables.find(
+          (item) =>
+            item?.enabled !== false &&
+            String(item?.key ?? '').trim() === key
+        )
+
+      if (!variable) {
+        return fullMatch
+      }
+
+      return String(
+        variable.value ?? ''
+      )
+    }
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function applyAuthorization(
+  headers,
+  parsedUrl,
+  authorization,
+  environment
+) {
 
   if (!authorization || authorization.type === 'None') {
     return
@@ -57,8 +116,11 @@ function applyAuthorization(headers, parsedUrl, authorization) {
     const apiKeyName =
       String(authorization.apiKey).trim()
 
-    const apiKeyValue =
-      String(authorization.apiValue ?? '')
+const apiKeyValue =
+  resolveEnvironmentVariables(
+    String(authorization.apiValue ?? ''),
+    environment
+  )
 
     if (!apiKeyName) {
       return
@@ -104,6 +166,29 @@ function applyAuthorization(headers, parsedUrl, authorization) {
  *   "Content-Type": "application/json"
  * }
  */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function buildHeaders(headers) {
   const result = {}
 

@@ -23,7 +23,10 @@ import {
 
 import {
     loadWorkspaces,
-    saveWorkspaces
+    saveWorkspaces,
+     createWorkspace,
+        loadActiveWorkspaceId,
+    saveActiveWorkspaceId
 } from './services/workspaceService'
 
 import { exportEnvironment as exportEnvironmentData, importEnvironmentFromFile } from './services/importExportService'
@@ -44,34 +47,37 @@ function App() {
 
 
   const historyState = useHistory({ onShowDialog: setDialogState })
-  const { response, isSending, sendRequest } = useRequest(({ request, response: responseData, resolvedUrl }) => {
-    historyState.addEntry({
-      name: request.name || 'Untitled Request',
-      method: request.method,
-      url: request.url,
-      resolvedUrl,
-      statusCode: responseData.status,
-      statusText: responseData.statusText,
-      responseTime: responseData.responseTime,
-      responseSize: responseData.responseSize,
-      environment: historyState.activeEnvironment,
-      headers: request.headers ?? [],
-      params: request.params ?? [],
-      authorization: request.authorization ?? null,
-      requestBody: request.body ?? '',
-      responseBody: responseData.responseBody ?? '',
-    })
-  })
+
+  
+
+
+
 
  
-const [workspaces,setWorkspaces] =
-useState(() => loadWorkspaces())
+const [workspaces, setWorkspaces] =
+    useState(() => loadWorkspaces())
 
+const [activeWorkspaceId, setActiveWorkspaceId] =
+    useState(() => {
 
-const [activeWorkspaceId,setActiveWorkspaceId] =
-useState(
-    () => loadWorkspaces()[0]?.id
-)
+        const loadedWorkspaces =
+            loadWorkspaces()
+
+        const savedWorkspaceId =
+            loadActiveWorkspaceId()
+
+        const savedWorkspaceExists =
+            loadedWorkspaces.some(
+                workspace =>
+                    workspace.id === savedWorkspaceId
+            )
+
+        if (savedWorkspaceExists) {
+            return savedWorkspaceId
+        }
+
+        return loadedWorkspaces[0]?.id ?? null
+    })
 
 
 const activeWorkspace =
@@ -80,160 +86,255 @@ const activeWorkspace =
         workspace.id === activeWorkspaceId
     )
 
+const environments =
+    activeWorkspace?.environments ?? []
+
+
+
 
   function handleWorkspaceChange(workspace){
 
     setActiveWorkspaceId(
         workspace.id
     )
+        saveActiveWorkspaceId(
+        workspace.id
+    )
 
 }
 
 
+function handleCreateWorkspace() {
 
-function handleCreateWorkspace(){
+    setDialogState({
+        open: true,
+        type: "input",
+        title: "New Workspace",
+        message: "Enter a name for the new workspace.",
+        initialValue: "",
+        options: [],
+        confirmLabel: "Create",
+        cancelLabel: "Cancel",
 
-    const name =
-        window.prompt(
-            "Enter workspace name"
-        );
+        onConfirm: (workspaceName) => {
 
+            const name =
+                String(workspaceName || "").trim()
 
-    if(!name || !name.trim()){
-        return;
-    }
-
-
-    const newWorkspace = {
-
-        id: crypto.randomUUID(),
-
-        name:name.trim(),
-
-        collections:[],
-
-        environments:[]
-
-    };
-
-
-    const updated = [
-
-        ...workspaces,
-
-        newWorkspace
-
-    ];
-
-
-    setWorkspaces(updated);
-
-
-    setActiveWorkspaceId(
-        newWorkspace.id
-    );
-
-
-    saveWorkspaces(updated);
-
-}
-
-function handleRenameWorkspace(){
-
-    const current =
-        activeWorkspace;
-
-
-    if(!current){
-        return;
-    }
-
-
-    const newName =
-        window.prompt(
-            "Rename workspace",
-            current.name
-        );
-
-
-    if(!newName || !newName.trim()){
-        return;
-    }
-
-
-    const updated =
-        workspaces.map(workspace=>
-
-            workspace.id === current.id
-
-            ?
-
-            {
-                ...workspace,
-                name:newName.trim()
+            if (!name) {
+                return
             }
 
-            :
+const newWorkspace = {
+    id: crypto.randomUUID(),
+    name,
+    collections: [],
+    environments: [],
+    selectedRequestId: null
+}
+            const updated = [
+                ...workspaces,
+                newWorkspace,
+            ]
 
-            workspace
+            setWorkspaces(updated)
 
-        );
+            saveWorkspaces(updated)
 
+            setActiveWorkspaceId(
+                newWorkspace.id
+            )
 
-    setWorkspaces(updated);
+            saveActiveWorkspaceId(
+                newWorkspace.id
+            )
 
+            setDialogState((current) => ({
+                ...current,
+                open: false,
+            }))
+        },
 
-    saveWorkspaces(updated);
-
+        onCancel: () =>
+            setDialogState((current) => ({
+                ...current,
+                open: false,
+            })),
+    })
 }
 
 
 
+function handleRenameWorkspace() {
 
-function handleDeleteWorkspace(){
+    const currentWorkspace =
+        activeWorkspace
 
-    if(workspaces.length <= 1){
-
-        alert(
-            "At least one workspace is required"
-        );
-
-        return;
-
+    if (!currentWorkspace) {
+        return
     }
 
+    setDialogState({
+        open: true,
+        type: "input",
+        title: "Rename Workspace",
+        message: "Enter a new name for the workspace.",
+        initialValue: currentWorkspace.name,
+        options: [],
+        confirmLabel: "Rename",
+        cancelLabel: "Cancel",
 
-    const confirmDelete =
-        window.confirm(
-            "Delete current workspace?"
-        );
+        onConfirm: (newName) => {
 
+            const name =
+                String(newName || "").trim()
 
-    if(!confirmDelete){
-        return;
-    }
+            if (!name) {
+                return
+            }
 
+            const updated =
+                workspaces.map(
+                    (workspace) =>
 
-    const updated =
-        workspaces.filter(
-            workspace =>
-            workspace.id !== activeWorkspace.id
-        );
+                        workspace.id ===
+                        currentWorkspace.id
 
+                            ? {
+                                ...workspace,
+                                name,
+                            }
 
-    setWorkspaces(updated);
+                            : workspace
+                )
 
+            setWorkspaces(updated)
 
-    setActiveWorkspaceId(
-        updated[0].id
-    );
+            saveWorkspaces(updated)
 
+            setDialogState((current) => ({
+                ...current,
+                open: false,
+            }))
+        },
 
-    saveWorkspaces(updated);
-
+        onCancel: () =>
+            setDialogState((current) => ({
+                ...current,
+                open: false,
+            })),
+    })
 }
 
 
+
+function handleDeleteWorkspace() {
+
+    const currentWorkspace =
+        activeWorkspace
+
+    if (!currentWorkspace) {
+        return
+    }
+
+    /*
+    Do not allow the last workspace
+    to be deleted.
+    */
+
+    if (workspaces.length <= 1) {
+        return
+    }
+
+
+    setDialogState({
+
+        open: true,
+
+        type: "input",
+
+        title: "Delete Workspace",
+
+        message:
+            `Delete workspace "${currentWorkspace.name}"? Type DELETE to confirm.`,
+
+        initialValue: "",
+
+        options: [],
+
+        confirmLabel: "Save",
+
+        cancelLabel: "Cancel",
+
+
+        onConfirm: (value) => {
+
+            /*
+            User must type exactly:
+            DELETE
+            */
+
+            if (
+                String(value || "").trim() !==
+                "DELETE"
+            ) {
+
+                return
+
+            }
+
+
+            const updated =
+                workspaces.filter(
+                    (workspace) =>
+                        workspace.id !==
+                        currentWorkspace.id
+                )
+
+
+            if (updated.length === 0) {
+                return
+            }
+
+
+            const nextWorkspace =
+                updated[0]
+
+
+            setWorkspaces(updated)
+
+            saveWorkspaces(updated)
+
+
+            setActiveWorkspaceId(
+                nextWorkspace.id
+            )
+
+
+            saveActiveWorkspaceId(
+                nextWorkspace.id
+            )
+
+
+            setDialogState((current) => ({
+                ...current,
+                open: false,
+            }))
+
+        },
+
+
+        onCancel: () => {
+
+            setDialogState((current) => ({
+                ...current,
+                open: false,
+            }))
+
+        },
+
+    })
+}
 
 function handleImportWorkspace(){
 
@@ -292,8 +393,6 @@ function handleExportWorkspace(){
 
 
 
-    const environments =
-    activeWorkspace?.environments ?? []
 
 
 const collections =
@@ -301,55 +400,139 @@ const collections =
 
 
 const collectionState =
-useCollections({
+    useCollections({
 
-    workspaceId:
-        activeWorkspace?.id,
+        workspaceId:
+            activeWorkspace?.id,
+
+        workspaceCollections:
+            activeWorkspace?.collections || [],
+
+        initialSelectedRequestId:
+            activeWorkspace?.selectedRequestId ?? null,
+
+        onSelectedRequestChange:
+            handleSelectedRequestChange,
+
+        onCollectionsChange:
+            handleWorkspaceCollectionsChange,
+
+        onShowDialog:
+            setDialogState
+
+    })
 
 
-    workspaceCollections:
-        activeWorkspace?.collections || [],
+function handleWorkspaceCollectionsChange(collections) {
 
 
-    onCollectionsChange:
-        handleWorkspaceCollectionsChange,
 
 
-    onShowDialog:
-        setDialogState
 
-})
+    const updatedWorkspaces =
+        workspaces.map((workspace) => {
 
-
-function handleWorkspaceCollectionsChange(
-    collections
-){
-
-    setWorkspaces(
-        previous =>
-        previous.map(
-            workspace =>
-
-            workspace.id === activeWorkspaceId
-
-            ?
-
-            {
-                ...workspace,
-                collections
+            if (workspace.id !== activeWorkspaceId) {
+                return workspace
             }
 
-            :
+            return {
+                ...workspace,
+                collections,
+            }
+        })
 
-            workspace
-        )
-    )
+    setWorkspaces(updatedWorkspaces)
 
+    saveWorkspaces(updatedWorkspaces)
 }
 
 
 
+function handleSelectedRequestChange(requestId) {
+
+    console.trace(
+    '[APP] handleSelectedRequestChange CALLED FROM'
+)
+
+    console.log("================================")
+    console.log("[APP] SAVING SELECTED REQUEST")
+    console.log("[APP] requestId:", requestId)
+    console.log("[APP] activeWorkspaceId:", activeWorkspaceId)
+    console.log("[APP] activeWorkspace:", activeWorkspace)
+
+    // IMPORTANT DEBUG
+    const workspace =
+        workspaces.find(
+            workspace =>
+                workspace.id === activeWorkspaceId
+        )
+
+    console.log(
+        "[APP] CURRENT SAVED REQUEST ID:",
+        workspace?.selectedRequestId
+    )
+
+    console.log("================================")
+
+
+    const updatedWorkspaces =
+        workspaces.map((workspace) => {
+
+            if (
+                workspace.id !== activeWorkspaceId
+            ) {
+                return workspace
+            }
+
+            return {
+                ...workspace,
+
+                selectedRequestId:
+                    requestId,
+            }
+        })
+
+
+    const updatedActiveWorkspace =
+        updatedWorkspaces.find(
+            workspace =>
+                workspace.id === activeWorkspaceId
+        )
+
+
+    console.log("================================")
+    console.log("[APP] UPDATED ACTIVE WORKSPACE:")
+    console.log(updatedActiveWorkspace)
+
+    console.log(
+        "[APP] NEW SELECTED REQUEST ID:",
+        updatedActiveWorkspace?.selectedRequestId
+    )
+
+    console.log("================================")
+
+
+    setWorkspaces(
+        updatedWorkspaces
+    )
+
+    saveWorkspaces(
+        updatedWorkspaces
+    )
+}
+
+
   const activeEnvironment = environments.find((environment) => environment.active) ?? null
+
+  const {
+    response,
+    isSending,
+    sendRequest,
+} = useRequest(
+    undefined,
+    activeEnvironment
+)   
 
   function handleEnvironmentChange(environmentId){
 

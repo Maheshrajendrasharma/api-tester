@@ -632,7 +632,6 @@ useEffect(() => {
     * `expanded` property. This state allows folders to
     * be opened/closed without changing the data model.
     */
-    const [expandedNodes, setExpandedNodes] = useState({})
 
     const [draggedNodeId, setDraggedNodeId] =
   useState(null)
@@ -643,35 +642,15 @@ const [dropTargetId, setDropTargetId] =
 const [dropPosition, setDropPosition] =
   useState(null)
 
-    function toggleNode(nodeId) {
-      if (!nodeId) return
+function toggleNode(nodeId) {
 
-      setExpandedNodes((current) => ({
-        ...current,
-        [nodeId]: current[nodeId] === false,
-      }))
-
-      /*
-      * Keep compatibility with the existing collection
-      * toggle callback.
-      */
-      if (onToggleCollection) {
-        onToggleCollection(nodeId)
-      }
+    if (!nodeId) {
+        return
     }
 
-    function isNodeExpanded(node) {
-      if (
-        Object.prototype.hasOwnProperty.call(
-          expandedNodes,
-          node.id
-        )
-      ) {
-        return expandedNodes[node.id]
-      }
+    onToggleCollection?.(nodeId)
+}
 
-      return node.expanded !== false
-    }
 
   function filterTreeForSearch(node, searchText) {
   if (!node) {
@@ -973,52 +952,201 @@ function handleDrop(
     * This prevents old collections from crashing while
     * new Postman collections use `children`.
     */
-    function normalizeCollectionForDisplay(collection) {
-      if (!collection) return null
+function normalizeCollectionForDisplay(collection) {
 
-      if (Array.isArray(collection.children)) {
+    if (!collection) {
+        return null
+    }
+
+
+    /*
+     * =====================================================
+     * NEW TREE FORMAT
+     * =====================================================
+     */
+
+    if (
+        Array.isArray(
+            collection.children
+        )
+    ) {
+
         return {
-          ...collection,
-          expanded: isNodeExpanded(collection),
+            ...collection,
+
+            type:
+                collection.type ??
+                'collection',
+
+            expanded:
+                collection.expanded !== false,
+
+            children:
+                collection.children.map(
+                    (child) =>
+                        normalizeTreeNode(
+                            child
+                        )
+                ),
         }
-      }
+    }
 
-      const requestChildren = Array.isArray(
-        collection.requests
-      )
-        ? collection.requests.map((request) => ({
-            ...request,
-            type: 'request',
-          }))
-        : []
 
-      const folderChildren = Array.isArray(
-        collection.folders
-      )
-        ? collection.folders.map((folder) => ({
-            ...folder,
-            type: 'folder',
-            children: [
-              ...(Array.isArray(folder.requests)
-                ? folder.requests.map((request) => ({
+    /*
+     * =====================================================
+     * OLD COLLECTION FORMAT
+     *
+     * requests[]
+     * folders[]
+     * =====================================================
+     */
+
+    const requestChildren =
+        Array.isArray(
+            collection.requests
+        )
+            ? collection.requests.map(
+                (request) => ({
                     ...request,
                     type: 'request',
-                  }))
-                : []),
-            ],
-          }))
-        : []
+                })
+            )
+            : []
 
-      return {
+
+    const folderChildren =
+        Array.isArray(
+            collection.folders
+        )
+            ? collection.folders.map(
+                (folder) =>
+                    normalizeOldFolder(
+                        folder
+                    )
+            )
+            : []
+
+
+    return {
+
         ...collection,
+
         type: 'collection',
-        expanded: isNodeExpanded(collection),
+
+        expanded:
+            collection.expanded !== false,
+
         children: [
-          ...folderChildren,
-          ...requestChildren,
+            ...folderChildren,
+            ...requestChildren,
         ],
-      }
     }
+}
+
+
+/*
+ * =========================================================
+ * NORMALIZE NEW TREE NODE
+ * =========================================================
+ */
+
+function normalizeTreeNode(node) {
+
+    if (!node) {
+        return null
+    }
+
+
+    /*
+     * REQUEST
+     */
+
+    if (
+        node.type === 'request'
+    ) {
+
+        return {
+            ...node,
+            type: 'request',
+        }
+    }
+
+
+    /*
+     * FOLDER / COLLECTION
+     */
+
+    return {
+
+        ...node,
+
+        expanded:
+            node.expanded !== false,
+
+        children:
+            Array.isArray(
+                node.children
+            )
+                ? node.children.map(
+                    normalizeTreeNode
+                )
+                : [],
+    }
+}
+
+
+/*
+ * =========================================================
+ * NORMALIZE OLD FOLDER
+ * =========================================================
+ */
+
+function normalizeOldFolder(folder) {
+
+    if (!folder) {
+        return null
+    }
+
+
+    const requestChildren =
+        Array.isArray(
+            folder.requests
+        )
+            ? folder.requests.map(
+                (request) => ({
+                    ...request,
+                    type: 'request',
+                })
+            )
+            : []
+
+
+    const nestedFolders =
+        Array.isArray(
+            folder.folders
+        )
+            ? folder.folders.map(
+                normalizeOldFolder
+            )
+            : []
+
+
+    return {
+
+        ...folder,
+
+        type: 'folder',
+
+        expanded:
+            folder.expanded !== false,
+
+        children: [
+            ...nestedFolders,
+            ...requestChildren,
+        ],
+    }
+}
+
 
     function renderCollection(collection) {
   const treeCollection =
@@ -1041,29 +1169,50 @@ function handleDrop(
       * Make sure nested nodes get their current expansion
       * state.
       */
-      function prepareNode(currentNode) {
-        if (!currentNode) return null
+function prepareNode(currentNode) {
 
-        return {
-  ...currentNode,
-  expanded: collectionSearch.trim()
-  ? true
-  : isNodeExpanded(currentNode),
+    if (!currentNode) {
+        return null
+    }
 
-   __onExportCollection: onExportCollection,
-   __onRenameFolder: onRenameFolder,
-   __onDeleteFolder: onDeleteFolder,
-   __onExportCollection: onExportCollection,
-   __onRenameFolder: onRenameFolder,
-   __onDuplicateFolder: onDuplicateFolder,
-   __onExportFolder: onExportFolder,
-   __onDeleteFolder: onDeleteFolder,
-  children: Array.isArray(currentNode.children)
-    ? currentNode.children.map(prepareNode)
-    : [],
+
+    return {
+
+        ...currentNode,
+
+        expanded:
+            collectionSearch.trim()
+                ? true
+                : currentNode.expanded !== false,
+
+        __onExportCollection:
+            onExportCollection,
+
+        __onRenameFolder:
+            onRenameFolder,
+
+        __onDeleteFolder:
+            onDeleteFolder,
+
+        __onDuplicateFolder:
+            onDuplicateFolder,
+
+        __onExportFolder:
+            onExportFolder,
+
+        __onDeleteFolder:
+            onDeleteFolder,
+
+        children:
+            Array.isArray(
+                currentNode.children
+            )
+                ? currentNode.children.map(
+                    prepareNode
+                )
+                : [],
+    }
 }
-      }
-
       return (
 <TreeNode
   key={collection.id}
