@@ -364,7 +364,8 @@ const [selectedRequestId, setSelectedRequestId] =
     )
 
 
-
+const [historyRequest, setHistoryRequest] =
+    useState(null)
 
 /*
 =======================================================
@@ -510,20 +511,27 @@ useEffect(() => {
      SELECTED REQUEST
      ======================================================= */
 
-  const selectedRequest = useMemo(() => {
+ const selectedRequest = useMemo(() => {
+
+    // History request has priority
+    if (historyRequest) {
+        return historyRequest
+    }
+
     if (!selectedRequestId) {
-      return null
+        return null
     }
 
     return findRequestInCollections(
-      collections,
-      selectedRequestId
+        collections,
+        selectedRequestId
     )
-  }, [
+
+}, [
     collections,
     selectedRequestId,
-  ])
-
+    historyRequest,
+])
 
   /* =======================================================
      DIALOG HELPERS
@@ -982,6 +990,9 @@ function selectRequest(
     requestId
 ) {
 
+    // Leaving history mode
+    setHistoryRequest(null)
+
     setSelectedRequestId(
         requestId
     )
@@ -990,7 +1001,6 @@ function selectRequest(
         requestId
     )
 }
-
 
   /* =======================================================
      TOGGLE COLLECTION / FOLDER
@@ -2055,6 +2065,33 @@ function createFolder(parentId) {
   return folder.id
 }
 
+
+
+
+
+function showHistoryRequest(request) {
+
+    setHistoryRequest({
+        ...request,
+
+        __historyTimestamp:
+            request?.__historyTimestamp ??
+            Date.now(),
+    })
+
+}
+
+
+
+function clearHistoryRequest() {
+
+    setHistoryRequest(null)
+
+}
+
+
+
+
   /* =======================================================
      RETURN API
      ======================================================= */
@@ -2063,6 +2100,10 @@ function createFolder(parentId) {
   collections,
   selectedRequestId,
   selectedRequest,
+
+  showHistoryRequest,
+  clearHistoryRequest,
+
   createNewCollection,
   importCollection,
   exportCollection,

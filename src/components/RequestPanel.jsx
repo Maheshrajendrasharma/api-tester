@@ -5,9 +5,11 @@ import HeadersEditor from './HeadersEditor'
 import ParamsEditor from './ParamsEditor'
 import { getActiveParameters, removeGeneratedParameters } from '../utils/helpers'
 import { HTTP_METHODS } from '../utils/constants'
-import VariableField from './VariableField'
-import { api } from "../services/scriptApi"
 
+import VariableField from './VariableField'
+
+import CodeEditor from './CodeEditor'
+import { api } from "../services/scriptApi"
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body','Scripts']
 
@@ -69,7 +71,33 @@ if (!request) {
 
   return (
     <section className="request-panel">
-      <div className="request-title-row"><span className="request-dot" /><h1 className="request-title">{request.name}</h1></div>
+      <div className="request-title-row">
+
+  <span className="request-dot" />
+
+  <h1 className="request-title">
+
+    {request.name}
+
+    {request.__historyTimestamp && (
+      <span className="historical-request-label">
+
+        {' '}
+        (Last executed:{' '}
+
+        {new Date(
+          request.__historyTimestamp
+        ).toLocaleDateString('en-GB')}
+
+        )
+
+      </span>
+    )}
+
+  </h1>
+
+</div>
+
       <div className="request-bar">
         <select aria-label="HTTP method" className="method-select" value={request.method} onChange={(event) => updateRequest({ method: event.target.value })} title={`${request.method} Request`}>
           {HTTP_METHODS.map((item) => <option key={item}>{item}</option>)}
@@ -203,12 +231,11 @@ if (!request) {
 </div>
 
 {(request.bodyMode ?? "raw") === "raw" && (
-  <VariableField
+  <CodeEditor
     key={request.id}
-    environment={environment}
-    className="json-editor"
-    multiline
     value={request.body ?? ""}
+    language="json"
+    environment={environment}
     onChange={(e) =>
       updateRequest({
         body: e.target.value,
@@ -224,72 +251,101 @@ if (!request) {
 
     {activeTab === "Scripts" && (
 
-<div className="script-container">
+  <div className="script-container">
 
     <div className="script-sidebar">
 
-        <button
-            className={
-                activeScriptTab==="Pre-request"
-                    ? "active"
-                    : ""
-            }
-            onClick={()=>
-                setActiveScriptTab("Pre-request")
-            }
-        >
-            Pre-request
-        </button>
+      <button
+        className={
+          activeScriptTab === "Pre-request"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setActiveScriptTab("Pre-request")
+        }
+      >
+        Pre-request
+      </button>
 
-        <button
-            className={
-                activeScriptTab==="Post-response"
-                    ? "active"
-                    : ""
-            }
-            onClick={()=>
-                setActiveScriptTab("Post-response")
-            }
-        >
-            Post-response
-        </button>
+      <button
+        className={
+          activeScriptTab === "Post-response"
+            ? "active"
+            : ""
+        }
+        onClick={() =>
+          setActiveScriptTab("Post-response")
+        }
+      >
+        Post-response
+      </button>
 
     </div>
+
 
     <div className="script-main">
 
+      {activeScriptTab === "Pre-request" && (
+
         <ScriptEditor
-            value={
-                activeScriptTab==="Pre-request"
-                    ? request.scripts?.preRequest ?? ""
-                    : request.scripts?.postResponse ?? ""
-            }
+          key={`${request.id}-pre-request`}
+          environment={environment}
+          value={
+            request.scripts?.preRequest ?? ""
+          }
+          placeholder="Write pre-request script here..."
+          onChange={(event) => {
 
-            placeholder="Write JavaScript here..."
+            updateRequest({
 
-            onChange={(event)=>{
+              scripts: {
+                ...(request.scripts ?? {}),
 
-                updateRequest({
+                preRequest:
+                  event.target.value,
 
-                    scripts:{
-                        ...(request.scripts ?? {}),
+              },
 
-                        [activeScriptTab==="Pre-request"
-                            ? "preRequest"
-                            : "postResponse"
-                        ]:event.target.value
+            })
 
-                    }
-
-                })
-
-            }}
-
+          }}
         />
+
+      )}
+
+
+      {activeScriptTab === "Post-response" && (
+
+        <ScriptEditor
+          key={`${request.id}-post-response`}
+          environment={environment}
+          value={
+            request.scripts?.postResponse ?? ""
+          }
+          placeholder="Write post-response script here..."
+          onChange={(event) => {
+
+            updateRequest({
+
+              scripts: {
+                ...(request.scripts ?? {}),
+
+                postResponse:
+                  event.target.value,
+
+              },
+
+            })
+
+          }}
+        />
+
+      )}
 
     </div>
 
-</div>
+  </div>
 
 )}
   </div>

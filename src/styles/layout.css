@@ -950,12 +950,103 @@ font-size:13px;
 
 .history-filter:focus { border-color: #4e8f77; }
 .history-section { display: flex; flex-direction: column; gap: 4px; margin: 0 0 10px; }
-.history-row{
-height:30px;
-padding:2px 8px;
-gap:8px;
-margin:0;
+
+
+.history-row {
+  height: 30px;
+  padding: 2px 8px;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  box-sizing: border-box;
 }
+
+/* The wrapper containing request name + history metadata */
+.history-row > div {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Request name stays on the left */
+.history-row {
+  height: 30px;
+  padding: 2px 8px;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  gap: 0px;
+}
+
+/* Left section: request name */
+.history-row > div:first-child {
+  display: flex;
+  align-items: center;
+
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Request name gets priority */
+.history-row .sidebar-row-title {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Timestamp gives up space first */
+.history-row .history-meta {
+  flex: 0 1 auto;
+
+  min-width: 0;
+  max-width: 45%;
+
+  margin-left: auto;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: #768491;
+  font-size: 10px;
+}
+
+/* Favorite remains visible */
+.history-row .history-favorite {
+  flex: 0 0 28px;
+  width: 28px;
+  margin-left: 4px;
+}
+
+/* Date / status / environment move to the right */
+.history-row .history-meta {
+  margin-left: auto;
+  padding-left: 40px;
+
+  flex: 0 0 auto;
+
+  color: #768491;
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+.history-row > div {
+  flex: 1 1 auto;
+}
+
 .history-meta { color: #768491; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history-favorite { display: grid; width: 24px; height: 24px; place-items: center; padding: 0; color: #8fa0b3; background: transparent; border: 0; border-radius: 999px; font-size: 15px; cursor: pointer; }
 .history-favorite.active { color: #f4ca64; }
@@ -1619,9 +1710,9 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   place-items: center;
   padding: 0;
   color: #98a6b5;
-  background: #0f335a;
+  background: transparent;
   border: 0;
-  border-radius: 0px;
+  border-radius: 0;
   cursor: pointer;
   font: inherit;
   line-height: 1;
@@ -1637,13 +1728,6 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 /* Horizontal dots */
-.tree-row-actions .action-menu-trigger {
-  font-family: Arial, sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1;
-}
 
 /* Hover on dots */
 .tree-row-actions .action-menu-trigger:hover,
@@ -1656,17 +1740,15 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
    ACTION MENU POPUP
    ========================================================= */
 
-.tree-row-actions .action-menu-popover {
-  position: absolute;
-  z-index: 50;
-  top: calc(100% + 4px);
-  right: 0;
-  width: 174px;
-  padding: 5px;
-  background: #1a222b;
-  border: 1px solid #384552;
-  border-radius: 8px;
-  box-shadow: 0 12px 26px rgb(0 0 0 / 34%);
+.tree-row-actions {
+  position: relative;
+  display: flex;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
 }
 
 .tree-row-actions .action-menu-popover button {
@@ -5660,4 +5742,326 @@ color:white;
     flex-direction: column;
 
     overflow: hidden;
+}
+
+.historical-request-label {
+  color: #a8b3c2;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   CODEMIRROR JSON BODY EDITOR
+   ========================================================= */
+
+.json-body-editor {
+    flex: 1;
+    width: 100%;
+    min-height: 260px;
+
+    overflow: hidden;
+
+    background: #151b21;
+
+    border: 1px solid #2c3640;
+    border-radius: 8px;
+
+    box-sizing: border-box;
+}
+
+
+
+.json-body-editor .cm-editor {
+    height: 100%;
+    width: 100%;
+}
+
+.json-body-editor .cm-scroller {
+    overflow: auto;
+}
+
+.json-body-editor .cm-content {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.json-body-editor .cm-gutters {
+    border-right: 1px solid #2c3640;
+}
+
+
+
+/* =========================================================
+   CODEMIRROR EDITOR
+   ========================================================= */
+
+.code-editor {
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+
+    overflow: hidden;
+
+    background: #151b21;
+
+    border: 1px solid #2c3640;
+    border-radius: 8px;
+
+    box-sizing: border-box;
+}
+
+
+.code-editor .cm-editor {
+    height: 100%;
+    width: 100%;
+
+    background: #151b21;
+}
+
+
+.code-editor .cm-scroller {
+    overflow: auto;
+}
+
+
+.code-editor .cm-content {
+    min-height: 100%;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+.code-editor .cm-gutters {
+    background: #151b21;
+
+    border-right:
+        1px solid #2c3640;
+}
+
+
+.code-editor .cm-lineNumbers .cm-gutterElement {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+.code-editor .cm-foldGutter {
+    width: 16px;
+}
+
+
+.code-editor .cm-activeLine {
+    background: #1b222a;
+}
+
+
+.code-editor .cm-activeLineGutter {
+    background: #1b222a;
+}
+
+
+.code-editor .cm-selectionBackground {
+    background: #264f78 !important;
+}
+
+
+.code-editor .cm-cursor {
+    border-left-color: #6ee7b7;
+}
+
+/* =========================================================
+   CODEMIRROR API TESTER EDITOR
+   ========================================================= */
+
+.code-editor {
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+
+    overflow: hidden;
+
+    background: #151b21;
+
+    border: 1px solid #2c3640;
+    border-radius: 8px;
+
+    box-sizing: border-box;
+}
+
+
+.code-editor .cm-editor {
+    height: 100%;
+    width: 100%;
+
+    background: #151b21;
+}
+
+
+.code-editor .cm-scroller {
+    overflow: auto;
+}
+
+
+.code-editor .cm-content {
+    min-height: 100%;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+.code-editor .cm-gutters {
+    background: #151b21;
+
+    color: #667384;
+
+    border-right:
+        1px solid #2c3640;
+}
+
+
+.code-editor .cm-lineNumbers .cm-gutterElement {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+.code-editor .cm-foldGutter {
+    width: 16px;
+}
+
+
+.code-editor .cm-activeLine {
+    background: #1b222a;
+}
+
+
+.code-editor .cm-activeLineGutter {
+    background: #1b222a;
+}
+
+
+.code-editor .cm-selectionBackground {
+    background: #264f78 !important;
+}
+
+
+.code-editor .cm-cursor {
+    border-left-color: #6ee7b7;
+}
+
+/* =========================================================
+   CODEMIRROR AUTOCOMPLETE
+   ========================================================= */
+
+.code-editor .cm-tooltip-autocomplete {
+    background: #1b222a;
+
+    border:
+        1px solid #34404d;
+
+    color: #dbe5ee;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+
+.code-editor .cm-tooltip-autocomplete > ul {
+    max-height: 280px;
+}
+
+
+.code-editor .cm-tooltip-autocomplete > ul > li {
+    padding: 7px 10px;
+
+    color: #dbe5ee;
+}
+
+
+.code-editor .cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: #263342;
+
+    color: #ffffff;
+}
+
+
+.code-editor .cm-completionLabel {
+    color: #dbe5ee;
+}
+
+
+.code-editor .cm-completionDetail {
+    color: #7f8c9d;
+
+    margin-left: 12px;
+}
+
+
+.code-editor .cm-completionIcon {
+    color: #6ee7b7;
+}
+
+
+.history-row {
+  height: 30px;
+  padding: 2px 8px;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* LEFT: request name */
+.history-row > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+}
+
+/* Request name */
+
+/* RIGHT: date/status/environment */
+
+
+/* Favorite */
+.history-row .history-favorite {
+  flex: 0 0 28px;
+  width: 28px;
+
+  margin-left: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Three-dot menu */
+.history-row .action-menu {
+  flex: 0 0 20px;
+  width: 20px;
+  min-width: 20px;
+
+  margin-left: 2px;
+  padding: 0;
+}
+
+.history-row .action-menu .action-menu-trigger {
+  width: 20px;
+  min-width: 20px;
+  height: 24px;
+
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

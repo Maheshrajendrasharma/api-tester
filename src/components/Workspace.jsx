@@ -81,7 +81,7 @@ return (
       onDoubleClick={resetSplit}
     />
 
-    <ResponsePanel response={response} />
+    <ResponsePanel response={response} environment={environment}/>
   </section>
 )
 }

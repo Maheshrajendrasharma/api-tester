@@ -517,19 +517,17 @@ collectionId={collectionId}
     )
   }
 
-  function HistoryView({
-    historyEntries,
-    historySearch,
-    activeHistoryFilter,
-    onHistorySearchChange,
-    onHistoryFilterChange,
-    onRestoreHistoryEntry,
-    onRenameHistoryEntry,
-    onDuplicateHistoryEntry,
-    onDeleteHistoryEntry,
-    onToggleHistoryFavorite,
-    onClearHistory,
-  }) {
+function HistoryView({
+  historyEntries,
+  historySearch,
+  activeHistoryFilter,
+  onHistorySearchChange,
+  onHistoryFilterChange,
+  onRestoreHistoryEntry,
+  onDeleteHistoryEntry,
+  onToggleHistoryFavorite,
+  onClearHistory,
+}) {
     return (
       <>
         <div className="history-controls">
@@ -594,31 +592,21 @@ collectionId={collectionId}
               </button>
 
               <ActionMenu
-                label="History actions"
-                actions={[
-                  {
-                    label: 'Restore',
-                    onClick: () =>
-                      onRestoreHistoryEntry(entry),
-                  },
-                  {
-                    label: 'Rename',
-                    onClick: () =>
-                      onRenameHistoryEntry(entry.id),
-                  },
-                  {
-                    label: 'Duplicate',
-                    onClick: () =>
-                      onDuplicateHistoryEntry(entry.id),
-                  },
-                  {
-                    label: 'Delete',
-                    onClick: () =>
-                      onDeleteHistoryEntry(entry.id),
-                    destructive: true,
-                  },
-                ]}
-              />
+  label="History actions"
+  actions={[
+    {
+      label: 'View Request',
+      onClick: () =>
+        onRestoreHistoryEntry(entry),
+    },
+    {
+      label: 'Delete',
+      onClick: () =>
+        onDeleteHistoryEntry(entry.id),
+      destructive: true,
+    },
+  ]}
+/>
             </SidebarRow>
           ))}
         </div>
@@ -824,8 +812,6 @@ function Sidebar({
   onHistorySearchChange,
   onHistoryFilterChange,
   onRestoreHistoryEntry,
-  onRenameHistoryEntry,
-  onDuplicateHistoryEntry,
   onDeleteHistoryEntry,
   onToggleHistoryFavorite,
   onClearHistory
@@ -1752,13 +1738,6 @@ return (
             onRestoreHistoryEntry
           }
 
-          onRenameHistoryEntry={
-            onRenameHistoryEntry
-          }
-
-          onDuplicateHistoryEntry={
-            onDuplicateHistoryEntry
-          }
 
           onDeleteHistoryEntry={
             onDeleteHistoryEntry

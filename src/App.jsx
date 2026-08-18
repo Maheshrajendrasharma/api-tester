@@ -20,7 +20,6 @@ import {
 } from './services/environmentService'
 
 
-
 import {
     loadWorkspaces,
     saveWorkspaces,
@@ -38,6 +37,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] =useState(true)
 
   const [environmentPanelOpen, setEnvironmentPanelOpen] = useState(true)
+
+  const [historicalRequest, setHistoricalRequest] = useState(null)
 
    const toggleEnvironmentPanel = () => {
     setEnvironmentPanelOpen(prev => !prev)
@@ -531,14 +532,72 @@ function handleSelectedRequestChange(requestId) {
 
   const activeEnvironment = environments.find((environment) => environment.active) ?? null
 
-  const {
+function handleRequestSuccess({
+    request,
+    response,
+    resolvedUrl,
+}) {
+
+    console.log('================================')
+    console.log('[APP] REQUEST SUCCESS')
+    console.log('[APP] RESPONSE ALREADY DISPLAYED')
+    console.log('[APP] NOW CREATING HISTORY')
+    console.log('================================')
+
+    historyState.addEntry({
+        name:
+            collectionState.selectedRequest?.name
+            ?? request?.name
+            ?? 'Unnamed Request',
+
+        method:
+            request?.method
+            ?? 'GET',
+
+        url:
+            request?.url
+            ?? resolvedUrl
+            ?? '',
+
+        resolvedUrl:
+            resolvedUrl
+            ?? request?.url
+            ?? '',
+
+        params:
+            request?.params
+            ?? [],
+
+        headers:
+            request?.headers
+            ?? [],
+
+        authorization:
+            request?.authorization
+            ?? null,
+
+        requestBody:
+            request?.body
+            ?? '',
+
+        response:
+            response,
+
+        environment:
+            activeEnvironment,
+    })
+}
+
+
+const {
     response,
     isSending,
     sendRequest,
 } = useRequest(
-    undefined,
-    activeEnvironment
-)   
+    handleRequestSuccess,
+    activeEnvironment,
+    collectionState.selectedRequestId
+)
 
   function handleEnvironmentChange(environmentId){
 
@@ -687,19 +746,68 @@ function handleExportAllEnvironments() {
 
 
 
-  function handleHistoryRestore(entry) {
-    const requestTemplate = {
-      name: entry.name,
-      method: entry.method,
-      url: entry.resolvedUrl || entry.url,
-      params: entry.params ?? [],
-      headers: entry.headers ?? [],
-      authorization: entry.authorization ?? null,
-      body: entry.requestBody ?? '',
-    }
+function handleHistoryRestore(entry) {
 
-    collectionState.restoreRequest(requestTemplate)
-  }
+    console.log('================================')
+    console.log('[HISTORY] VIEW REQUEST')
+    console.log('[HISTORY] ENTRY:', entry)
+    console.log('================================')
+
+const requestTemplate = {
+
+    name:
+        entry?.name ??
+        'Untitled Request',
+
+    method:
+        entry?.method ??
+        'GET',
+
+    url:
+        entry?.resolvedUrl ||
+        entry?.url ||
+        '',
+
+    params:
+        entry?.params ??
+        [],
+
+    headers:
+        entry?.headers ??
+        [],
+
+    authorization:
+        entry?.authorization ??
+        null,
+
+    body:
+        entry?.requestBody ??
+        '',
+
+    __historyTimestamp:
+        entry?.timestamp ??
+        Date.now(),
+}
+    // DO NOT call restoreRequest()
+    // DO NOT modify collections
+    // DO NOT modify selectedRequestId
+
+    collectionState.showHistoryRequest(
+        requestTemplate
+    )
+
+    setHistoricalRequest({
+
+        name:
+            entry?.name ??
+            'Untitled Request',
+
+        timestamp:
+            entry?.timestamp ??
+            Date.now(),
+
+    })
+}
 
   function handleClearHistory() {
     setDialogState({ open: true, type: 'confirm', title: 'Clear history', message: 'Clear all history entries?', initialValue: '', options: [], confirmLabel: 'Clear', cancelLabel: 'Cancel', onConfirm: () => { setDialogState((current) => ({ ...current, open: false })); historyState.clearEntries() }, onCancel: () => setDialogState((current) => ({ ...current, open: false })) })
@@ -969,7 +1077,18 @@ onToggleEnvironmentPanel={toggleEnvironmentPanel}
   onImportIntoCollection={collectionState.importCollectionIntoCollection}
 
   onCreateRequest={collectionState.createNewRequest}
-  onSelectRequest={collectionState.selectRequest}
+
+  onSelectRequest={(collectionId, requestId) => {
+
+    setHistoricalRequest(null)
+
+    collectionState.selectRequest(
+        collectionId,
+        requestId
+    )
+
+}}
+
   onToggleCollection={collectionState.toggleCollection}
 
   onRenameCollection={collectionState.renameCollection}
@@ -990,8 +1109,6 @@ onToggleEnvironmentPanel={toggleEnvironmentPanel}
   onHistoryFilterChange={historyState.setFilter}
 
   onRestoreHistoryEntry={handleHistoryRestore}
-  onRenameHistoryEntry={historyState.renameEntry}
-  onDuplicateHistoryEntry={historyState.duplicateEntry}
   onDeleteHistoryEntry={historyState.deleteEntry}
   onToggleHistoryFavorite={historyState.toggleFavorite}
   onClearHistory={handleClearHistory}
@@ -1013,7 +1130,7 @@ environmentPanel={
   ) : null
 }
 >
-        <Workspace environment={activeEnvironment} isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} />
+        <Workspace environment={activeEnvironment} isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} historicalRequest={historicalRequest}/>
       </AppLayout>
       <SharedDialog open={dialogState.open} type={dialogState.type} title={dialogState.title} message={dialogState.message} initialValue={dialogState.initialValue} options={dialogState.options} confirmLabel={dialogState.confirmLabel} cancelLabel={dialogState.cancelLabel} onConfirm={dialogState.onConfirm} onCancel={dialogState.onCancel} />
     </>

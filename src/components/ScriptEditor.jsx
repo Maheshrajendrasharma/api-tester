@@ -1,18 +1,18 @@
-import VariableField from './VariableField'
+import CodeEditor from './CodeEditor'
 
 function ScriptEditor({
   environment,
   value,
   onChange,
-  placeholder = 'Write script here...',
+  placeholder = 'Write JavaScript here...',
 }) {
   return (
     <div className="script-editor">
 
-      <VariableField
-        environment={environment}
+      <CodeEditor
         value={value || ''}
-        multiline
+        language="javascript"
+        environment={environment}
         placeholder={placeholder}
         onChange={onChange}
       />
