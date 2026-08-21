@@ -301,7 +301,7 @@
   z-index: 1;
   box-sizing: border-box;
   margin: 0;
-  padding: 0 10px;
+  padding: 0 0px;
   pointer-events: none;
   color: #dbe5ee;
   font: inherit;
@@ -507,9 +507,7 @@
 }
 
 
-.variable-field-overlay {
-  display: none !important;
-}
+
 
 .variable-field.multiline .variable-field-overlay,
 .variable-field.multiline .variable-field-input {
@@ -4381,6 +4379,21 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
     height:100%;
 
     overflow:hidden;
+      width:100%;
+    min-height:0;
+
+}
+
+
+.headers-editor {
+
+      width:100%;
+
+    height:100%;
+
+    overflow:hidden;
+      width:100%;
+    min-height:0;
 
 }
 
@@ -4391,6 +4404,18 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .params-table {
 
     width:100%;
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.headers-table {
+
+      width:100%;
 
     height:100%;
 
@@ -5157,11 +5182,9 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
     height:100%;
 
-    display:flex;
 
-    flex-direction:column;
 
-    min-height:0;
+    min-width:0;
 
 }
 
@@ -5170,30 +5193,45 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 .headers-table {
 
     height:100%;
+   height:100%;
 
     display:flex;
 
     flex-direction:column;
-
-    min-height:0;
 
 }
 
 
 
 .headers-table-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
 
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
 
-    flex:1;
-
-    min-height:0;
-
-    overflow-y:auto;
-
-    overflow-x:hidden;
-
+    box-sizing: border-box;
 }
 
+
+
+.headers-table-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.headers-table-body::-webkit-scrollbar-track {
+    background: #0f1419;
+}
+
+.headers-table-body::-webkit-scrollbar-thumb {
+    background: #34404c;
+    border-radius: 6px;
+}
+
+.headers-table-body::-webkit-scrollbar-thumb:hover {
+    background: #4b5967;
+}
 
 /* =====================================================
    AUTHORIZATION SCROLL FIX
@@ -5798,8 +5836,8 @@ color:white;
 
 .code-editor {
     width: 100%;
-    height: 100%;
-    min-height: 260px;
+    height: 300%;
+    min-height: 360px;
 
     overflow: hidden;
 
@@ -5970,7 +6008,7 @@ color:white;
 
 
 .code-editor .cm-tooltip-autocomplete > ul {
-    max-height: 280px;
+    max-height: 380px;
 }
 
 
@@ -6065,3 +6103,168 @@ color:white;
   align-items: center;
   justify-content: center;
 }
+
+.headers-table-body {
+    height: 460px !important;
+    max-height: 260px !important;
+
+    flex: 0 0 360px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;  
+}
+
+.headers-table-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.headers-table-body::-webkit-scrollbar-track {
+    background: #0f1419;
+}
+
+.headers-table-body::-webkit-scrollbar-thumb {
+    background: #34404c;
+    border-radius: 6px;
+}
+
+.headers-table-body::-webkit-scrollbar-thumb:hover {
+    background: #4b5967;
+}
+
+/* =========================================================
+   HEADERS TAB SCROLL CONTAINER
+   ========================================================= */
+
+.headers-tab-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   CODEMIRROR VARIABLE COLORS
+   ========================================================= */
+
+/* =========================================================
+   CODEMIRROR VARIABLE STATUS COLORS
+   ========================================================= */
+
+.cm-variable-token-enabled {
+    color: #6ee7b7 !important;
+}
+
+.cm-variable-token-undefined {
+    color: #f38b91 !important;
+}
+
+.cm-variable-token-disabled {
+    color: #8b97a4 !important;
+}
+
+
+/* =========================================================
+   VARIABLE FIELD - SHOW COLORED OVERLAY
+   ========================================================= */
+
+.variable-field-input.has-variables {
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    caret-color: #eef6fc !important;
+}
+
+.variable-field-input.has-variables::selection {
+    background: #264f78 !important;
+}
+
+.variable-field-overlay {
+    color: #dbe5ee;
+    z-index: 2 !important;
+}
+
+.variable-field-input.has-variables {
+    z-index: 1 !important;
+}
+
+.variable-field-overlay .variable-token.enabled {
+    color: #6ee7b7 !important;
+}
+
+.variable-field-overlay .variable-token.undefined {
+    color: #f38b91 !important;
+}
+
+.variable-field-overlay .variable-token.disabled {
+    color: #8b97a4 !important;
+}
+
+.cm-variable-token-enabled {
+    color: #6ee7b7 !important;
+}
+
+.cm-variable-token-undefined {
+    color: #f38b91 !important;
+}
+
+.cm-variable-token-disabled {
+    color: #8b97a4 !important;
+}
+
+/* =====================================================
+   FINAL VARIABLE OVERLAY ALIGNMENT FIX
+   Keep overlay and input exactly identical
+===================================================== */
+
+
+.variable-field-overlay,
+.variable-field-input {
+
+    font-family: 'Cascadia Code', Consolas, monospace !important;
+
+    font-size: 13px !important;
+
+    font-weight: 500 !important;
+
+    line-height: 1.5 !important;
+
+    letter-spacing: 0 !important;
+
+    word-spacing: 0 !important;
+
+    text-transform:none !important;
+
+}
+
+
+.variable-field-overlay {
+
+    position:absolute !important;
+
+    inset:0 !important;
+
+    padding:0 10px !important;
+
+    display:flex;
+
+    align-items:center;
+
+    white-space:pre !important;
+
+    overflow:hidden;
+
+}
+
+
+.variable-field-input {
+
+    padding:0 10px !important;
+
+    color:transparent !important;
+
+    caret-color:white !important;
+
+}
+

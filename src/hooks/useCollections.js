@@ -224,8 +224,14 @@ function getAllNodes(root) {
 }
 
 
+
+
+
 /*
   Find a request across all collections.
+
+
+  
 */
 function findRequestInCollections(collections, requestId) {
   for (const collection of collections) {
@@ -403,45 +409,24 @@ useEffect(() => {
 
     if (initialSelectedRequestId) {
 
-        console.log(
-            '[COLLECTIONS] Saved request ID exists:',
+
+console.log(
+  "CURRENT COLLECTION REQUESTS:",
+  JSON.stringify(
+    currentCollections,
+    null,
+    2
+  )
+)
+      
+
+    const savedRequest =
+        findRequestInCollections(
+            currentCollections,
             initialSelectedRequestId
         )
 
-
-        const savedRequest =
-            findRequestInCollections(
-                currentCollections,
-                initialSelectedRequestId
-            )
-
-
-        if (savedRequest) {
-
-            console.log(
-                '[COLLECTIONS] SAVED REQUEST FOUND:',
-                savedRequest.id,
-                savedRequest.name
-            )
-
-        } else {
-
-            console.log(
-                '[COLLECTIONS] Saved request not found yet.'
-            )
-
-            console.log(
-                '[COLLECTIONS] Keeping saved request ID:',
-                initialSelectedRequestId
-            )
-        }
-
-
-        // IMPORTANT:
-        // Keep the saved ID.
-        //
-        // Do NOT call onSelectedRequestChange here.
-        // Otherwise the parent can overwrite it.
+    if (savedRequest) {
 
         setSelectedRequestId(
             initialSelectedRequestId
@@ -450,6 +435,30 @@ useEffect(() => {
         return
     }
 
+
+    console.log(
+        '[COLLECTIONS] Saved request removed. Selecting first request.'
+    )
+
+
+    const firstRequest =
+        findFirstRequest(
+            currentCollections[0]
+        )
+
+
+    setSelectedRequestId(
+        firstRequest?.id ?? null
+    )
+
+
+    onSelectedRequestChange?.(
+        firstRequest?.id ?? null
+    )
+
+
+    return
+}
 
     // =====================================================
     // CASE 2:
@@ -502,8 +511,7 @@ useEffect(() => {
 
 }, [
     workspaceId,
-    initialSelectedRequestId,
-    workspaceCollections
+    initialSelectedRequestId
 ])
 /*
 
@@ -915,6 +923,11 @@ useEffect(() => {
      ======================================================= */
 
 function createNewRequest(parentId) {
+
+  console.log(
+    "CREATE REQUEST CLICKED PARENT ID:",
+    parentId
+  )
   if (!parentId) {
     return null
   }

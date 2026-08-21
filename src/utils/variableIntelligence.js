@@ -37,12 +37,16 @@ export function getVariableReferences(
       )
 
 
-    const status =
-      !variable
-        ? 'undefined'
-        : variable.enabled === false
-          ? 'disabled'
-          : 'enabled'
+const hasValue =
+  variable &&
+  String(variable.value ?? '').trim() !== ''
+
+const status =
+  !variable || !hasValue
+    ? 'undefined'
+    : variable.enabled === false
+      ? 'disabled'
+      : 'enabled'
 
 
     return {

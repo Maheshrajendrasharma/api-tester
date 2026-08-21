@@ -378,97 +378,137 @@ function VariableField({
   // =====================================================
 
 
-  function applySuggestion(variable) {
+function applySuggestion(variable) {
 
 
-    if (!autocomplete) {
-
-      return
-
-    }
+  if (!autocomplete) {
+    return
+  }
 
 
-    const key =
-
-      String(
-        variable.key ?? ''
-      ).trim()
+  const key =
+    String(variable.key ?? '').trim()
 
 
-
-    if (!key) {
-
-      return
-
-    }
+  if (!key) {
+    return
+  }
 
 
-
-    const replacement =
-
-      `{{${key}}}`
+  const cursorStart =
+    autocomplete.start
 
 
+  const cursorEnd =
+    autocomplete.end
 
-    const nextValue =
+
+  /*
+     Find actual {{
+  */
+
+  const before =
+    value.slice(
+      0,
+      cursorStart
+    )
 
 
-      value.slice(
+  const openBrace =
+    before.lastIndexOf('{{')
 
-        0,
 
-        autocomplete.start
-
-      )
-
-      +
-
-      replacement
-
-      +
-
-      value.slice(
-
-        autocomplete.end
-
-      )
+  const start =
+    openBrace >= 0
+      ? openBrace
+      : cursorStart
 
 
 
-    onChange({
-
-      target: {
-
-        value: nextValue
-
-      }
-
-    })
+  /*
+     Find existing }}
+  */
 
 
-
-    setAutocomplete(null)
-
-
-
-    requestAnimationFrame(() => {
+  const after =
+    value.slice(
+      cursorEnd
+    )
 
 
-      if (!inputRef.current) {
-
-        return
-
-      }
+  const closeBrace =
+    after.indexOf('}}')
 
 
-      inputRef.current.focus()
+
+  const end =
+    closeBrace >= 0
+      ? cursorEnd + closeBrace + 2
+      : cursorEnd
 
 
-    })
 
+  const replacement =
+    `{{${key}}}`
+
+
+
+  const nextValue =
+
+    value.slice(
+      0,
+      start
+    )
+
+    +
+
+    replacement
+
+    +
+
+    value.slice(
+      end
+    )
+
+
+
+  onChange({
+
+  target: {
+
+    value: nextValue
 
   }
 
+})
+
+
+setAutocomplete(null)
+
+
+requestAnimationFrame(() => {
+
+  if (!inputRef.current) {
+    return
+  }
+
+
+const cursorPosition =
+    start + replacement.length
+
+
+  inputRef.current.focus()
+
+
+  inputRef.current.setSelectionRange(
+    cursorPosition,
+    cursorPosition
+  )
+
+
+})
+
+}
   // =====================================================
 // KEYBOARD NAVIGATION
 // =====================================================

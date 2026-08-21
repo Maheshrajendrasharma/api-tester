@@ -398,12 +398,11 @@ function TreeNode({
             <ActionMenu
   label={`${isCollection ? 'Collection' : 'Folder'} actions`}
   actions={[
-{
+
+  {
   label: 'New Request',
   onClick: () =>
-    onCreateRequest?.(
-      isCollection ? collectionId : node.id
-    ),
+    onCreateRequest?.(node.id),
 },
 
 ...(onCreateFolder
@@ -502,12 +501,10 @@ function TreeNode({
     onToggleNode={onToggleNode}
 
 onRenameFolder={onRenameFolder}
-onDuplicateFolder={(folderId) =>
-  onDuplicateFolder?.(collection.id, folderId)
-}
+onDuplicateFolder={onDuplicateFolder}
 onExportFolder={onExportFolder}
 onDeleteFolder={onDeleteFolder}
-collectionId={collectionId} 
+collectio0nId={collectionId} 
 
   />
 ))}
@@ -1476,7 +1473,7 @@ dropTargetId={dropTargetId}
 dropPosition={dropPosition}
 draggedNodeId={draggedNodeId}
 onCreateRequest={(parentId) =>
-  onCreateRequest(
+  onCreateRequest?.(
     parentId || collection.id
   )
 }
@@ -1486,10 +1483,21 @@ onCreateFolder={(parentId) =>
     parentId || collection.id
   )
 }
-          onRenameFolder={onRenameFolder}
-  onDuplicateFolder={onDuplicateFolder}
-  onExportFolder={onExportFolder}
-  onDeleteFolder={onDeleteFolder}
+onRenameFolder={(folderId) =>
+  onRenameFolder?.(collection.id, folderId)
+}
+
+onDuplicateFolder={(folderId) =>
+  onDuplicateFolder?.(collection.id, folderId)
+}
+
+onExportFolder={(folderId) =>
+  onExportFolder?.(collection.id, folderId)
+}
+
+onDeleteFolder={(folderId) =>
+  onDeleteFolder?.(collection.id, folderId)
+}
         />
       )
     }
