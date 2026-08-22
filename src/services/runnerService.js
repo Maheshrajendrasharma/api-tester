@@ -55,10 +55,23 @@ export async function runNode({
       break
     }
 
-    const started = performance.now()
-    state.currentRequestId = item.request.id
-    state.currentIteration = item.iteration
-    onProgress?.({ ...state })
+const started = performance.now()
+
+state.currentRequestId = item.request.id
+state.currentIteration = item.iteration
+
+
+onProgress?.({
+
+  ...state,
+
+  event: "request-start",
+
+  requestId: item.request.id,
+
+  requestStatus: "running"
+
+})
 
     try {
       const result = await executeRequest({
@@ -93,8 +106,27 @@ export async function runNode({
         state.failed += 1
       }
 
-      onResult?.(runnerResult, { ...state })
-      onProgress?.({ ...state })
+onResult?.(
+  runnerResult,
+  {
+    ...state
+  }
+)
+
+
+onProgress?.({
+
+  ...state,
+
+  event:"request-complete",
+
+  requestId:item.request.id,
+
+  requestStatus: passed
+      ? "success"
+      : "failed"
+
+})
 
       if (!passed && config.stopOnError) {
         state.status = 'failed'
@@ -114,8 +146,25 @@ export async function runNode({
       state.completed += 1
       state.failed += 1
 
-      onResult?.(runnerResult, { ...state })
-      onProgress?.({ ...state })
+onResult?.(
+  runnerResult,
+  {
+    ...state
+  }
+)
+
+
+onProgress?.({
+
+  ...state,
+
+  event:"request-complete",
+
+  requestId:item.request.id,
+
+  requestStatus:"failed"
+
+})
 
       if (config.stopOnError) {
         state.status = 'failed'

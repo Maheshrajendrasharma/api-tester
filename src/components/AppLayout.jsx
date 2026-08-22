@@ -129,6 +129,7 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
     overflow: "hidden",
     display: "flex",
     flexDirection: "column",
+    position:"relative",
   }}
 >
   {children}

@@ -1170,11 +1170,19 @@ environmentPanel={
   runnerState.open ? (
 
     <RunnerScreen
-      open={runnerState.open}
-      collections={collections}
-      initialCollectionId={runnerState.collectionId}
-      initialNodeId={runnerState.nodeId}
-      onClose={() =>
+  open={runnerState.open}
+
+  collections={
+    collections.filter(
+      (collection) =>
+        collection.id === runnerState.collectionId
+    )
+  }
+
+  initialCollectionId={runnerState.collectionId}
+  initialNodeId={runnerState.nodeId}
+
+  onClose={() =>
         setRunnerState({
           open: false,
           collectionId: null,
