@@ -54,17 +54,9 @@ className={`
 
 
 
-        <span className="runner-tree-icon">
-
-          {
-            isRequest
-              ? 'POST'
-              : node.type === 'collection'
-                ? '📁'
-                : '📂'
-          }
-
-        </span>
+<span className="runner-tree-icon">
+  {isRequest ? '' : node.type === 'collection' ? '📁' : '📂'}
+</span>
 
 
 
@@ -175,17 +167,13 @@ export default function RunnerTree({
         collections.map((collection) => (
 
 
-          <RunnerTreeNode
-
-            key={collection.id}
-
-            node={collection}
-
-            selectedId={selectedId}
-
-            onSelect={onSelect}
-
-          />
+<RunnerTreeNode
+  key={collection.id}
+  node={collection}
+  selectedId={selectedId}
+  executionMap={executionMap}
+  onSelect={onSelect}
+/>
 
 
         ))
@@ -194,6 +182,6 @@ export default function RunnerTree({
 
     </div>
 
-  )
+  ) 
 
 }

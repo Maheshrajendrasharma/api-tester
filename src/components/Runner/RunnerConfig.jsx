@@ -57,21 +57,22 @@ export default function RunnerConfig({ onRun, disabled = false }) {
     <div className="runner-config">
       <div className="runner-section-title">Run scope</div>
       <div className="runner-scope-group">
-        {Object.entries({
-          [RUNNER_SCOPE.REQUEST]: 'Request',
-          [RUNNER_SCOPE.FOLDER]: 'Folder',
-          [RUNNER_SCOPE.COLLECTION]: 'Collection',
-        }).map(([value, label]) => (
-          <label key={value} className="runner-radio-row">
-            <input
-              type="radio"
-              value={value}
-              checked={config.scope === value}
-              onChange={(event) => update('scope', event.target.value)}
-            />
-            {label}
-          </label>
-        ))}
+{Object.entries({
+  [RUNNER_SCOPE.FOLDER]: 'Folder',
+  [RUNNER_SCOPE.COLLECTION]: 'Collection',
+}).map(([value, label]) => (
+  <label key={value} className="runner-radio-row">
+    <input
+      type="radio"
+      value={value}
+      checked={config.scope === value}
+      onChange={(event) =>
+        update('scope', event.target.value)
+      }
+    />
+    {label}
+  </label>
+))}
       </div>
 
       <div className="runner-grid">

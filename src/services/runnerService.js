@@ -74,24 +74,65 @@ onProgress?.({
 })
 
     try {
-      const result = await executeRequest({
-        request: item.request,
-        iteration: item.iteration,
-        row: item.row,
-        config,
-        signal,
-      })
+      console.log(
+  "========== RUNNER ITEM REQUEST =========="
+)
 
-      const responseTime = Math.round(performance.now() - started)
-      const passed = result?.error == null && result?.ok !== false
+console.log(
+ JSON.stringify(item.request,null,2)
+)
 
-      const runnerResult = createRunnerResult({
+console.log(
+ "METHOD:",
+ item.request.method
+)
+
+console.log(
+ "URL:",
+ item.request.url
+)
+
+console.log(
+ "BODY:",
+ item.request.body
+)
+const result = await executeRequest(
+    item.request
+)
+
+console.log("RUNNER EXECUTE RESPONSE", result)
+
+const responseTime =
+  Math.round(performance.now() - started)
+
+const statusCode =
+  Number(
+    result?.statusCode ??
+    result?.response?.status ??
+    result?.status ??
+    result?.response?.statusCode ??
+    NaN
+  )
+
+const hasHttpStatus =
+  Number.isFinite(statusCode)
+
+const passed =
+  result?.error == null &&
+  (
+    hasHttpStatus
+      ? statusCode >= 200 && statusCode < 300
+      : result?.ok === true
+  )
+
+const runnerResult = createRunnerResult({
         request: item.request,
         iteration: item.iteration,
         row: item.row,
         status: passed ? 'passed' : 'failed',
-        statusCode: result?.statusCode ?? result?.response?.status ?? null,
-        responseTime,
+statusCode: hasHttpStatus
+  ? statusCode
+  : null,        responseTime,
         response: result?.response ?? result,
         error: result?.error ?? null,
         tests: result?.tests ?? [],

@@ -238,9 +238,20 @@ function EnvironmentIcon() {
     onDragOver(event, request)
   }
   onDragLeave={onDragLeave}
-  onDrop={(event) =>
-    onDrop(event, request)
-  }
+onDrop={(event) => {
+
+  onDrop(event, request)
+
+  onMoveNode?.({
+    node: request,
+    targetNode: request,
+    position: dropPosition,
+  })
+
+}}
+  
+
+  
         selected={selectedRequestId === request.id}
         onClick={() => onSelectRequest(request.id)}
       >
@@ -256,23 +267,39 @@ function EnvironmentIcon() {
             onClick={(event) => event.stopPropagation()}
           >
             <ActionMenu
-              label="Request actions"
-              actions={[
-                {
-                  label: 'Rename',
-                  onClick: () => onRenameRequest(request.id),
-                },
-                {
-                  label: 'Duplicate',
-                  onClick: () => onDuplicateRequest(request.id),
-                },
-                {
-                  label: 'Delete',
-                  onClick: () => onDeleteRequest(request.id),
-                  destructive: true,
-                },
-              ]}
-            />
+  label="Request actions"
+  actions={[
+{
+  label: 'Run',
+  onClick: () => {
+
+    console.log(
+      "REQUEST RUN CLICK",
+      {
+        request,
+        onRunNodeExists: !!onRunNode
+      }
+    )
+
+    onRunNode?.(request)
+
+  },
+    },
+    {
+      label: 'Rename',
+      onClick: () => onRenameRequest(request.id),
+    },
+    {
+      label: 'Duplicate',
+      onClick: () => onDuplicateRequest(request.id),
+    },
+    {
+      label: 'Delete',
+      onClick: () => onDeleteRequest(request.id),
+      destructive: true,
+    },
+  ]}
+/>
           </div>
         </div>
       </SidebarRow>
@@ -292,9 +319,9 @@ function TreeNode({
   onRunNode,
   dropTargetId,
   dropPosition,
-  draggedNodeId,  
-  onSelectRequest,
+  draggedNodeId,
 
+  onSelectRequest,
   onRenameCollection,
   onDuplicateCollection,
   onDeleteCollection,
@@ -329,13 +356,12 @@ function TreeNode({
           onDuplicateRequest={onDuplicateRequest}
           onDeleteRequest={onDeleteRequest}
           onRunNode={onRunNode}
-
            onDragStart={onDragStart}
     onDragEnd={onDragEnd}
     onDragOver={onDragOver}
     onDragLeave={onDragLeave}
     onDrop={onDrop}
-
+    onMoveNode={onMoveNode}
     dropTargetId={dropTargetId}
     dropPosition={dropPosition}
 
@@ -536,8 +562,6 @@ onRenameFolder={onRenameFolder}
 onExportFolder={onExportFolder}
 
 onDeleteFolder={onDeleteFolder}
-collectio0nId={collectionId} 
-
   />
 ))}
           </TreeGuide>
@@ -1525,7 +1549,6 @@ onCreateFolder={(parentId) =>
   )
 }
 onRenameFolder={onRenameFolder}
-onRunNode={onRunNode}
 
 onDuplicateFolder={onDuplicateFolder}
 

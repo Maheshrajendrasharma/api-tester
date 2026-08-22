@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import './runner.css'
 
 import RunnerTree from './RunnerTree'
 import RunnerConfig from './RunnerConfig'
@@ -11,19 +12,13 @@ import {
 
 
 export default function RunnerPanel({
-
   open = false,
-
   collections = [],
-
   initialCollectionId = null,
-
   initialNodeId = null,
-
   executeRequest,
-
+  onRunnerHistoryEntry,
   onClose,
-
 }) {
 
 
@@ -133,11 +128,13 @@ const [executionMap, setExecutionMap] = useState({})
     })
 
 
-
+console.log(
+  "RUNNER EXECUTOR",
+  executeRequest
+)
 
 
     runNode({
-
   collections,
   collectionId,
   nodeId,
@@ -146,56 +143,95 @@ const [executionMap, setExecutionMap] = useState({})
   executeRequest,
   signal: controller.signal,
 
+  onProgress: (progress) => {
+    setState(progress)
 
-onProgress:(progress)=>{
+    if (progress.event === 'request-start') {
+      setExecutionMap((previous) => ({
+        ...previous,
+        [progress.requestId]: {
+          status: 'running',
+        },
+      }))
+    }
 
+    if (progress.event === 'request-complete') {
+      setExecutionMap((previous) => ({
+        ...previous,
+        [progress.requestId]: {
+          status: progress.requestStatus,
+        },
+      }))
+    }
+  },
 
-  setState(progress)
+  onResult: (runnerResult) => {
 
+    console.log(
+      '[RUNNER RESULT]',
+      runnerResult
+    )
 
+    onRunnerHistoryEntry?.({
+      name:
+        runnerResult.requestName ||
+        'Unnamed Request',
 
-  if(
-    progress.event === "request-start"
-  ){
+      method:
+        runnerResult.request?.method ||
+        'GET',
 
-    setExecutionMap(prev=>({
+      url:
+        runnerResult.request?.url ||
+        '',
 
-      ...prev,
+      resolvedUrl:
+        runnerResult.request?.url ||
+        '',
 
-      [progress.requestId]:{
+      statusCode:
+        runnerResult.statusCode,
 
-        status:"running"
+      statusText:
+        runnerResult.status,
 
-      }
+      responseTime:
+        runnerResult.responseTime,
 
-    }))
+      responseSize: null,
 
-  }
+      environment: null,
 
+      headers:
+        runnerResult.request?.headers || [],
 
+      params:
+        runnerResult.request?.params || [],
 
+      authorization:
+        runnerResult.request?.authorization || null,
 
-  if(
-    progress.event === "request-complete"
-  ){
+      requestBody:
+        runnerResult.request?.body || '',
 
-    setExecutionMap(prev=>({
+      responseBody:
+        typeof runnerResult.response === 'string'
+          ? runnerResult.response
+          : JSON.stringify(
+              runnerResult.response ?? {},
+              null,
+              2
+            ),
 
-      ...prev,
+      error:
+        runnerResult.error || null,
 
-      [progress.requestId]:{
+      runner: true,
+      iteration:
+        runnerResult.iteration,
 
-        status:progress.requestStatus
-
-      }
-
-    }))
-
-  }
-
-
-},
-
+    })
+  },
 })
 .finally(() => {
 

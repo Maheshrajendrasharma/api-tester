@@ -578,9 +578,9 @@ function handleRequestSuccess({
 
     historyState.addEntry({
         name:
-            collectionState.selectedRequest?.name
-            ?? request?.name
-            ?? 'Unnamed Request',
+        collectionState.selectedRequest?.name
+        ?? request?.name
+        ?? 'Unnamed Request',
 
         method:
             request?.method
@@ -1167,9 +1167,9 @@ environmentPanel={
 
 >
        {
-  runnerState.open ? (
+runnerState.open ? (
 
-    <RunnerScreen
+  <RunnerScreen
   open={runnerState.open}
 
   collections={
@@ -1182,27 +1182,33 @@ environmentPanel={
   initialCollectionId={runnerState.collectionId}
   initialNodeId={runnerState.nodeId}
 
+  executeRequest={sendRequest}
+
+  onRunnerHistoryEntry={(entry) => {
+    historyState.addEntry(entry)
+  }}
+
   onClose={() =>
-        setRunnerState({
-          open: false,
-          collectionId: null,
-          nodeId: null,
-        })
-      }
-    />
+    setRunnerState({
+      open: false,
+      collectionId: null,
+      nodeId: null,
+    })
+  }
+/>
 
-  ) : (
+) : (
 
-    <Workspace
-      environment={activeEnvironment}
-      isSending={isSending}
-      onSend={sendRequest}
-      response={response}
-      request={collectionState.selectedRequest}
-      onRequestChange={collectionState.updateRequest}
-    />
+  <Workspace
+    environment={activeEnvironment}
+    isSending={isSending}
+    onSend={sendRequest}
+    response={response}
+    request={collectionState.selectedRequest}
+    onRequestChange={collectionState.updateRequest}
+  />
 
-  )
+)
 }
       </AppLayout>
 
