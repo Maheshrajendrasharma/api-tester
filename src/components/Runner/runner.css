@@ -1,0 +1,282 @@
+/* ===============================
+   RUNNER OVERLAY
+   =============================== */
+
+.runner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: #0f141b;
+  display: flex;
+  overflow: hidden;
+}
+
+
+/* Main runner container */
+
+.runner-panel {
+
+  width:100%;
+  height:100%;
+
+  display:flex;
+  flex-direction:column;
+
+  background:#0f141b;
+  color:#e6edf3;
+
+}
+
+
+/* Header */
+
+.runner-header {
+
+ height:55px;
+
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+
+ padding:0 20px;
+
+ border-bottom:1px solid #26313d;
+
+ background:#111820;
+
+}
+
+
+.runner-title {
+
+ font-size:18px;
+ font-weight:600;
+
+}
+
+
+.runner-subtitle {
+
+ font-size:13px;
+ color:#8b949e;
+
+}
+
+
+.runner-close {
+
+ background:none;
+ border:none;
+ color:#fff;
+
+ font-size:24px;
+
+ cursor:pointer;
+
+}
+
+
+
+/* ===============================
+   THREE COLUMN LAYOUT
+================================ */
+
+
+.runner-layout {
+
+ flex:1;
+
+ display:grid;
+
+ grid-template-columns:
+     320px
+     1fr
+     350px;
+
+
+ overflow:hidden;
+
+}
+
+
+
+/* LEFT */
+
+.runner-left {
+
+ border-right:1px solid #26313d;
+
+ overflow:auto;
+
+ padding:15px;
+
+}
+
+
+/* CENTER */
+
+.runner-middle {
+
+ overflow:auto;
+
+ padding:15px;
+
+ border-right:1px solid #26313d;
+
+}
+
+
+
+/* RIGHT */
+
+.runner-right {
+
+ overflow:auto;
+
+ padding:15px;
+
+}
+
+
+
+
+/* Section headings */
+
+.runner-section-title {
+
+ font-size:13px;
+
+ text-transform:uppercase;
+
+ color:#8b949e;
+
+ margin-bottom:12px;
+
+}
+
+
+
+/* ===============================
+   TREE STYLE
+================================ */
+
+
+.runner-left button {
+
+ width:100%;
+
+ text-align:left;
+
+ background:#151c24;
+
+ color:#dce6f1;
+
+ border:1px solid transparent;
+
+ padding:7px 10px;
+
+ margin-bottom:3px;
+
+ border-radius:4px;
+
+ cursor:pointer;
+
+}
+
+
+.runner-left button:hover {
+
+ background:#212b36;
+
+ border-color:#3b82f6;
+
+}
+
+
+
+
+/* ===============================
+ CONFIG PANEL
+================================ */
+
+
+.runner-middle input,
+.runner-middle select {
+
+ background:#111820;
+
+ color:white;
+
+ border:1px solid #30363d;
+
+ padding:8px;
+
+ border-radius:5px;
+
+}
+
+
+
+.runner-middle button {
+
+ background:#6c5ce7;
+
+ color:white;
+
+ border:none;
+
+ padding:8px 18px;
+
+ border-radius:5px;
+
+ cursor:pointer;
+
+}
+
+
+
+.runner-middle button:hover {
+
+ background:#7c6cff;
+
+}
+
+
+
+
+/* ===============================
+ RESULTS
+================================ */
+
+
+.runner-right {
+
+ background:#0d1117;
+
+}
+
+
+.runner-result-card {
+
+ background:#161b22;
+
+ border:1px solid #30363d;
+
+ padding:10px;
+
+ margin-bottom:8px;
+
+ border-radius:6px;
+
+}
+
+
+
+/* remove page scroll */
+
+.runner-panel,
+.runner-layout {
+
+ min-height:0;
+
+}

@@ -120,11 +120,12 @@ function AppLayout({ header, sidebar, environmentPanel, children }) {
   }}
 />
 
-        <div
+<div
   className="app-layout-main"
   style={{
     minWidth: 0,
     width: "100%",
+    height: "100%",
     overflow: "hidden",
     display: "flex",
     flexDirection: "column",

@@ -1,12 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import RequestPanel from './RequestPanel'
 import ResponsePanel from './ResponsePanel'
+import RunnerPanel from './Runner/RunnerPanel'
 
 const dividerHeight = 6
 const minimumRequestHeight = 220
 const minimumResponseHeight = 180
 
-function Workspace({ environment, isSending, onSend, response, request, onRequestChange }) {
+function Workspace({
+  environment,
+  isSending,
+  onSend,
+  response,
+  request,
+  onRequestChange,
+  showRunner,
+  runnerProps
+}) {
   const workspaceRef = useRef(null)
   const cleanupDragRef = useRef(null)
   const [requestHeight, setRequestHeight] = useState(null)
@@ -64,6 +74,14 @@ return (
     style={splitStyle}
     aria-label="API request workspace"
   >
+{
+showRunner ? (
+
+  <RunnerPanel {...runnerProps} />
+
+) : (
+
+  <>
     <RequestPanel
       environment={environment}
       isSending={isSending}
@@ -81,7 +99,13 @@ return (
       onDoubleClick={resetSplit}
     />
 
-    <ResponsePanel response={response} environment={environment}/>
+    <ResponsePanel
+      response={response}
+      environment={environment}
+    />
+  </>
+)
+}
   </section>
 )
 }

@@ -18,6 +18,8 @@ import {
     deleteEnvironment,
     renameEnvironment,
 } from './services/environmentService'
+import RunnerScreen from "./components/RunnerScreen";
+
 
 
 import {
@@ -97,6 +99,62 @@ const environments =
     activeWorkspace?.environments ?? []
 
 
+const [runnerState, setRunnerState] = useState({
+  open: false,
+  nodeId: null,
+  nodeType: null,
+  collectionId: null,
+})
+
+
+
+function handleRunNode(
+  collectionId,
+  nodeId
+) {
+  const collection =
+    collectionState.collections.find(
+      (item) =>
+        item.id === collectionId
+    )
+
+  if (!collection) {
+    return
+  }
+
+  const findNodeType = (node) => {
+    if (!node) {
+      return null
+    }
+
+    if (node.id === nodeId) {
+      return node.type
+    }
+
+    if (
+      Array.isArray(node.children)
+    ) {
+      for (const child of node.children) {
+        const result =
+          findNodeType(child)
+
+        if (result) {
+          return result
+        }
+      }
+    }
+
+    return null
+  }
+
+  setRunnerState({
+    open: true,
+    collectionId,
+    nodeId,
+    nodeType:
+      findNodeType(collection, nodeId),
+  })
+}
 
 
   function handleWorkspaceChange(workspace){
@@ -109,6 +167,8 @@ const environments =
     )
 
 }
+
+
 
 
 function handleCreateWorkspace() {
@@ -432,103 +492,75 @@ const collectionState =
 
 function handleWorkspaceCollectionsChange(collections) {
 
+    setWorkspaces((currentWorkspaces) => {
+
+        const updatedWorkspaces =
+            currentWorkspaces.map((workspace) => {
+
+                if (
+                    workspace.id !==
+                    activeWorkspaceId
+                ) {
+                    return workspace
+                }
+
+                return {
+                    ...workspace,
+                    collections,
+                }
+            })
 
 
-
-
-    const updatedWorkspaces =
-        workspaces.map((workspace) => {
-
-            if (workspace.id !== activeWorkspaceId) {
-                return workspace
-            }
-
-            return {
-                ...workspace,
-                collections,
-            }
-        })
-
-    setWorkspaces(updatedWorkspaces)
-
-    saveWorkspaces(updatedWorkspaces)
-}
-
-
-
-function handleSelectedRequestChange(requestId) {
-
-    console.trace(
-    '[APP] handleSelectedRequestChange CALLED FROM'
-)
-
-    console.log("================================")
-    console.log("[APP] SAVING SELECTED REQUEST")
-    console.log("[APP] requestId:", requestId)
-    console.log("[APP] activeWorkspaceId:", activeWorkspaceId)
-    console.log("[APP] activeWorkspace:", activeWorkspace)
-
-    // IMPORTANT DEBUG
-    const workspace =
-        workspaces.find(
-            workspace =>
-                workspace.id === activeWorkspaceId
-        )
-
-    console.log(
-        "[APP] CURRENT SAVED REQUEST ID:",
-        workspace?.selectedRequestId
-    )
-
-    console.log("================================")
-
-
-    const updatedWorkspaces =
-        workspaces.map((workspace) => {
-
-            if (
-                workspace.id !== activeWorkspaceId
-            ) {
-                return workspace
-            }
-
-            return {
-                ...workspace,
-
-                selectedRequestId:
-                    requestId,
-            }
-        })
-
-
-    const updatedActiveWorkspace =
-        updatedWorkspaces.find(
-            workspace =>
-                workspace.id === activeWorkspaceId
+        saveWorkspaces(
+            updatedWorkspaces
         )
 
 
-    console.log("================================")
-    console.log("[APP] UPDATED ACTIVE WORKSPACE:")
-    console.log(updatedActiveWorkspace)
+        return updatedWorkspaces
 
-    console.log(
-        "[APP] NEW SELECTED REQUEST ID:",
-        updatedActiveWorkspace?.selectedRequestId
-    )
+    })
 
-    console.log("================================")
-
-
-    setWorkspaces(
-        updatedWorkspaces
-    )
-
-    saveWorkspaces(
-        updatedWorkspaces
-    )
 }
 
+
+function handleSelectedRequestChange(
+    requestId
+) {
+
+    setWorkspaces((currentWorkspaces) => {
+
+        const updatedWorkspaces =
+            currentWorkspaces.map(
+                (workspace) => {
+
+                    if (
+                        workspace.id !==
+                        activeWorkspaceId
+                    ) {
+                        return workspace
+                    }
+
+                    return {
+                        ...workspace,
+
+                        selectedRequestId:
+                            requestId,
+                    }
+
+                }
+            )
+
+
+        saveWorkspaces(
+            updatedWorkspaces
+        )
+
+
+        return updatedWorkspaces
+
+    })
+
+}
 
   const activeEnvironment = environments.find((environment) => environment.active) ?? null
 
@@ -1077,6 +1109,8 @@ onToggleEnvironmentPanel={toggleEnvironmentPanel}
   onImportIntoCollection={collectionState.importCollectionIntoCollection}
 
   onCreateRequest={collectionState.createNewRequest}
+  onRunNode={handleRunNode}  
+
 
   onSelectRequest={(collectionId, requestId) => {
 
@@ -1129,9 +1163,41 @@ environmentPanel={
     />
   ) : null
 }
+
+
 >
-        <Workspace environment={activeEnvironment} isSending={isSending} onSend={sendRequest} response={response} request={collectionState.selectedRequest} onRequestChange={collectionState.updateRequest} historicalRequest={historicalRequest}/>
+       {
+  runnerState.open ? (
+
+    <RunnerScreen
+      open={runnerState.open}
+      collections={collections}
+      initialCollectionId={runnerState.collectionId}
+      initialNodeId={runnerState.nodeId}
+      onClose={() =>
+        setRunnerState({
+          open: false,
+          collectionId: null,
+          nodeId: null,
+        })
+      }
+    />
+
+  ) : (
+
+    <Workspace
+      environment={activeEnvironment}
+      isSending={isSending}
+      onSend={sendRequest}
+      response={response}
+      request={collectionState.selectedRequest}
+      onRequestChange={collectionState.updateRequest}
+    />
+
+  )
+}
       </AppLayout>
+
       <SharedDialog open={dialogState.open} type={dialogState.type} title={dialogState.title} message={dialogState.message} initialValue={dialogState.initialValue} options={dialogState.options} confirmLabel={dialogState.confirmLabel} cancelLabel={dialogState.cancelLabel} onConfirm={dialogState.onConfirm} onCancel={dialogState.onCancel} />
     </>
   )

@@ -213,6 +213,7 @@ function EnvironmentIcon() {
     onDeleteRequest,
     onMoveNode,
       onDragStart,
+      onRunNode,
   onDragEnd,
   onDragOver,
   onDragLeave,
@@ -288,7 +289,7 @@ function TreeNode({
   onDragOver,
   onDragLeave,
   onDrop,
-
+  onRunNode,
   dropTargetId,
   dropPosition,
   draggedNodeId,  
@@ -327,6 +328,7 @@ function TreeNode({
           onRenameRequest={onRenameRequest}
           onDuplicateRequest={onDuplicateRequest}
           onDeleteRequest={onDeleteRequest}
+          onRunNode={onRunNode}
 
            onDragStart={onDragStart}
     onDragEnd={onDragEnd}
@@ -419,6 +421,21 @@ function TreeNode({
 
     ...(isCollection
       ? [
+        {
+label: 'Run',
+onClick: () => {
+
+  console.log("SIDEBAR RUN CLICK", {
+    collectionId,
+    nodeId: node.id,
+    onRunNodeExists: !!onRunNode
+  })
+
+  onRunNode?.(
+    collectionId,
+    node.id
+  )
+}},
           {
             label: 'Rename',
             onClick: () => onRenameCollection?.(node.id),
@@ -441,6 +458,12 @@ function TreeNode({
 
     ...(isFolder
       ? [
+      {
+        label: 'Run',
+        onClick: () =>
+          onRunNode?.(node.id),
+      },
+
           {
             label: 'Rename',
             onClick: () => onRenameFolder?.(node.id),
@@ -475,6 +498,7 @@ function TreeNode({
     selectedRequestId={selectedRequestId}
     onSelectRequest={onSelectRequest}
     onExportCollection={onExportCollection}
+    onRunNode={onRunNode}
 
       onMoveNode={onMoveNode}
 
@@ -483,6 +507,7 @@ function TreeNode({
   onDragOver={onDragOver}
   onDragLeave={onDragLeave}
   onDrop={onDrop}
+  
 
   dropTargetId={dropTargetId}
   dropPosition={dropPosition}
@@ -500,9 +525,16 @@ function TreeNode({
     onCreateRequest={onCreateRequest}
     onToggleNode={onToggleNode}
 
-onRenameFolder={onRenameFolder}
+
+
 onDuplicateFolder={onDuplicateFolder}
+
+onRenameFolder={onRenameFolder}
+
+
+
 onExportFolder={onExportFolder}
+
 onDeleteFolder={onDeleteFolder}
 collectio0nId={collectionId} 
 
@@ -591,6 +623,11 @@ function HistoryView({
               <ActionMenu
   label="History actions"
   actions={[
+      {
+    label: 'Run',
+    onClick: () =>
+      onRunNode?.(request.id),
+  },
     {
       label: 'View Request',
       onClick: () =>
@@ -779,6 +816,7 @@ function HistoryNavIcon() {
 
 
 function Sidebar({
+  
   collections,
   selectedRequestId,
   onCreateCollection,
@@ -791,6 +829,7 @@ function Sidebar({
   onDeleteFolder,
   onExportCollection,
   onImportIntoCollection,
+  onRunNode,
   onCreateRequest,
   onSelectRequest,
   onToggleCollection,
@@ -812,6 +851,7 @@ function Sidebar({
   onDeleteHistoryEntry,
   onToggleHistoryFavorite,
   onClearHistory
+  
 }) {
       const [sidebarView, setSidebarView] =
         useState('collections')
@@ -1435,6 +1475,7 @@ function prepareNode(currentNode) {
               requestId
             )
           }
+          onRunNode={onRunNode}
           onRenameCollection={onRenameCollection}
           onDuplicateCollection={onDuplicateCollection}
           onDeleteCollection={onDeleteCollection}
@@ -1483,21 +1524,14 @@ onCreateFolder={(parentId) =>
     parentId || collection.id
   )
 }
-onRenameFolder={(folderId) =>
-  onRenameFolder?.(collection.id, folderId)
-}
+onRenameFolder={onRenameFolder}
+onRunNode={onRunNode}
 
-onDuplicateFolder={(folderId) =>
-  onDuplicateFolder?.(collection.id, folderId)
-}
+onDuplicateFolder={onDuplicateFolder}
 
-onExportFolder={(folderId) =>
-  onExportFolder?.(collection.id, folderId)
-}
+onExportFolder={onExportFolder}
 
-onDeleteFolder={(folderId) =>
-  onDeleteFolder?.(collection.id, folderId)
-}
+onDeleteFolder={onDeleteFolder}
         />
       )
     }

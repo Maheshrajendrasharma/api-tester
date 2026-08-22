@@ -1067,95 +1067,98 @@ function toggleCollection(
    DUPLICATE FOLDER
    ======================================================= */
 
-function duplicateFolder(
-  collectionId,
-  folderId
-) {
-  if (!collectionId || !folderId) {
+function duplicateFolder(folderId) {
+
+  if (!folderId) {
     return
   }
 
-  const collection =
-    collections.find(
-      (item) =>
-        item.id === collectionId
-    )
 
-  if (!collection) {
-    return
-  }
+  // Find the folder and the collection that contains it.
+  let collection = null
+  let sourceFolder = null
 
-  const sourceFolder =
-    findNode(
-      collection,
-      folderId
-    )
 
-  if (
-    !sourceFolder ||
-    sourceFolder.type !== 'folder'
-  ) {
-    return
-  }
+  for (const currentCollection of collections) {
 
-  function findParent(
-    root,
-    targetId,
-    parent = null
-  ) {
-    if (!root) {
-      return null
-    }
+    const found =
+      findNode(
+        currentCollection,
+        folderId
+      )
 
-    if (root.id === targetId) {
-      return parent
-    }
 
     if (
-      Array.isArray(root.children)
+      found &&
+      found.type === 'folder'
     ) {
-      for (const child of root.children) {
-        const result =
-          findParent(
-            child,
-            targetId,
-            root
-          )
 
-        if (result) {
-          return result
-        }
-      }
+      collection =
+        currentCollection
+
+      sourceFolder =
+        found
+
+      break
+
     }
 
-    return null
   }
 
+
+  if (
+    !collection ||
+    !sourceFolder
+  ) {
+    return
+  }
+
+
+  // Find the folder's current parent.
   const parent =
     findParent(
       collection,
       folderId
     )
 
+
+  // Collect folder names for unique naming.
   const existingNames = []
 
-  function collectFolderNames(node) {
-    if (!node) return
 
-    if (node.type === 'folder') {
-      existingNames.push(node.name)
+  function collectFolderNames(node) {
+
+    if (!node) {
+      return
     }
 
+
+    if (node.type === 'folder') {
+      existingNames.push(
+        node.name
+      )
+    }
+
+
     if (
-      Array.isArray(node.children)
+      Array.isArray(
+        node.children
+      )
     ) {
+
       node.children.forEach(
         collectFolderNames
       )
+
     }
+
   }
 
-  collectFolderNames(collection)
+
+  collectFolderNames(
+    collection
+  )
+
 
   const duplicateName =
     generateUniqueName(
@@ -1164,11 +1167,16 @@ function duplicateFolder(
       existingNames
     )
 
+
+  // Clone the entire folder tree.
   function cloneNode(node) {
+
     return {
+
       ...node,
 
-      id: createId(),
+      id:
+        createId(),
 
       name:
         node.id === sourceFolder.id
@@ -1176,41 +1184,58 @@ function duplicateFolder(
           : node.name,
 
       children:
-        Array.isArray(node.children)
+        Array.isArray(
+          node.children
+        )
           ? node.children.map(
               cloneNode
             )
           : [],
+
     }
+
   }
 
-  const duplicate =
-    cloneNode(sourceFolder)
 
+  const duplicate =
+    cloneNode(
+      sourceFolder
+    )
+
+
+  // Put duplicate next to the original.
   const destinationId =
-    parent?.id || collection.id
+    parent?.id ??
+    collection.id
+
 
   updateCollections(
     (currentCollections) =>
+
       currentCollections.map(
         (collectionItem) => {
+
           if (
             collectionItem.id !==
-            collectionId
+            collection.id
           ) {
+
             return collectionItem
+
           }
+
 
           return insertNode(
             collectionItem,
             destinationId,
             duplicate
           )
+
         }
       )
   )
-}
 
+}
 
 
 

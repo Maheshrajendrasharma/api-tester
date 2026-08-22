@@ -8,14 +8,27 @@
     overflow: hidden;
 }
 
+.app-shell {
+
+    height:100vh;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
 
 
 .app-layout {
   position: relative;
+    flex:1;
   display: grid;
   grid-template-columns: var(--sidebar-width) var(--sidebar-divider-width) minmax(0, 1fr) var(--environment-divider-width) var(--environment-panel-width);
   min-height: 0;
-  overflow: visible;
+  overflow: hidden;
   transition: grid-template-columns var(--panel-transition-duration) ease, grid-template-rows var(--panel-transition-duration) ease;
 }
 
@@ -6268,3 +6281,26 @@ color:white;
 
 }
 
+#root {
+    width:100%;
+    height:100vh;
+}
+
+.runner-screen {
+
+    position:absolute;
+
+    inset:0;
+
+     min-height:0;
+     flex:1;
+
+    height:100%;
+
+    width:100%;
+
+    overflow:hidden;
+
+    z-index:20;
+
+}
