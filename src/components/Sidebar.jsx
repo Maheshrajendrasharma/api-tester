@@ -206,6 +206,7 @@ function EnvironmentIcon() {
 
   function RequestTreeRow({
     request,
+    collectionId,
     selectedRequestId,
     onSelectRequest,
     onRenameRequest,
@@ -231,7 +232,7 @@ function EnvironmentIcon() {
   }`}
   draggable
   onDragStart={(event) =>
-    onDragStart(event, request)
+    onDragStart(event, request, collectionId)
   }
   onDragEnd={onDragEnd}
   onDragOver={(event) =>
@@ -239,15 +240,7 @@ function EnvironmentIcon() {
   }
   onDragLeave={onDragLeave}
 onDrop={(event) => {
-
-  onDrop(event, request)
-
-  onMoveNode?.({
-    node: request,
-    targetNode: request,
-    position: dropPosition,
-  })
-
+   onDrop(event, request)
 }}
   
 
@@ -350,6 +343,7 @@ function TreeNode({
       return (
         <RequestTreeRow
           request={node}
+          collectionId={collectionId}
           selectedRequestId={selectedRequestId}
           onSelectRequest={onSelectRequest}
           onRenameRequest={onRenameRequest}
@@ -390,17 +384,15 @@ function TreeNode({
         }`}
       >
         <div
-  className={`tree-node-row ${
-    dropTargetId === node.id
-      ? 'drop-inside'
-      : ''
-  }`}
-  draggable={!isCollection}
-  onDragStart={(event) => {
-    if (!isCollection) {
-      onDragStart(event, node)
-    }
-  }}
+className={`tree-node-row ${
+  dropTargetId === node.id
+    ? `drop-${dropPosition}`
+    : ''
+}`}
+  draggable={true}
+onDragStart={(event) => {
+  onDragStart(event, node, collectionId)
+}}
   onDragEnd={onDragEnd}
   onDragOver={(event) =>
     onDragOver(event, node)
@@ -910,6 +902,12 @@ useEffect(() => {
     const [draggedNodeId, setDraggedNodeId] =
   useState(null)
 
+const [draggedCollectionId, setDraggedCollectionId] =
+  useState(null)
+
+const [draggedNodeType, setDraggedNodeType] =
+  useState(null)
+
 const [dropTargetId, setDropTargetId] =
   useState(null)
 
@@ -1010,14 +1008,19 @@ function getCollectionsForDisplay() {
 }
 
 
-   function handleDragStart(event, node) {
-  if (!node || node.type === 'collection') {
+function handleDragStart(event, node, collectionId) {
+
+  if (!node) {
     return
   }
 
+
   setDraggedNodeId(node.id)
+  setDraggedCollectionId(collectionId ?? null)
+  setDraggedNodeType(node.type)
 
   event.dataTransfer.effectAllowed = 'move'
+
   event.dataTransfer.setData(
     'text/plain',
     node.id
@@ -1026,57 +1029,112 @@ function getCollectionsForDisplay() {
 
 function handleDragEnd() {
   setDraggedNodeId(null)
+  setDraggedCollectionId(null)
+  setDraggedNodeType(null)
   setDropTargetId(null)
   setDropPosition(null)
 }
 
-function handleDragOver(
-  event,
-  node
-) {
+function handleDragOver(event, node) {
+
   if (
     !node ||
-    node.type === 'collection' ||
     !draggedNodeId ||
     node.id === draggedNodeId
   ) {
     return
   }
 
+
   event.preventDefault()
 
   event.dataTransfer.dropEffect = 'move'
 
+
+  const rect =
+    event.currentTarget.getBoundingClientRect()
+
+
+  const positionY =
+    event.clientY - rect.top
+
+
+  const height =
+    rect.height
+
+
+
   /*
-   * Folder:
-   * dropping on it means move INSIDE it.
+   * Top 25%  -> move before
    */
-  if (node.type === 'folder') {
+  if (positionY < height * 0.25) {
+
     setDropTargetId(node.id)
-    setDropPosition('inside')
+    setDropPosition('before')
     return
+
   }
+
 
   /*
-   * Request:
-   * dropping above/below it means reorder
-   * at the request's existing level.
+   * Bottom 25% -> move after
    */
-  if (node.type === 'request') {
-    const rect =
-      event.currentTarget.getBoundingClientRect()
-
-    const middle =
-      rect.top + rect.height / 2
-
-    const position =
-      event.clientY < middle
-        ? 'before'
-        : 'after'
+  if (positionY > height * 0.75) {
 
     setDropTargetId(node.id)
-    setDropPosition(position)
+    setDropPosition('after')
+    return
+
   }
+
+
+  /*
+   * Middle -> move inside folder/collection
+   *
+   * A top-level collection can never be nested inside
+   * another collection (or folder) - it can only be
+   * reordered against its sibling collections.
+   */
+  const draggedIsCollection =
+  draggedNodeType === 'collection'
+
+
+/*
+ * Folder can accept children
+ */
+if (
+  node.type === 'folder'
+) {
+
+  setDropTargetId(node.id)
+  setDropPosition('inside')
+  return
+
+}
+
+
+/*
+ * Collection:
+ * only allow reorder
+ * not inside another collection
+ */
+if (
+  node.type === 'collection'
+) {
+
+  setDropTargetId(node.id)
+  setDropPosition('after')
+  return
+
+}
+
+  /*
+   * Request cannot contain children
+   * so middle stays reorder
+   */
+  setDropTargetId(node.id)
+  setDropPosition('after')
+
 }
 
 function handleDragLeave(event) {
@@ -1096,19 +1154,21 @@ function handleDragLeave(event) {
 
 function handleDrop(
   event,
-  collectionId,
+  destinationCollectionId,
   targetNode
 ) {
   event.preventDefault()
   event.stopPropagation()
 
   const sourceNodeId =
-    event.dataTransfer.getData(
-      'text/plain'
-    ) || draggedNodeId
+    event.dataTransfer.getData('text/plain') || draggedNodeId
+
+  const sourceCollectionId = draggedCollectionId
+
 
   if (
     !sourceNodeId ||
+    !sourceCollectionId ||
     !targetNode ||
     sourceNodeId === targetNode.id
   ) {
@@ -1116,48 +1176,41 @@ function handleDrop(
     return
   }
 
-  const collection =
+
+  // Sidebar sets draggedCollectionId === draggedNodeId
+  // when the node being dragged IS a top-level collection.
+  const draggedNode =
+  findNode(
     collections.find(
-      (item) =>
-        item.id === collectionId
-    )
+      item => item.id === sourceCollectionId
+    ),
+    sourceNodeId
+  )
 
-  if (!collection) {
-    handleDragEnd()
-    return
-  }
 
-  const sourceNode =
-    findNode(
-      collection,
-      sourceNodeId
-    )
-
-  if (!sourceNode) {
-    handleDragEnd()
-    return
-  }
+const isDraggedCollection =
+  draggedNode?.type === 'collection'
 
   /*
-   * ------------------------------------------------
-   * DROP ON FOLDER
-   * ------------------------------------------------
-   *
-   * Folder becomes the new parent.
-   * The dragged item goes to the end of
-   * that folder's children.
+   * ---------------------------------------------
+   * REORDER TOP-LEVEL COLLECTIONS
+   * ---------------------------------------------
    */
-  if (targetNode.type === 'folder') {
+if (isDraggedCollection) {
+
+  // collection dropped INSIDE another collection
+  if (
+    dropPosition === 'inside' &&
+    targetNode.type === 'collection'
+  ) {
+
     const children =
-      Array.isArray(
-        targetNode.children
-      )
-        ? targetNode.children
-        : []
+      targetNode.children ?? []
 
     onMoveNode(
-      collectionId,
+      sourceCollectionId,
       sourceNodeId,
+      targetNode.id,
       targetNode.id,
       children.length
     )
@@ -1166,30 +1219,114 @@ function handleDrop(
     return
   }
 
-  /*
-   * ------------------------------------------------
-   * DROP ON REQUEST
-   * ------------------------------------------------
-   *
-   * Request remains at the same hierarchy level.
-   */
-  if (targetNode.type === 'request') {
-    const parent =
-      findParent(
-        collection,
-        targetNode.id
+
+  // collection reorder
+  if (
+    targetNode.type === 'collection'
+  ) {
+
+    const targetIndex =
+      collections.findIndex(
+        item => item.id === targetNode.id
       )
 
-    if (!parent) {
+
+    const destinationIndex =
+      dropPosition === 'after'
+        ? targetIndex + 1
+        : targetIndex
+
+
+    onMoveNode(
+      sourceCollectionId,
+      sourceNodeId,
+      sourceCollectionId,
+      null,
+      destinationIndex
+    )
+
+
+    handleDragEnd()
+    return
+  }
+}
+
+
+/*
+ * ---------------------------------------------
+ * DROP INSIDE FOLDER
+ * ---------------------------------------------
+ */
+if (
+  dropPosition === 'inside' &&
+  (
+    targetNode.type === 'folder'
+  )
+) {
+
+  const children =
+    Array.isArray(targetNode.children)
+      ? targetNode.children
+      : []
+
+
+  onMoveNode(
+    sourceCollectionId,
+    sourceNodeId,
+    destinationCollectionId,
+    targetNode.id,
+    children.length
+  )
+
+
+  handleDragEnd()
+  return
+}
+
+  /*
+   * ---------------------------------------------
+   * DROP BEFORE / AFTER ANY NODE
+   * (same collection, or a different one)
+   * ---------------------------------------------
+   */
+  if (
+    dropPosition === 'before' ||
+    dropPosition === 'after'
+  ) {
+
+    const destinationCollection =
+      collections.find(
+        (item) => item.id === destinationCollectionId
+      )
+
+    if (!destinationCollection) {
       handleDragEnd()
       return
     }
 
+
+    const parent =
+      findParent(
+        destinationCollection,
+        targetNode.id
+      )
+
+
+    /*
+     * Root collection handling
+     */
+    const actualParent =
+      parent || destinationCollection
+
+
+
     const targetIndex =
-      parent.children?.findIndex(
-        (child) =>
+      actualParent.children?.findIndex(
+        child =>
           child.id === targetNode.id
       )
+
+
 
     if (
       targetIndex === undefined ||
@@ -1199,23 +1336,31 @@ function handleDrop(
       return
     }
 
+
+
     let destinationIndex =
       targetIndex
 
-    if (
-      dropPosition === 'after'
-    ) {
+
+
+    if(dropPosition === 'after'){
       destinationIndex =
         targetIndex + 1
     }
 
+
+
     onMoveNode(
-      collectionId,
+      sourceCollectionId,
       sourceNodeId,
-      parent.id,
+      destinationCollectionId,
+      actualParent.id,
       destinationIndex
     )
+
+
   }
+
 
   handleDragEnd()
 }

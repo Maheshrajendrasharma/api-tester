@@ -1970,60 +1970,149 @@ async function exportFolder(folderId) {
      ======================================================= */
 
 function moveCollectionNode(
-  collectionId,
+  sourceCollectionId,
   nodeId,
+  destinationCollectionId,
   destinationId,
   index = null
 ) {
-  updateCollections((currentCollections) =>
-    currentCollections.map((collection) => {
-      if (collection.id !== collectionId) {
-        return collection
-      }
+  updateCollections((currentCollections) => {
 
-      const sourceParent = findParent(
-        collection,
-        nodeId
+    /*
+     * ---------------------------------------------
+     * CASE 1: reordering a top-level collection.
+     *
+     * Sidebar signals this by passing the dragged
+     * collection's own id as both the source
+     * collection id and the node id.
+     * ---------------------------------------------
+     */
+const isReorderingCollection =
+  sourceCollectionId === nodeId &&
+  destinationId === null
+
+    if (isReorderingCollection) {
+      const fromIndex = currentCollections.findIndex(
+        (collection) => collection.id === nodeId
       )
 
-      const destinationParent = findNode(
-        collection,
-        destinationId
-      )
-
-      if (!destinationParent) {
-        return collection
+      if (fromIndex === -1) {
+        return currentCollections
       }
 
-      let finalIndex = index
+      const next = [...currentCollections]
+      const [moved] = next.splice(fromIndex, 1)
 
-      // Same-parent reorder correction.
-      if (
-        sourceParent &&
-        sourceParent.id === destinationParent.id &&
-        index !== null
-      ) {
-        const sourceIndex =
-          sourceParent.children?.findIndex(
-            (child) => child.id === nodeId
-          )
+      let toIndex =
+        typeof index === 'number'
+          ? index
+          : next.length
 
-        if (
-          sourceIndex !== -1 &&
-          sourceIndex < index
-        ) {
-          finalIndex = index - 1
+      // Removing the source shifts everything after it
+      // back by one, so correct the target index.
+      if (fromIndex < toIndex) {
+        toIndex -= 1
+      }
+
+      toIndex = Math.max(0, Math.min(toIndex, next.length))
+
+      next.splice(toIndex, 0, moved)
+
+      return next
+    }
+
+    /*
+     * ---------------------------------------------
+     * CASE 2: move within the same collection.
+     * ---------------------------------------------
+     */
+    if (sourceCollectionId === destinationCollectionId) {
+      return currentCollections.map((collection) => {
+        if (collection.id !== sourceCollectionId) {
+          return collection
         }
+
+        const sourceParent = findParent(
+          collection,
+          nodeId
+        )
+
+        const destinationParent = findNode(
+          collection,
+          destinationId
+        )
+
+        if (!destinationParent) {
+          return collection
+        }
+
+        let finalIndex = index
+
+        // Same-parent reorder correction.
+        if (
+          sourceParent &&
+          sourceParent.id === destinationParent.id &&
+          index !== null
+        ) {
+          const sourceIndex =
+            sourceParent.children?.findIndex(
+              (child) => child.id === nodeId
+            )
+
+          if (
+            sourceIndex !== -1 &&
+            sourceIndex < index
+          ) {
+            finalIndex = index - 1
+          }
+        }
+
+        return moveNode(
+          collection,
+          nodeId,
+          destinationId,
+          finalIndex
+        )
+      })
+    }
+
+    /*
+     * ---------------------------------------------
+     * CASE 3: move a request/folder into a
+     * DIFFERENT collection.
+     * ---------------------------------------------
+     */
+    let movedNode = null
+
+    const afterRemoval = currentCollections.map((collection) => {
+      if (collection.id !== sourceCollectionId) {
+        return collection
       }
 
-      return moveNode(
+      const result = removeNode(collection, nodeId)
+
+      movedNode = result.removedNode
+
+      return result.tree
+    })
+
+    if (!movedNode) {
+      return currentCollections
+    }
+
+    return afterRemoval.map((collection) => {
+      if (collection.id !== destinationCollectionId) {
+        return collection
+      }
+
+      return insertNode(
         collection,
-        nodeId,
         destinationId,
-        finalIndex
+        movedNode,
+        index
       )
     })
-  )
+  })
 }
 
 
