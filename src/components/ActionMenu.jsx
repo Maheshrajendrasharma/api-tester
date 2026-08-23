@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
-function ActionMenu({ label, actions }) {
-  const menuRef = useRef(null)
+function ActionMenu({
+  label,
+  actions,
+  className = '',
+}) {  const menuRef = useRef(null)
   const triggerRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -79,8 +82,8 @@ function ActionMenu({ label, actions }) {
   }
 
   return (
-    <div
-      className="action-menu"
+<div
+  className={`action-menu ${className}`}
       ref={menuRef}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={handleMenuKeyDown}

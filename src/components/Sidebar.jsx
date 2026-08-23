@@ -880,6 +880,49 @@ const [collectionSearch, setCollectionSearch] =
 
 const collectionSearchInputRef = useRef(null)
 
+const collectionMenuRef = useRef(null)
+
+
+const [showCollectionActions, setShowCollectionActions] =
+  useState(false)
+
+
+useEffect(()=>{
+
+    function closeMenu(event){
+
+        if(
+            collectionMenuRef.current &&
+            !collectionMenuRef.current.contains(event.target)
+        ){
+
+            setShowCollectionActions(false)
+
+        }
+
+    }
+
+
+    document.addEventListener(
+        "mousedown",
+        closeMenu
+    )
+
+
+    return ()=>{
+
+        document.removeEventListener(
+            "mousedown",
+            closeMenu
+        )
+
+    }
+
+
+},[])
+
+
+
 
 useEffect(() => {
   if (
@@ -913,6 +956,8 @@ const [dropTargetId, setDropTargetId] =
 
 const [dropPosition, setDropPosition] =
   useState(null)
+
+
 
 function toggleNode(nodeId) {
 
@@ -1810,7 +1855,7 @@ return (
               </span>
 
               <span className="sidebar-collection-title">
-                COLLECTIONS
+                COLLECTIONS        
               </span>
 
             </button>
@@ -1857,20 +1902,50 @@ return (
 
           {/* COLLECTION ACTIONS */}
 
-          {!collectionSearchOpen && (
+          <div
+  className="workspace-actions-wrapper"
+  ref={collectionMenuRef}
+>
 
-            <ActionMenu
-              label="Collection actions"
-              actions={[
-                {
-                  label: 'Import Collection',
-                  onClick: () =>
-                    onImportCollection?.(),
-                },
-              ]}
-            />
+<button
+  type="button"
+  className="workspace-menu-button"
+  title="Collection options"
+  onClick={() =>
+    setShowCollectionActions(
+      previous => !previous
+    )
+  }
+>
+  ⋮
+</button>
 
-          )}
+
+{showCollectionActions && (
+
+<div
+ className="workspace-actions-menu"
+ onMouseDown={(e)=>e.stopPropagation()}
+>
+
+<button
+ type="button"
+ onClick={()=>{
+    onImportCollection?.()
+    setShowCollectionActions(false)
+ }}
+>
+ Import Collection
+</button>
+
+</div>
+
+)}
+
+</div>
+
+
+
 
         </div>
 
