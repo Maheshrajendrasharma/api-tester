@@ -8,7 +8,7 @@ export function createRunnerConfig(overrides = {}) {
   return {
     scope: RUNNER_SCOPE.REQUEST,
     iterations: 1,
-    delayMs: 0,
+    delayMs: 100,
     timeoutMs: 30000,
     stopOnError: false,
     runPreRequest: true,

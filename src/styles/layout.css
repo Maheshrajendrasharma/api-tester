@@ -194,7 +194,7 @@
 }
 
 
-.environment-panel-expand-handle { position: absolute; z-index: 5; top: 50%; right: 0; display: grid; width: 24px; height: 82px; place-items: center; padding: 0; color: #c7d0dc; background: #202933; border: 1px solid #3d4b5a; border-right: 0; border-radius: 7px 0 0 7px; cursor: pointer; font: inherit; font-size: 22px; line-height: 1; transform: translateY(-50%); }
+.environment-panel-expand-handle { position: absolute; z-index: 9999; top: 50%; right: 0; display: grid; width: 24px; height: 82px; place-items: center; padding: 0; color: #c7d0dc; background: #202933; border: 1px solid #3d4b5a; border-right: 0; border-radius: 7px 0 0 7px; cursor: pointer; font: inherit; font-size: 22px; line-height: 1; transform: translateY(-50%); }
 .environment-panel-expand-handle:hover, .environment-panel-expand-handle:focus-visible { color: #6ee7b7; background: #293842; outline: none; }
 .environment-collapse-handle { right: var(--environment-panel-width); border-right: 0; border-radius: 7px 0 0 7px; }
 

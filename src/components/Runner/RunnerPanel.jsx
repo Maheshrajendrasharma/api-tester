@@ -134,110 +134,141 @@ console.log(
 )
 
 
-    runNode({
+runNode({
+
   collections,
+
   collectionId,
+
   nodeId,
+
   config,
+
   dataRows,
+
   executeRequest,
+
   signal: controller.signal,
 
+
   onProgress: (progress) => {
+
     setState(progress)
 
+
     if (progress.event === 'request-start') {
-      setExecutionMap((previous) => ({
+
+      setExecutionMap(previous => ({
+
         ...previous,
+
         [progress.requestId]: {
-          status: 'running',
-        },
+
+          status: 'running'
+
+        }
+
       }))
+
     }
 
+
     if (progress.event === 'request-complete') {
-      setExecutionMap((previous) => ({
+
+      setExecutionMap(previous => ({
+
         ...previous,
+
         [progress.requestId]: {
-          status: progress.requestStatus,
-        },
+
+          status: progress.requestStatus
+
+        }
+
       }))
+
     }
+
   },
+
 
   onResult: (runnerResult) => {
 
+
     console.log(
-      '[RUNNER RESULT]',
+      "[RUNNER RESULT]",
       runnerResult
     )
 
+
     onRunnerHistoryEntry?.({
+
       name:
         runnerResult.requestName ||
         'Unnamed Request',
+
 
       method:
         runnerResult.request?.method ||
         'GET',
 
+
       url:
         runnerResult.request?.url ||
         '',
+
 
       resolvedUrl:
         runnerResult.request?.url ||
         '',
 
+
       statusCode:
         runnerResult.statusCode,
+
 
       statusText:
         runnerResult.status,
 
+
       responseTime:
         runnerResult.responseTime,
 
-      responseSize: null,
-
-      environment: null,
-
-      headers:
-        runnerResult.request?.headers || [],
-
-      params:
-        runnerResult.request?.params || [],
-
-      authorization:
-        runnerResult.request?.authorization || null,
-
-      requestBody:
-        runnerResult.request?.body || '',
 
       responseBody:
+
         typeof runnerResult.response === 'string'
-          ? runnerResult.response
-          : JSON.stringify(
-              runnerResult.response ?? {},
-              null,
-              2
-            ),
+
+        ? runnerResult.response
+
+        :
+
+        JSON.stringify(
+          runnerResult.response ?? {},
+          null,
+          2
+        ),
+
 
       error:
         runnerResult.error || null,
 
-      runner: true,
+
+      runner:true,
+
+
       iteration:
-        runnerResult.iteration,
+        runnerResult.iteration
 
     })
-  },
+
+  }
+
+
 })
 .finally(() => {
 
-
- setRunning(false)
-
+  setRunning(false)
 
 })
 
@@ -313,42 +344,24 @@ console.log(
 
 
 
-          {/* LEFT TREE */}
+        {/* LEFT CONFIG */}
 
-          <section className="runner-left">
-
-
-            <div className="runner-section-title">
-
-              Select target
-
-            </div>
+<section className="runner-middle">
 
 
+<RunnerConfig
 
 
-            <div className="runner-tree">
+onRun={handleRun}
 
 
-              <RunnerTree
+disabled={running}
 
- collections={collections}
-
- selectedId={
-   selectedNode?.id ||
-   initialNodeId
- }
-
- executionMap={executionMap}
-
- onSelect={setSelectedNode}
 
 />
 
-            </div>
 
-
-          </section>
+</section>
 
 
 
@@ -356,25 +369,42 @@ console.log(
 
 
 
-          {/* CENTER CONFIG */}
+{/* CENTER TREE */}
 
-          <section className="runner-middle">
-
-
-            <RunnerConfig
+<section className="runner-left">
 
 
-              onRun={handleRun}
+<div className="runner-section-title">
+
+Select target
+
+</div>
 
 
-              disabled={running}
+
+<div className="runner-tree">
 
 
-            />
+<RunnerTree
+
+collections={collections}
+
+selectedId={
+ selectedNode?.id ||
+ initialNodeId
+}
+
+executionMap={executionMap}
+
+onSelect={setSelectedNode}
+
+/>
 
 
-          </section>
+</div>
 
+
+</section>
 
 
 

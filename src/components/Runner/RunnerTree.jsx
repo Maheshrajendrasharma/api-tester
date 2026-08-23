@@ -53,18 +53,30 @@ className={`
       >
 
 
-
 <span className="runner-tree-icon">
   {isRequest ? '' : node.type === 'collection' ? '📁' : '📂'}
 </span>
 
 
+{
+  isRequest && (
+
+    <span className="runner-tree-method">
+
+      {node.method || 'GET'}
+
+    </span>
+
+  )
+}
+
 
 <span className="runner-tree-name">
 
- {node.name}
+  {node.name}
 
 </span>
+
 
 
 {
@@ -75,23 +87,7 @@ className={`
    {executionStatus}
 
  </span>
-
 }
-
-
-
-        {
-          isRequest && (
-
-            <span className="runner-tree-method">
-
-              {node.method || 'GET'}
-
-            </span>
-
-          )
-        }
-
 
       </div>
 

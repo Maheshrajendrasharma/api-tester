@@ -50,6 +50,7 @@ export default function RunnerConfig({ onRun, disabled = false }) {
       values: manualList,
     })
 
+    
     onRun?.({ config, dataRows })
   }
 
@@ -57,9 +58,14 @@ export default function RunnerConfig({ onRun, disabled = false }) {
     <div className="runner-config">
       <div className="runner-section-title">Run scope</div>
       <div className="runner-scope-group">
-{Object.entries({
-  [RUNNER_SCOPE.FOLDER]: 'Folder',
-  [RUNNER_SCOPE.COLLECTION]: 'Collection',
+{Object.entries({ 
+
+  [RUNNER_SCOPE.REQUEST]: 'Request',
+
+  [RUNNER_SCOPE.FOLDER]: 'Folder', 
+
+  [RUNNER_SCOPE.COLLECTION]: 'Collection', 
+
 }).map(([value, label]) => (
   <label key={value} className="runner-radio-row">
     <input
@@ -89,9 +95,9 @@ export default function RunnerConfig({ onRun, disabled = false }) {
           Delay (ms)
           <input
             type="number"
-            min="0"
+            min="100"
             value={config.delayMs}
-            onChange={(event) => update('delayMs', Number(event.target.value) || 0)}
+            onChange={(event) => update('delayMs', Number(event.target.value) || 100)}
           />
         </label>
         <label>

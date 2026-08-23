@@ -121,6 +121,7 @@
    ========================================================= */
 
 .runner-layout {
+
   flex: 1 1 auto;
 
   min-width: 0;
@@ -128,15 +129,22 @@
 
   display: grid;
 
+  /*
+     Select Target | Run Scope | Execution
+  */
+
   grid-template-columns:
-    300px
-    minmax(380px, 1fr)
-    330px;
+
+    minmax(340px, 38%)
+
+    minmax(280px, 22%)
+
+    minmax(260px, 30%);
+
 
   overflow: hidden;
+
 }
-
-
 /* =========================================================
    LEFT - TREE
    ========================================================= */
@@ -336,16 +344,17 @@
    ========================================================= */
 
 .runner-tree-method {
-  flex: 0 0 auto;
 
-  margin-left: 6px;
+  width:40px;
 
-  color: #6fc9ff;
+  flex-shrink:0;
 
-  font-size: 9px;
-  font-weight: 800;
+  color:#6fc9ff;
 
-  text-transform: uppercase;
+  font-size:11px;
+
+  font-weight:800;
+
 }
 
 

@@ -520,6 +520,8 @@ export function useRequest(
 
             }, 0)
 
+            return nextResponse
+
 
             console.log(
                 '[REQUEST] COMPLETE'
