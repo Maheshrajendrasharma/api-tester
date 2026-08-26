@@ -2,72 +2,223 @@ const VARIABLE_PATTERN =
   /(?<!\\)\{\{\s*([^{}]+?)\s*\}\}/g
 
 
+
+import {
+  getRuntimeVariable,
+  hasRuntimeVariable,
+} from '../services/scriptRuntime'
+
+import {
+  resolveDynamicVariable,
+} from '../services/dynamicVariables'
+
+
+
+
+
+
 export function getVariableReferences(
   text,
   environment
 ) {
 
-  if (typeof text !== 'string') {
+  if (
+    typeof text !== 'string'
+  ) {
     return []
   }
 
-
   const variables =
-    Array.isArray(environment?.variables)
+    Array.isArray(
+      environment?.variables
+    )
       ? environment.variables
       : []
-
 
   return [
     ...text.matchAll(
       VARIABLE_PATTERN
-    )
-  ].map((match) => {
+    ),
+  ].map(
+    (match) => {
 
-    const key =
-      match[1].trim()
+      const key =
+        match[1].trim()
 
+      /*
+       * =================================================
+       * ENVIRONMENT VARIABLE
+       * =================================================
+       */
 
-    const variable =
-      variables.find(
-        (item) =>
-          String(
-            item?.key ?? ''
-          ).trim() === key
-      )
-
-
-const hasValue =
-  variable &&
-  String(variable.value ?? '').trim() !== ''
-
-const status =
-  !variable || !hasValue
-    ? 'undefined'
-    : variable.enabled === false
-      ? 'disabled'
-      : 'enabled'
+      const environmentVariable =
+        variables.find(
+          (item) =>
+            String(
+              item?.key ?? ''
+            ).trim() === key
+        )
 
 
-    return {
+      /*
+       * =================================================
+       * DYNAMIC VARIABLE
+       * =================================================
+       */
 
-      key,
+      const dynamicKey =
+        key.startsWith('$')
+          ? key.substring(1)
+          : key
 
-      start:
-        match.index,
+      const dynamicValue =
+        resolveDynamicVariable(
+          dynamicKey
+        )
 
-      end:
-        match.index +
-        match[0].length,
 
-      status,
+      /*
+       * =================================================
+       * RUNTIME VARIABLE
+       * =================================================
+       */
 
-      value:
-        variable?.value,
+      let runtimeValue
+
+      if (
+        hasRuntimeVariable(
+          key
+        )
+      ) {
+
+        runtimeValue =
+          getRuntimeVariable(
+            key
+          )
+
+      }
+
+
+      /*
+       * =================================================
+       * RESOLVE STATUS
+       * =================================================
+       */
+
+      let status =
+        'undefined'
+
+      let value =
+        undefined
+
+
+      /*
+       * Disabled environment variable
+       * must remain disabled even if a value exists.
+       */
+
+      if (
+        environmentVariable &&
+        environmentVariable.enabled === false
+      ) {
+
+        status =
+          'disabled'
+
+        value =
+          environmentVariable.value
+
+      }
+
+
+      /*
+       * Dynamic variable
+       */
+
+      else if (
+        dynamicValue !== undefined
+      ) {
+
+        status =
+          'enabled'
+
+        value =
+          dynamicValue
+
+      }
+
+
+      /*
+       * Runtime variable
+       */
+
+      else if (
+        runtimeValue !== undefined
+      ) {
+
+        status =
+          'enabled'
+
+        value =
+          runtimeValue
+
+      }
+
+
+      /*
+       * Environment variable
+       */
+
+      else if (
+        environmentVariable &&
+        String(
+          environmentVariable.value ?? ''
+        ).trim() !== ''
+      ) {
+
+        status =
+          'enabled'
+
+        value =
+          environmentVariable.value
+
+      }
+
+
+      /*
+       * Missing / empty
+       */
+
+      else {
+
+        status =
+          'undefined'
+
+        value =
+          environmentVariable?.value
+
+      }
+
+
+      return {
+
+        key,
+
+        start:
+          match.index,
+
+        end:
+          match.index +
+          match[0].length,
+
+        status,
+
+        value,
+
+      }
 
     }
-
-  })
+  )
 
 }
 

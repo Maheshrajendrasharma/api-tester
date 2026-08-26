@@ -37,13 +37,14 @@ function resizePanels(event) {
 
   const workspaceBounds = workspace.getBoundingClientRect()
 
-  const minimumHeight = 120
-  const minimumResponseHeight = 80
+const minimumHeight = 220
+const minimumResponseHeight = 180
 
-  const nextHeight = event.clientY - workspaceBounds.top
+const nextHeight =
+  event.clientY - workspaceBounds.top
 
-  const maximumRequestHeight =
-    workspaceBounds.height - minimumResponseHeight
+const maximumRequestHeight =
+  workspaceBounds.height - minimumResponseHeight
 
   setRequestHeight(
     Math.min(

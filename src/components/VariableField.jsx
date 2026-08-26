@@ -9,10 +9,19 @@ import { createPortal } from 'react-dom'
 
 import {
   getAutocompleteQuery,
-  getVariableReferences
+  getVariableReferences,
 } from '../utils/variableIntelligence'
 
 import { resolveDynamicVariable } from '../services/dynamicVariables'
+
+
+import {
+  getAutocompleteVariables,
+  filterAutocompleteVariables,
+  getVariableAutocompleteContext,
+} from '../utils/variableAutocomplete'
+
+
 
 
 function VariableField({
@@ -27,8 +36,8 @@ function VariableField({
 
   const inputRef = useRef(null)
 
-  const containerRef = useRef(null)
-
+const containerRef = useRef(null)
+const autocompleteRef = useRef(null)
 
   const [autocomplete, setAutocomplete] =
     useState(null)
@@ -58,26 +67,6 @@ function VariableField({
   // =====================================================
 
 
-  const environmentVariables = useMemo(() => {
-
-
-    return (environment?.variables ?? [])
-
-      .filter(
-        (item) =>
-          item?.enabled !== false &&
-          String(item?.key ?? '').trim()
-      )
-
-      .map((item) => ({
-        id: `env-${item.id ?? item.key}`,
-        key: String(item.key).trim(),
-        source: 'Environment',
-        value: item.value
-      }))
-
-
-  }, [environment])
 
 
 
@@ -86,32 +75,6 @@ function VariableField({
   // =====================================================
 
 
-  const dynamicVariables = useMemo(() => {
-
-
-    const keys = [
-      'guid',
-      'timestamp',
-      'isoTimestamp',
-      'randomFirstName',
-      'randomLastName'
-    ]
-
-
-    return keys.map((key) => ({
-
-      id: `dynamic-${key}`,
-
-      key,
-
-      source: 'Dynamic',
-
-      value: resolveDynamicVariable(key)
-
-    }))
-
-
-  }, [])
 
 
 
@@ -120,23 +83,16 @@ function VariableField({
   // =====================================================
 
 
-  const availableVariables = useMemo(() => {
-
-
-    return [
-
-      ...environmentVariables,
-
-      ...dynamicVariables
-
+const availableVariables =
+  useMemo(
+    () =>
+      getAutocompleteVariables(
+        environment
+      ),
+    [
+      environment,
     ]
-
-
-  }, [
-    environmentVariables,
-    dynamicVariables
-  ])
-
+  )
 
 
   // =====================================================
@@ -167,40 +123,25 @@ function VariableField({
   // =====================================================
 
 
-  const suggestions = useMemo(() => {
+const suggestions =
+  useMemo(
+    () => {
 
+      if (!autocomplete) {
+        return []
+      }
 
-    if (!autocomplete) {
+      return filterAutocompleteVariables(
+        availableVariables,
+        autocomplete.query
+      )
 
-      return []
-
-    }
-
-
-    const query =
-      autocomplete.query
-        .toLowerCase()
-
-
-
-    return availableVariables.filter(
-
-      (variable) =>
-
-        variable.key
-          .toLowerCase()
-          .startsWith(query)
-
-    )
-
-
-  }, [
-
-    autocomplete,
-
-    availableVariables
-
-  ])
+    },
+    [
+      autocomplete,
+      availableVariables,
+    ]
+  )
 
 
 
@@ -221,19 +162,22 @@ function VariableField({
     function handleOutsideClick(event) {
 
 
-      if (
+     const clickedInsideInput =
+  containerRef.current?.contains(
+    event.target
+  )
 
-        containerRef.current &&
+const clickedInsideAutocomplete =
+  autocompleteRef.current?.contains(
+    event.target
+  )
 
-        !containerRef.current.contains(
-          event.target
-        )
-
-      ) {
-
-        setAutocomplete(null)
-
-      }
+if (
+  !clickedInsideInput &&
+  !clickedInsideAutocomplete
+) {
+  setAutocomplete(null)
+}
 
 
     }
@@ -311,41 +255,27 @@ function VariableField({
 
 
   function updateAutocomplete(
-    nextValue,
-    cursorPosition
-  ) {
+  nextValue,
+  cursorPosition
+) {
 
-
-    const nextAutocomplete =
-
-      getAutocompleteQuery(
-
-        nextValue,
-
-        cursorPosition
-
-      )
-
-
-
-    setAutocomplete(
-      nextAutocomplete
+  const nextAutocomplete =
+    getVariableAutocompleteContext(
+      nextValue,
+      cursorPosition
     )
 
+  setAutocomplete(
+    nextAutocomplete
+  )
 
+  requestAnimationFrame(() => {
+    updateDropdownPosition()
+  })
 
-    requestAnimationFrame(() => {
+  setActiveSuggestion(0)
 
-      updateDropdownPosition()
-
-    })
-
-
-
-    setActiveSuggestion(0)
-
-
-  }
+}
 
 
 
@@ -448,8 +378,10 @@ function applySuggestion(variable) {
 
 
 
-  const replacement =
-    `{{${key}}}`
+const replacement =
+  autocomplete.hasDollarPrefix
+    ? `{{$${key}}}`
+    : `{{${key}}}`
 
 
 
@@ -903,6 +835,7 @@ return (
     {suggestions.length > 0 &&
 createPortal(
     <div
+       ref={autocompleteRef}
         className="variable-autocomplete floating-dropdown"
         style={{
             position: "fixed",

@@ -274,7 +274,9 @@ onDrop={(event) => {
       }
     )
 
-    onRunNode?.(request)
+      onRunNode?.(
+    collectionId,
+    request.id)
 
   },
     },
@@ -474,13 +476,16 @@ onClick: () => {
         ]
       : []),
 
-    ...(isFolder
-      ? [
-      {
-        label: 'Run',
-        onClick: () =>
-          onRunNode?.(node.id),
-      },
+...(isFolder
+  ? [
+    {
+      label: 'Run',
+      onClick: () =>
+        onRunNode?.(
+          collectionId,
+          node.id
+        ),
+    },
 
           {
             label: 'Rename',
@@ -572,6 +577,7 @@ function HistoryView({
   onDeleteHistoryEntry,
   onToggleHistoryFavorite,
   onClearHistory,
+  onRunHistoryEntry
 }) {
     return (
       <>
@@ -638,12 +644,14 @@ function HistoryView({
 
               <ActionMenu
   label="History actions"
+  
   actions={[
-      {
-    label: 'Run',
-    onClick: () =>
-      onRunNode?.(request.id),
-  },
+  /*
+{
+  label: 'Run',
+  onClick: () =>
+    onRunHistoryEntry?.(entry),
+},*/
     {
       label: 'View Request',
       onClick: () =>
@@ -864,9 +872,11 @@ function Sidebar({
   onHistorySearchChange,
   onHistoryFilterChange,
   onRestoreHistoryEntry,
+  onRunHistoryEntry,
   onDeleteHistoryEntry,
   onToggleHistoryFavorite,
   onClearHistory
+
   
 }) {
       const [sidebarView, setSidebarView] =
@@ -1902,37 +1912,30 @@ return (
 
           {/* COLLECTION ACTIONS */}
 
-          <div
-  className="workspace-actions-wrapper"
-  ref={collectionMenuRef}
+<div
+ className="collection-actions-wrapper"
+ ref={collectionMenuRef}
 >
 
 <button
-  type="button"
-  className="workspace-menu-button"
-  title="Collection options"
-  onClick={() =>
-    setShowCollectionActions(
-      previous => !previous
-    )
-  }
+ className="collection-menu-button"
+ type="button"
+ onClick={() =>
+   setShowCollectionActions(prev => !prev)
+ }
 >
-  ⋮
+ ⋮
 </button>
 
 
 {showCollectionActions && (
 
-<div
- className="workspace-actions-menu"
- onMouseDown={(e)=>e.stopPropagation()}
->
+<div className="collection-actions-menu">
 
 <button
- type="button"
  onClick={()=>{
-    onImportCollection?.()
-    setShowCollectionActions(false)
+   onImportCollection?.()
+   setShowCollectionActions(false)
  }}
 >
  Import Collection
@@ -2022,6 +2025,9 @@ return (
           onRestoreHistoryEntry={
             onRestoreHistoryEntry
           }
+
+
+          onRunHistoryEntry={onRunHistoryEntry}
 
 
           onDeleteHistoryEntry={

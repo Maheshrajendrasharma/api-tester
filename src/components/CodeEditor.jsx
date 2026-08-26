@@ -1,1381 +1,1422 @@
-import { useEffect, useMemo, useRef } from 'react'
+import Editor from "@monaco-editor/react";
 
 import {
-  EditorView,
-  basicSetup,
-} from 'codemirror'
-
-import {
-  EditorState,
-  StateEffect,
-  StateField,
-  Prec,
-} from '@codemirror/state'
-
-import {
-  json,
-} from '@codemirror/lang-json'
-
-import {
-  javascript,
-} from '@codemirror/lang-javascript'
-
-import { createTheme } from '@uiw/codemirror-themes'
-import { tags as t } from '@lezer/highlight'
-
-import {
-  autocompletion,
-  completionKeymap,
-  startCompletion,
-} from '@codemirror/autocomplete'
-
-import {
-  Decoration,
-  keymap,
-} from '@codemirror/view'
-
-import {
-  getAutocompleteQuery,
-  getVariableReferences,
-} from '../utils/variableIntelligence'
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 
 import {
   resolveDynamicVariable,
-} from '../services/dynamicVariables'
+} from "../services/dynamicVariables";
+
+import {
+  getVariableReferences,
+} from "../utils/variableIntelligence";
+
+import {
+  getAutocompleteVariables,
+  filterAutocompleteVariables,
+  getVariableAutocompleteContext,
+} from "../utils/variableAutocomplete";
 
 
-/* =========================================================
-   CUSTOM API TESTER THEME
-   ========================================================= */
+/*
+ * =========================================================
+ * MONACO THEME
+ * =========================================================
+ */
 
-const apiTesterTheme = createTheme({
-  theme: 'dark',
-
-  settings: {
-    background: '#151b21',
-    foreground: '#dbe5ee',
-    caret: '#6ee7b7',
-    selection: '#264f78',
-    lineHighlight: '#1b222a',
-    gutterBackground: '#151b21',
-  },
-
-styles: [
-
-  /* COMMENT */
-  {
-    tag: t.comment,
-    color: '#6a9955',
-  },
-
-  /* STRING → ORANGE */
-  {
-    tag: t.string,
-    color: '#CE9178',
-  },
-
-  /* NORMAL VARIABLE NAME */
-  {
-    tag: t.variableName,
-    color: '#dbe5ee',
-  },
-
-  /* JSON KEY → ORANGE */
-  {
-    tag: t.propertyName,
-    color: '#CE9178',
-  },
-
-  /* NUMBER / INTEGER → DARK BLUE */
-  {
-    tag: t.number,
-    color: '#4F81BD',
-  },
-
-  /* BOOLEAN */
-  {
-    tag: t.bool,
-    color: '#569CD6',
-  },
-
-  /* KEYWORD / NULL */
-  {
-    tag: t.keyword,
-    color: '#C586C0',
-  },
-
-],
-
-})
+const API_TESTER_THEME = "api-tester-dark";
 
 
+function defineApiTesterTheme(monaco) {
 
-const variableStatusTheme =
-  EditorView.theme({
+  monaco.editor.defineTheme(
+    API_TESTER_THEME,
+    {
+      base: "vs-dark",
 
-    /* =========================
-       RESOLVED VARIABLE
-       ========================= */
+      inherit: true,
 
-    '.cm-variable-token-enabled, .cm-variable-token-enabled *': {
-      color: '#6ee7b7 !important',
-    },
+      rules: [
 
-    /* =========================
-       UNDEFINED VARIABLE
-       ========================= */
+        /*
+         * Comments
+         */
 
-    '.cm-variable-token-undefined, .cm-variable-token-undefined *': {
-      color: '#f38b91 !important',
-    },
-
-    /* =========================
-       DISABLED VARIABLE
-       ========================= */
-
-    '.cm-variable-token-disabled, .cm-variable-token-disabled *': {
-      color: '#8b97a4 !important',
-    },
-
-  })
+        {
+          token: "comment",
+          foreground: "6A9955",
+        },
 
 
+        /*
+         * JSON Keys
+         */
+
+        {
+          token: "string.key.json",
+          foreground: "6FC9FF",
+        },
 
 
+        /*
+         * JSON String Values
+         */
+
+        {
+          token: "string.value.json",
+          foreground: "FFFFFF",
+        },
 
 
+        /*
+         * Normal strings
+         */
 
-/* =========================================================
-   VARIABLE DECORATIONS
-   ========================================================= */
-
-const setVariableDecorations =
-  StateEffect.define()
+        {
+          token: "string",
+          foreground: "FFFFFF",
+        },
 
 
-const variableDecorationField =
-  StateField.define({
+        /*
+         * Numbers
+         */
 
-    create() {
-      return Decoration.none
-    },
+        {
+          token: "number",
+          foreground: "4F81BD",
+        },
 
-    update(
-      decorations,
-      transaction
-    ) {
 
-      /*
-       * Apply new variable decorations
-       */
-      for (
-        const effect
-        of transaction.effects
-      ) {
+        /*
+         * Keywords
+         */
 
-        if (
-          effect.is(
-            setVariableDecorations
-          )
-        ) {
-          return effect.value
-        }
+        {
+          token: "keyword",
+          foreground: "C586C0",
+        },
 
-      }
 
-      return decorations
+        /*
+         * Types
+         */
 
-    },
+        {
+          token: "type",
+          foreground: "9CDCFE",
+        },
 
-    provide: (field) =>
-      EditorView.decorations.from(
-        field
-      ),
 
-  })
-  
-  /*
+        /*
+         * Generic variables
+         */
+
+        {
+          token: "variable",
+          foreground: "DBE5EE",
+        },
+
+      ],
+
+      colors: {
+
+        "editor.background":
+          "#151B21",
+
+        "editor.foreground":
+          "#DBE5EE",
+
+        "editorCursor.foreground":
+          "#6EE7B7",
+
+        /*
+         * Selection
+         */
+
+        "editor.selectionBackground":
+          "#264F78",
+
+        "editor.inactiveSelectionBackground":
+          "#264F78",
+
+        /*
+         * Active line
+         */
+
+        "editor.lineHighlightBackground":
+          "#1B222A",
+
+        /*
+         * Line numbers
+         */
+
+        "editorLineNumber.foreground":
+          "#667384",
+
+        "editorLineNumber.activeForeground":
+          "#DBE5EE",
+
+        /*
+         * Gutter
+         */
+
+        "editorGutter.background":
+          "#151B21",
+
+        /*
+         * Indentation
+         */
+
+        "editorIndentGuide.background":
+          "#2C3640",
+
+        "editorIndentGuide.activeBackground":
+          "#465462",
+
+        /*
+         * Bracket matching
+         */
+
+        "editorBracketMatch.background":
+          "#26384A",
+
+        "editorBracketMatch.border":
+          "#6EE7B7",
+
+        /*
+         * Hover
+         */
+
+        "editorHoverWidget.background":
+          "#111820",
+
+        "editorHoverWidget.border":
+          "#394653",
+
+        /*
+         * Autocomplete
+         */
+
+        "editorSuggestWidget.background":
+          "#111820",
+
+        "editorSuggestWidget.border":
+          "#394653",
+
+        "editorSuggestWidget.foreground":
+          "#DBE5EE",
+
+        "editorSuggestWidget.selectedBackground":
+          "#243B55",
+
+        /*
+         * Whitespace
+         */
+
+        "editorWhitespace.foreground":
+          "#2C3640",
+
+      },
+    }
+  );
+
+}
+
+
+/*
+ * =========================================================
+ * LANGUAGE NORMALIZATION
+ * =========================================================
+ */
+
+function normalizeLanguage(language) {
+
+  if (
+    language === "js" ||
+    language === "javascript"
+  ) {
+
+    return "javascript";
+
+  }
+
+
+  if (
+    language === "json"
+  ) {
+
+    return "json";
+
+  }
+
+
+  return "plaintext";
+
+}
+
+
+/*
+ * =========================================================
+ * ENVIRONMENT VARIABLES
+ * =========================================================
+ */
+
+function getEnvironmentVariables(environment) {
+
+  const variables =
+    Array.isArray(
+      environment?.variables
+    )
+      ? environment.variables
+      : [];
+
+
+  return variables
+    .filter(
+      (item) =>
+        String(
+          item?.key ?? ""
+        ).trim()
+    )
+    .map(
+      (item) => ({
+
+        id:
+          `env-${item.id ?? item.key}`,
+
+        key:
+          String(
+            item.key
+          ).trim(),
+
+        source:
+          "Environment",
+
+        value:
+          item.value,
+
+        enabled:
+          item.enabled !== false,
+
+      })
+    );
+
+}
+
+
+/*
+ * =========================================================
+ * DYNAMIC VARIABLES
+ * =========================================================
+ */
+
+function getDynamicVariables() {
+
+  return [
+
+    "guid",
+
+    "randomUUID",
+
+    "timestamp",
+
+    "isoTimestamp",
+
+    "randomFirstName",
+
+    "randomLastName",
+
+    "randomCountryCode",
+
+  ];
+
+}
+
+
+/*
+ * =========================================================
+ * AVAILABLE VARIABLES
+ * =========================================================
+ */
+
+function buildAvailableVariables(environment) {
+
+  const environmentVariables =
+    getEnvironmentVariables(
+      environment
+    );
+
+
+  const dynamicVariables =
+    getDynamicVariables().map(
+      (key) => ({
+
+        id:
+          `dynamic-${key}`,
+
+        key,
+
+        source:
+          "Dynamic",
+
+        value:
+          resolveDynamicVariable(key),
+
+        enabled:
+          true,
+
+      })
+    );
+
+
+  return [
+
+    ...environmentVariables,
+
+    ...dynamicVariables,
+
+  ];
+
+}
+
+
+/*
  * =========================================================
  * CODE EDITOR
  * =========================================================
  */
 
-function CodeEditor({
-  value = '',
-  onChange,
-  language = 'text',
-  environment,
-  readOnly = false,
-  placeholder = '',
+export default function CodeEditor({
 
-  /*
-   * NEW:
-   *
-   * Used by the URL editor.
-   *
-   * false = normal multiline editor
-   * true  = single-line editor
-   */
+  value = "",
+
+  onChange,
+
+  language = "text",
+
+  environment,
+
+  readOnly = false,
+
+  placeholder = "",
+
   singleLine = false,
 
-  /*
-   * NEW:
-   *
-   * Allows the URL editor to keep its
-   * existing url-input styling.
-   */
-  className = '',
+  className = "",
+
 }) {
 
-  const editorParentRef =
-    useRef(null)
+
+  /*
+   * =======================================================
+   * REFS
+   * =======================================================
+   */
+
+  const editorRef =
+    useRef(null);
 
 
-  const editorViewRef =
-    useRef(null)
+  const monacoRef =
+    useRef(null);
+
+
+  const variableDecorationIdsRef =
+    useRef([]);
+
+
+  const completionProviderRef =
+    useRef(null);
 
 
   const environmentRef =
-    useRef(environment)
+    useRef(environment);
+
+
+  const variablesRef =
+    useRef([]);
 
 
   /*
-   * =========================================================
-   * KEEP LATEST ENVIRONMENT
-   * =========================================================
+   * Always keep the latest environment available.
    */
 
   environmentRef.current =
-    environment
+    environment;
 
 
   /*
-   * =========================================================
+   * =======================================================
    * AVAILABLE VARIABLES
-   * =========================================================
+   * =======================================================
    */
 
   const availableVariables =
-    useMemo(() => {
-
-      /*
-       * ENVIRONMENT VARIABLES
-       */
-
-      const environmentVariables =
-        (
-          environment?.variables ??
-          []
-        )
-.filter(
-  (item) =>
-    String(
-      item?.key ?? ''
-    ).trim()
-)
-.map(
-  (item) => ({
-
-    id:
-      `env-${item.id ?? item.key}`,
-
-    key:
-      String(
-        item.key
-      ).trim(),
-
-    source:
-      'Environment',
-
-    value:
-      item.value,
-
-    enabled:
-      item.enabled !== false,
-
-  })
-)
-
-      /*
-       * DYNAMIC VARIABLES
-       */
-
-      const dynamicKeys = [
-
-        'guid',
-
-        'timestamp',
-
-        'isoTimestamp',
-
-        'randomFirstName',
-
-        'randomLastName',
-
+    useMemo(
+      () =>
+        buildAvailableVariables(
+          environment
+        ),
+      [
+        environment,
       ]
-
-
-      const dynamicVariables =
-        dynamicKeys.map(
-          (key) => ({
-
-            id:
-              `dynamic-${key}`,
-
-            key,
-
-            source:
-              'Dynamic',
-
-            value:
-              resolveDynamicVariable(
-                key
-              ),
-
-          })
-        )
-
-
-      /*
-       * SAME VARIABLE SOURCE USED
-       * BY CODEMIRROR AUTOCOMPLETE
-       */
-
-      return [
-
-        ...environmentVariables,
-
-        ...dynamicVariables,
-
-      ]
-
-    }, [
-      environment,
-    ])
-
-
-  /*
-   * =========================================================
-   * KEEP LATEST VARIABLES AVAILABLE
-   * TO THE AUTOCOMPLETE CLOSURE
-   * =========================================================
-   */
-
-  const variablesRef =
-    useRef(
-      availableVariables
-    )
+    );
 
 
   variablesRef.current =
-    availableVariables
-
-
-function buildVariableDecorations(
-  text,
-  variables
-) {
-
-  const decorations = []
-
-  const variablePattern =
-    /(?<!\\)\{\{\s*([^{}]+?)\s*\}\}/g
-
-  for (
-    const match of text.matchAll(variablePattern)
-  ) {
-
-    const rawKey =
-      match[1].trim()
-
-    /*
-     * Support:
-     *
-     * {{base_url}}
-     * {{$timestamp}}
-     *
-     * Internally lookup "timestamp"
-     */
-
-    const key =
-      rawKey.startsWith('$')
-        ? rawKey.slice(1)
-        : rawKey
-
-
-    const variable =
-      variables.find(
-        (item) =>
-          String(
-            item?.key ?? ''
-          ).trim() === key
-      )
-
-
-    /*
-     * =====================================================
-     * VARIABLE STATUS
-     * =====================================================
-     *
-     * GREEN:
-     * exists + enabled + has value
-     *
-     * RED:
-     * does not exist
-     * OR exists but value is empty
-     *
-     * GRAY:
-     * exists but disabled
-     * =====================================================
-     */
-
-    let className =
-      'cm-variable-token-undefined'
-
-
-    if (!variable) {
-
-      className =
-        'cm-variable-token-undefined'
-
-    } else if (
-      variable.enabled === false
-    ) {
-
-      className =
-        'cm-variable-token-disabled'
-
-    } else if (
-      String(
-        variable.value ?? ''
-      ).trim() === ''
-    ) {
-
-      className =
-        'cm-variable-token-undefined'
-
-    } else {
-
-      className =
-        'cm-variable-token-enabled'
-
-    }
-
-
-    decorations.push(
-
-      Decoration.mark({
-
-        class:
-          className,
-
-      }).range(
-
-        match.index,
-
-        match.index +
-          match[0].length
-
-      )
-
-    )
-
-  }
-
-
-  return Decoration.set(
-    decorations,
-    true
-  )
-
-}
+    availableVariables;
 
 
   /*
-   * =========================================================
-   * VARIABLE AUTOCOMPLETE
-   * =========================================================
+   * =======================================================
+   * VARIABLE DECORATIONS
    *
-   * IMPORTANT:
+   * Environment variable with value:
+   * GREEN
    *
-   * This uses the existing
-   * getAutocompleteQuery()
+   * Missing / empty variable:
+   * RED
    *
-   * rather than creating another
-   * variable autocomplete system.
-   *
-   * It supports:
-   *
-   * {{
-   *
-   * {{|
-   *
-   * {{token
-   *
-   * {{token|
-   *
-   * {{|}}
-   *
-   * =========================================================
+   * Disabled variable:
+   * MUTED
+   * =======================================================
    */
 
-  function variableCompletionSource(
-    context
-  ) {
+  const updateVariableDecorations =
+    useCallback(
+      () => {
 
-    const document =
-      context.state.doc.toString()
+        const editor =
+          editorRef.current;
 
 
-    const position =
-      context.pos
+        if (!editor) {
 
+          return;
 
-    const autocomplete =
-      getAutocompleteQuery(
-        document,
-        position
-      )
+        }
 
 
-    /*
-     * User is not currently typing
-     * a variable expression.
-     */
+        const model =
+          editor.getModel();
 
-    if (!autocomplete) {
 
-      return null
+        if (!model) {
 
-    }
+          return;
 
+        }
 
-    const query =
-      String(
-        autocomplete.query ?? ''
-      ).toLowerCase()
 
+        const references =
+          getVariableReferences(
+            model.getValue(),
+            environmentRef.current
+          );
 
-    /*
-     * FILTER EXISTING VARIABLES
-     */
 
-    const matches =
-      variablesRef.current.filter(
-        (variable) =>
-          variable.key
-            .toLowerCase()
-            .startsWith(query)
-      )
+        const decorations =
+          references.map(
+            (reference) => {
 
+              const startPosition =
+                model.getPositionAt(
+                  reference.start
+                );
 
-    if (
-      !matches.length
-    ) {
 
-      return null
+              const endPosition =
+                model.getPositionAt(
+                  reference.end
+                );
 
-    }
 
+              let decorationClass =
+                "api-variable-undefined";
 
-    /*
-     * CODEMIRROR COMPLETION RESULT
-     */
 
-    return {
+              if (
+                reference.status === "enabled"
+              ) {
 
-      from:
-        autocomplete.start ??
-        autocomplete.from ??
-        position,
-
-      to:
-        autocomplete.end ??
-        position,
-
-
-      options:
-        matches.map(
-          (variable) => ({
-
-            label:
-              variable.key,
-
-            detail:
-              variable.source,
-
-            type:
-              variable.source ===
-              'Dynamic'
-                ? 'keyword'
-                : 'variable',
-
-
-            /*
-             * INSERT:
-             *
-             * {{variable}}
-             */
-            
-            
-            
-            apply: (view, completion) => {
-
-
-  const label =
-    completion.label
-
-
-  const state =
-    view.state
-
-
-  const cursor =
-    state.selection.main.head
-
-
-  const text =
-    state.doc.toString()
-
-
-  /*
-   Find the last {{
-  */
-
-  const before =
-    text.slice(
-      0,
-      cursor
-    )
-
-
-  const start =
-    before.lastIndexOf('{{')
-
-
-  if(start !== -1){
-
-
-    /*
-      Find closing }}
-
-      after cursor
-    */
-
-    const after =
-      text.slice(
-        cursor
-      )
-
-
-    const close =
-      after.indexOf('}}')
-
-
-    const end =
-      close !== -1
-        ? cursor + close + 2
-        : cursor
-
-
-
-    const value =
-      `{{${label}}}`
-
-
-
-    view.dispatch({
-
-      changes: {
-
-        from:
-          start,
-
-        to:
-          end,
-
-        insert:
-          value,
-
-      },
-
-
-      selection: {
-
-        anchor:
-          start +
-          value.length,
-
-      },
-
-
-    })
-
-
-    return
-
-  }
-
-
-
-  /*
-    fallback
-  */
-
-
-  const value =
-    `{{${label}}}`
-
-
-  view.dispatch({
-
-    changes: {
-
-      from,
-
-      to,
-
-      insert:
-        value,
-
-    },
-
-
-    selection: {
-
-      anchor:
-        from +
-        value.length,
-
-    },
-
-  })
-
-
-},            
-
-          })
-        ),
-
-    }
-
-  }
-
-
-  /*
-   * =========================================================
-   * CREATE EDITOR
-   * =========================================================
-   */
-
-  useEffect(() => {
-
-    if (
-      !editorParentRef.current
-    ) {
-
-      return
-
-    }
-
-
-    let languageExtension =
-      []
-
-
-    /*
-     * =======================================================
-     * JSON
-     * =======================================================
-     */
-
-    if (
-      language === 'json'
-    ) {
-
-      languageExtension = [
-
-        json(),
-
-      ]
-
-    }
-
-
-    /*
-     * =======================================================
-     * JAVASCRIPT
-     * =======================================================
-     */
-
-    else if (
-      language === 'javascript' ||
-      language === 'js'
-    ) {
-
-      languageExtension = [
-
-        javascript(),
-
-      ]
-
-    }
-
-
-    /*
-     * =======================================================
-     * READ ONLY
-     * =======================================================
-     */
-
-    const readOnlyExtension =
-      readOnly
-        ? EditorState.readOnly.of(
-            true
-          )
-        : []
-
-
-    /*
-     * =======================================================
-     * CHANGE LISTENER
-     * =======================================================
-     */
-
-    const changeListener =
-      EditorView.updateListener.of(
-        (update) => {
-
-          if (
-            !update.docChanged
-          ) {
-
-            return
-
-          }
-
-
-          const nextValue =
-            update.state.doc.toString()
-
-          onChange?.({
-  target: {
-    value: nextValue,
-  },
-})
-
-            update.view.dispatch({
-
-  effects:
-    setVariableDecorations.of(
-      buildVariableDecorations(
-        nextValue,
-        variablesRef.current
-      )
-    ),
-
-})
-          /*
-           * KEEP EXISTING ONCHANGE
-           * BEHAVIOUR
-           */
-
- 
-
-
-          /*
-           * =================================================
-           * AUTO OPEN {{VARIABLE}} AUTOCOMPLETE
-           * =================================================
-           *
-           * CodeMirror may automatically convert:
-           *
-           * {{
-           *
-           * into:
-           *
-           * {{}}
-           *
-           * with cursor:
-           *
-           * {{|}}
-           *
-           * =================================================
-           */
-
-          const selection =
-            update.state.selection.main
-
-
-          const position =
-            selection.head
-
-
-          const beforeCursor =
-            update.state.doc.sliceString(
-
-              Math.max(
-                0,
-                position - 2
-              ),
-
-              position
-
-            )
-
-
-          const afterCursor =
-            update.state.doc.sliceString(
-
-              position,
-
-              Math.min(
-
-                update.state.doc.length,
-
-                position + 2
-
-              )
-
-            )
-
-
-          /*
-           * DETECT:
-           *
-           * {{|}}
-           */
-
-          if (
-            beforeCursor === '{{' &&
-            afterCursor === '}}'
-          ) {
-
-            /*
-             * Wait until the current
-             * CodeMirror update is complete.
-             */
-
-            setTimeout(() => {
-
-              try {
-
-if(
- !update.transactions.some(
-   tr => tr.isUserEvent(
-     'input.complete'
-   )
- )
-){
-
- startCompletion(
-   update.view
- )
-
-}
-
-              } catch {
-
-                /*
-                 * Ignore completion startup
-                 * errors.
-                 */
+                decorationClass =
+                  "api-variable-enabled";
 
               }
 
-            }, 0)
 
-          }
+              else if (
+                reference.status === "disabled"
+              ) {
 
-        }
-      )
+                decorationClass =
+                  "api-variable-disabled";
 
-
-    /*
-     * =======================================================
-     * PLACEHOLDER
-     * =======================================================
-     */
-
-    const placeholderExtension =
-      placeholder
-        ? EditorView.contentAttributes.of({
-
-            'data-placeholder':
-              placeholder,
-
-          })
-        : []
+              }
 
 
-    /*
-     * =======================================================
-     * VARIABLE AUTOCOMPLETION
-     * =======================================================
-     */
+              return {
 
-    const variableAutocomplete =
-      autocompletion({
+                range: {
 
-        activateOnTyping:
-          true,
+                  startLineNumber:
+                    startPosition.lineNumber,
 
-        override: [
+                  startColumn:
+                    startPosition.column,
 
-          variableCompletionSource,
+                  endLineNumber:
+                    endPosition.lineNumber,
 
-        ],
+                  endColumn:
+                    endPosition.column,
 
-        defaultKeymap:
-          true,
-
-      })
+                },
 
 
-    /*
-     * =======================================================
-     * LINE WRAPPING
-     * =======================================================
-     *
-     * Normal editors:
-     *
-     * Body
-     * Scripts
-     * Response
-     *
-     * keep line wrapping.
-     *
-     * URL:
-     *
-     * singleLine === true
-     *
-     * does NOT wrap.
-     * =======================================================
-     */
+                options: {
 
-    const lineWrappingExtension =
-      singleLine
-        ? []
-        : [
+                  inlineClassName:
+                    decorationClass,
 
-            EditorView.lineWrapping,
+                },
 
-          ]
+              };
 
-
-    /*
-     * =======================================================
-     * SINGLE LINE EDITOR
-     * =======================================================
-     *
-     * Prevent Enter from creating additional lines
-     * when this CodeEditor is being used for URL.
-     *
-     * We don't disable Enter globally because the
-     * normal Body/Script editors need it.
-     * =======================================================
-     */
-
-    const singleLineKeymap =
-      singleLine
-        ? keymap.of([
-
-            {
-
-              key:
-                'Enter',
-
-              run: () => true,
-
-            },
-
-          ])
-        : []
-
-        /*
- * =========================================================
- * SINGLE-LINE VARIABLE BRACE HANDLER
- * =========================================================
- *
- * CodeMirror basicSetup contains closeBrackets.
- *
- * Without this handler:
- *
- * user types:
- *
- * {{
- *
- * CodeMirror can create:
- *
- * {{}}
- *
- * That conflicts with our {{variable}} autocomplete.
- *
- * For single-line fields only, we therefore insert
- * "{" literally and let the autocomplete insert the
- * complete {{variable}} expression.
- *
- * Body / Script editors are NOT affected.
- * =========================================================
- */
-
-const singleLineVariableBraceHandler =
-  singleLine
-    ? Prec.highest(
-        EditorView.inputHandler.of(
-          (
-            view,
-            from,
-            to,
-            text
-          ) => {
-
-            /*
-             * Only intercept "{"
-             */
-
-            if (
-              text !== '{'
-            ) {
-              return false
             }
+          );
 
 
-            /*
-             * Insert only the opening brace.
-             *
-             * Do NOT allow closeBrackets to insert
-             * the automatic "}".
-             */
+        variableDecorationIdsRef.current =
+          editor.deltaDecorations(
+            variableDecorationIdsRef.current,
+            decorations
+          );
 
-            view.dispatch({
-
-              changes: {
-                from,
-                to,
-                insert: '{',
-              },
-
-              selection: {
-                anchor:
-                  from + 1,
-              },
-
-            })
-
-
-            /*
-             * Tell CodeMirror that we handled
-             * the input.
-             */
-
-            return true
-
-          }
-        )
-      )
-    : []
-
-    /*
-     * =======================================================
-     * CREATE STATE
-     * =======================================================
-     */
-
-    const startState =
-      EditorState.create({
-
-        doc:
-          value ?? '',
-
-
-extensions: [
-
-  basicSetup,
-
-  languageExtension,
-
-  variableAutocomplete,
-
-  apiTesterTheme,
-
-  variableDecorationField,
-
-  variableStatusTheme,
-
-  changeListener,
-
-  readOnlyExtension,
-
-  EditorView.editable.of(
-    !readOnly
-  ),
-
-  placeholderExtension,
-
-  lineWrappingExtension,
-
-  singleLineKeymap,
-
-  singleLineVariableBraceHandler,
-
-],
-
-      })
-
-
-    /*
-     * =======================================================
-     * CREATE VIEW
-     * =======================================================
-     */
-
-    const view =
-      new EditorView({
-
-        state:
-          startState,
-
-        parent:
-          editorParentRef.current,
-
-      })
-
-      view.dispatch({
-
-  effects:
-    setVariableDecorations.of(
-      buildVariableDecorations(
-        view.state.doc.toString(),
-        variablesRef.current
-      )
-    ),
-
-})
-
-
-    editorViewRef.current =
-      view
-
-
-    /*
-     * =======================================================
-     * CLEANUP
-     * =======================================================
-     */
-
-    return () => {
-
-      view.destroy()
-
-
-      editorViewRef.current =
-        null
-
-    }
-
-  }, [])
+      },
+      []
+    );
 
 
   /*
-   * =========================================================
-   * ENVIRONMENT CHANGE
-   * =========================================================
+   * =======================================================
+   * HANDLE VALUE CHANGE
+   * =======================================================
    */
 
-  useEffect(() => {
+  const handleChange =
+    useCallback(
+      (nextValue) => {
 
-  const view =
-    editorViewRef.current
+        const finalValue =
+          nextValue ?? "";
 
-  if (!view) {
-    return
-  }
 
-  const text =
-    view.state.doc.toString()
+        onChange?.({
 
-  view.dispatch({
-    effects:
-      setVariableDecorations.of(
-        buildVariableDecorations(
-          text,
-          variablesRef.current
-        )
-      ),
-  })
+          target: {
 
-}, [
-  environment,
-])
+            value:
+              finalValue,
+
+          },
+
+        });
+
+
+        requestAnimationFrame(
+          () => {
+
+            updateVariableDecorations();
+
+          }
+        );
+
+      },
+      [
+        onChange,
+        updateVariableDecorations,
+      ]
+    );
+
+
+  /*
+   * =======================================================
+   * EDITOR MOUNT
+   * =======================================================
+   */
+
+  const handleEditorMount =
+    useCallback(
+      (
+        editor,
+        monaco
+      ) => {
+
+
+        /*
+         * Store references
+         */
+
+        editorRef.current =
+          editor;
+
+
+        monacoRef.current =
+          monaco;
+
+
+        /*
+         * Define and activate theme
+         */
+
+        defineApiTesterTheme(
+          monaco
+        );
+
+
+        monaco.editor.setTheme(
+          API_TESTER_THEME
+        );
+
+
+        /*
+         * ===================================================
+         * AUTOCOMPLETE PROVIDER
+         * ===================================================
+         */
+
+        completionProviderRef.current =
+          monaco.languages.registerCompletionItemProvider(
+
+            normalizeLanguage(
+              language
+            ),
+
+            {
+
+              /*
+               * Monaco will call completion when {
+               * is typed.
+               */
+
+              triggerCharacters: [
+                "{",
+              ],
+
+
+              provideCompletionItems(
+                model,
+                position
+              ) {
+
+
+                const fullText =
+                  model.getValue();
+
+
+                const cursorOffset =
+                  model.getOffsetAt(
+                    position
+                  );
+
+
+                /*
+                 * Check whether cursor is inside
+                 *
+                 * {{
+                 * {{base
+                 * {{$timestamp
+                 */
+
+                const context =
+                  getVariableAutocompleteContext(
+                    fullText,
+                    cursorOffset
+                  );
+
+
+                /*
+                 * Outside {{ }}
+                 *
+                 * Return nothing.
+                 *
+                 * This prevents JavaScript / Monaco
+                 * irrelevant suggestions.
+                 */
+
+                if (!context) {
+
+                  return {
+
+                    suggestions: [],
+
+                  };
+
+                }
+
+
+                /*
+                 * Get only project variables.
+                 */
+
+                const variables =
+                  getAutocompleteVariables(
+                    environmentRef.current
+                  );
+
+
+                /*
+                 * Filter based on text after {{
+                 */
+
+                const matches =
+                  filterAutocompleteVariables(
+                    variables,
+                    context.query
+                  );
+
+
+                if (!matches.length) {
+
+                  return {
+
+                    suggestions: [],
+
+                  };
+
+                }
+
+
+                /*
+                 * Find replacement range.
+                 *
+                 * Example:
+                 *
+                 * {{bas|
+                 *
+                 * Only "bas" should be replaced.
+                 */
+
+                const queryStartOffset =
+                  context.openIndex +
+                  2 +
+                  (
+                    context.hasDollarPrefix
+                      ? 1
+                      : 0
+                  );
+
+
+                const startPosition =
+                  model.getPositionAt(
+                    queryStartOffset
+                  );
+
+
+                const range = {
+
+                  startLineNumber:
+                    startPosition.lineNumber,
+
+                  startColumn:
+                    startPosition.column,
+
+                  endLineNumber:
+                    position.lineNumber,
+
+                  endColumn:
+                    position.column,
+
+                };
+
+
+                return {
+
+                  suggestions:
+
+                    matches.map(
+                      (variable) => {
+
+
+                        const isDynamic =
+                          variable.source ===
+                          "Dynamic";
+
+
+                        /*
+                         * Dynamic variables should use $
+                         *
+                         * {{$timestamp}}
+                         *
+                         * Environment variables:
+                         *
+                         * {{base_url}}
+                         */
+
+                        const variableKey =
+                          isDynamic
+                            ? `$${variable.key}`
+                            : variable.key;
+
+
+                        return {
+
+                          label:
+                            variableKey,
+
+
+                          kind:
+                            monaco.languages
+                              .CompletionItemKind
+                              .Reference,
+
+
+                          detail:
+                            isDynamic
+                              ? "Dynamic variable"
+                              : "Environment variable",
+
+
+                          documentation:
+                            isDynamic
+                              ? `Dynamic variable: ${variableKey}`
+                              : `Environment variable: ${variable.key}`,
+
+
+                          /*
+                           * Insert the variable and
+                           * automatically close }}
+                           */
+
+                          insertText:
+  context.hasClosingBraces
+    ? variableKey
+    : `${variableKey}`,
+
+
+                          range,
+
+
+                          sortText:
+                            isDynamic
+                              ? `1-${variable.key}`
+                              : `0-${variable.key}`,
+
+
+                          filterText:
+                            variable.key,
+
+                        };
+
+                      }
+                    ),
+
+                };
+
+              },
+
+            }
+
+          );
+
+
+        /*
+         * ===================================================
+         * EDITOR OPTIONS
+         * ===================================================
+         */
+
+        editor.updateOptions({
+
+          readOnly,
+
+
+          wordWrap:
+            singleLine
+              ? "off"
+              : "on",
+
+
+          lineNumbers:
+            "on",
+
+
+          minimap: {
+
+            enabled:
+              false,
+
+          },
+
+
+          folding:
+            true,
+
+
+          automaticLayout:
+            true,
+
+
+          scrollBeyondLastLine:
+            false,
+
+
+          renderWhitespace:
+            "selection",
+
+
+          cursorBlinking:
+            "blink",
+
+
+          cursorStyle:
+            "line",
+
+
+          fontFamily:
+            'Consolas, "Courier New", monospace',
+
+
+          fontSize:
+            14,
+
+
+          lineHeight:
+            21,
+
+
+          padding: {
+
+            top:
+              8,
+
+            bottom:
+              8,
+
+          },
+
+
+          autoClosingBrackets:
+            singleLine
+              ? "never"
+              : "always",
+
+
+          autoClosingQuotes:
+            singleLine
+              ? "never"
+              : "always",
+
+
+          matchBrackets:
+            "always",
+
+
+          quickSuggestions:
+            true,
+
+
+          suggestOnTriggerCharacters:
+            true,
+
+
+          wordBasedSuggestions:
+            "off",
+
+
+          suggest: {
+
+            preview:
+              false,
+
+
+            showReferences:
+              true,
+
+
+            showMethods:
+              false,
+
+            showFunctions:
+              false,
+
+            showConstructors:
+              false,
+
+            showClasses:
+              false,
+
+            showInterfaces:
+              false,
+
+            showStructs:
+              false,
+
+            showVariables:
+              false,
+
+            showFields:
+              false,
+
+            showProperties:
+              false,
+
+            showModules:
+              false,
+
+            showEnums:
+              false,
+
+            showEnumMembers:
+              false,
+
+            showKeywords:
+              false,
+
+            showWords:
+              false,
+
+            showSnippets:
+              false,
+
+            showUsers:
+              false,
+
+            showFiles:
+              false,
+
+            showFolders:
+              false,
+
+            showOperators:
+              false,
+
+            showConstants:
+              false,
+
+            showValues:
+              false,
+
+            showUnits:
+              false,
+
+            showTypeParameters:
+              false,
+
+            showColors:
+              false,
+
+            showEvents:
+              false,
+
+            showIssues:
+              false,
+
+          },
+
+
+          selectOnLineNumbers:
+            true,
+
+
+          roundedSelection:
+            false,
+
+
+          selectionHighlight:
+            false,
+
+
+          occurrencesHighlight:
+            "off",
+
+
+          hideCursorInOverviewRuler:
+            true,
+
+
+          overviewRulerBorder:
+            false,
+
+
+          scrollbar: {
+
+            vertical:
+              "auto",
+
+            horizontal:
+              "auto",
+
+            verticalScrollbarSize:
+              10,
+
+            horizontalScrollbarSize:
+              10,
+
+          },
+
+        });
+
+
+        /*
+         * ===================================================
+         * PLACEHOLDER
+         * ===================================================
+         */
+
+        const wrapper =
+          editor.getDomNode()
+            ?.parentElement;
+
+
+        if (
+          wrapper &&
+          placeholder
+        ) {
+
+          wrapper.setAttribute(
+            "data-placeholder",
+            placeholder
+          );
+
+        }
+
+
+        /*
+         * ===================================================
+         * INITIAL VARIABLE COLORING
+         * ===================================================
+         */
+
+        requestAnimationFrame(
+          () => {
+
+            updateVariableDecorations();
+
+            editor.layout();
+
+          }
+        );
+
+
+      },
+      [
+        language,
+        readOnly,
+        singleLine,
+        placeholder,
+        updateVariableDecorations,
+      ]
+    );
 
 
   /*
    * =========================================================
    * EXTERNAL VALUE SYNCHRONIZATION
    * =========================================================
+   */
+
+  useEffect(
+    () => {
+
+      const editor =
+        editorRef.current;
+
+
+      if (!editor) {
+
+        return;
+
+      }
+
+
+      const model =
+        editor.getModel();
+
+
+      if (!model) {
+
+        return;
+
+      }
+
+
+      const currentValue =
+        editor.getValue();
+
+
+      const nextValue =
+        value ?? "";
+
+
+      /*
+       * Do nothing if Monaco already has
+       * the correct value.
+       */
+
+      if (
+        currentValue ===
+        nextValue
+      ) {
+
+        requestAnimationFrame(
+          () => {
+
+            updateVariableDecorations();
+
+          }
+        );
+
+        return;
+
+      }
+
+
+      const selection =
+        editor.getSelection();
+
+
+      editor.executeEdits(
+        "external-value",
+        [
+
+          {
+
+            range:
+              model.getFullModelRange(),
+
+            text:
+              nextValue,
+
+            forceMoveMarkers:
+              true,
+
+          },
+
+        ]
+      );
+
+
+      /*
+       * Restore cursor/selection where possible.
+       */
+
+      if (selection) {
+
+        try {
+
+          editor.setSelection(
+            selection
+          );
+
+        }
+
+        catch {
+
+          /*
+           * Ignore if selection is no longer valid.
+           */
+
+        }
+
+      }
+
+
+      requestAnimationFrame(
+        () => {
+
+          updateVariableDecorations();
+
+        }
+      );
+
+
+    },
+    [
+      value,
+      updateVariableDecorations,
+    ]
+  );
+
+
+  /*
+   * =========================================================
+   * ENVIRONMENT CHANGES
    *
-   * Important for:
+   * When environment variables change:
    *
-   * - selecting another request
-   * - restoring history
-   * - switching collections
-   * - Beautify
-   * - URL changes
+   * - autocomplete updates
+   * - green/red variable colors update
    * =========================================================
    */
 
-  useEffect(() => {
+  useEffect(
+    () => {
 
-    const view =
-      editorViewRef.current
-
-
-    if (!view) {
-
-      return
-
-    }
+      variablesRef.current =
+        buildAvailableVariables(
+          environment
+        );
 
 
-    const currentValue =
-      view.state.doc.toString()
+      requestAnimationFrame(
+        () => {
+
+          updateVariableDecorations();
+
+        }
+      );
 
 
-    const nextValue =
-      value ?? ''
+    },
+    [
+      environment,
+      updateVariableDecorations,
+    ]
+  );
 
 
-    if (
-      currentValue ===
-      nextValue
-    ) {
+  /*
+   * =========================================================
+   * CLEANUP
+   * =========================================================
+   */
 
-      return
+  useEffect(
+    () => {
 
-    }
+      return () => {
+
+        completionProviderRef.current
+          ?.dispose();
 
 
-    view.dispatch({
+        completionProviderRef.current =
+          null;
 
-      changes: {
 
-        from:
-          0,
+        editorRef.current =
+          null;
 
-        to:
-          view.state.doc.length,
 
-        insert:
-          nextValue,
+        monacoRef.current =
+          null;
 
-      },
 
-    })
+        variableDecorationIdsRef.current =
+          [];
 
-  }, [
-    value,
-  ])
+      };
+
+    },
+    []
+  );
 
 
   /*
@@ -1384,36 +1425,314 @@ extensions: [
    * =========================================================
    */
 
+  const monacoLanguage =
+    normalizeLanguage(
+      language
+    );
+
+
   return (
 
     <div
 
-      ref={
-        editorParentRef
-      }
-
       className={
         `code-editor${
           singleLine
-            ? ' code-editor-single-line'
-            : ''
+            ? " code-editor-single-line"
+            : ""
         }${
           className
             ? ` ${className}`
-            : ''
+            : ""
         }`
       }
 
-    />
 
-  )
+      data-placeholder={
+        placeholder || undefined
+      }
 
 
+      style={{
+
+        width:
+          "100%",
+
+        height:
+          "100%",
+
+        minHeight:
+          0,
+
+      }}
+
+    >
+
+      <Editor
+
+        height="100%"
+
+        width="100%"
 
 
-  
+        language={
+          monacoLanguage
+        }
+
+
+        value={
+          value ?? ""
+        }
+
+
+        theme={
+          API_TESTER_THEME
+        }
+
+
+        onMount={
+          handleEditorMount
+        }
+
+
+        onChange={
+          handleChange
+        }
+
+
+        options={{
+
+          readOnly,
+
+
+          quickSuggestions:
+            true,
+
+
+          suggestOnTriggerCharacters:
+            true,
+
+
+          wordBasedSuggestions:
+            "off",
+
+
+          wordWrap:
+            singleLine
+              ? "off"
+              : "on",
+
+
+          lineNumbers:
+            "on",
+
+
+          minimap: {
+
+            enabled:
+              false,
+
+          },
+
+
+          folding:
+            true,
+
+
+          automaticLayout:
+            true,
+
+
+          scrollBeyondLastLine:
+            false,
+
+
+          renderWhitespace:
+            "selection",
+
+
+          cursorBlinking:
+            "blink",
+
+
+          cursorStyle:
+            "line",
+
+
+          fontFamily:
+            'Consolas, "Courier New", monospace',
+
+
+          fontSize:
+            14,
+
+
+          lineHeight:
+            21,
+
+
+          padding: {
+
+            top:
+              8,
+
+            bottom:
+              8,
+
+          },
+
+
+          autoClosingBrackets:
+            singleLine
+              ? "never"
+              : "always",
+
+
+          autoClosingQuotes:
+            singleLine
+              ? "never"
+              : "always",
+
+
+          matchBrackets:
+            "always",
+
+
+          selectOnLineNumbers:
+            true,
+
+
+          roundedSelection:
+            false,
+
+
+          selectionHighlight:
+            false,
+
+
+          occurrencesHighlight:
+            "off",
+
+
+          hideCursorInOverviewRuler:
+            true,
+
+
+          overviewRulerBorder:
+            false,
+
+
+          scrollbar: {
+
+            vertical:
+              "auto",
+
+            horizontal:
+              "auto",
+
+            verticalScrollbarSize:
+              10,
+
+            horizontalScrollbarSize:
+              10,
+
+          },
+
+
+          suggest: {
+
+            preview:
+              false,
+
+            showReferences:
+              true,
+
+            showMethods:
+              false,
+
+            showFunctions:
+              false,
+
+            showConstructors:
+              false,
+
+            showClasses:
+              false,
+
+            showInterfaces:
+              false,
+
+            showStructs:
+              false,
+
+            showVariables:
+              false,
+
+            showFields:
+              false,
+
+            showProperties:
+              false,
+
+            showModules:
+              false,
+
+            showEnums:
+              false,
+
+            showEnumMembers:
+              false,
+
+            showKeywords:
+              false,
+
+            showWords:
+              false,
+
+            showSnippets:
+              false,
+
+            showUsers:
+              false,
+
+            showFiles:
+              false,
+
+            showFolders:
+              false,
+
+            showOperators:
+              false,
+
+            showConstants:
+              false,
+
+            showValues:
+              false,
+
+            showUnits:
+              false,
+
+            showTypeParameters:
+              false,
+
+            showColors:
+              false,
+
+            showEvents:
+              false,
+
+            showIssues:
+              false,
+
+          },
+
+        }}
+
+      />
+
+    </div>
+
+  );
 
 }
-
-
-export default CodeEditor

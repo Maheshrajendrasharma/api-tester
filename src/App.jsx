@@ -841,6 +841,23 @@ const requestTemplate = {
     })
 }
 
+
+const handleRunHistoryEntry = async (entry) => {
+
+  if (!entry) {
+    return
+  }
+
+  // Restore the historical request first
+  handleHistoryRestore(entry)
+
+  // Open the request / response area
+  setShowRunner(false)
+
+}
+
+
+
   function handleClearHistory() {
     setDialogState({ open: true, type: 'confirm', title: 'Clear history', message: 'Clear all history entries?', initialValue: '', options: [], confirmLabel: 'Clear', cancelLabel: 'Cancel', onConfirm: () => { setDialogState((current) => ({ ...current, open: false })); historyState.clearEntries() }, onCancel: () => setDialogState((current) => ({ ...current, open: false })) })
   }
@@ -1143,6 +1160,7 @@ onToggleEnvironmentPanel={toggleEnvironmentPanel}
   onHistoryFilterChange={historyState.setFilter}
 
   onRestoreHistoryEntry={handleHistoryRestore}
+  onRunHistoryEntry={handleRunHistoryEntry}
   onDeleteHistoryEntry={historyState.deleteEntry}
   onToggleHistoryFavorite={historyState.toggleFavorite}
   onClearHistory={handleClearHistory}
