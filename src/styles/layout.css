@@ -180,7 +180,7 @@
 
 /* === URL Field === */
 .variable-field:not(.multiline) {
-  height: 38px;
+  height: 30px;
 }
 .variable-field:not(.multiline) .variable-field-overlay {
   display: flex;
@@ -677,7 +677,7 @@ font-size:13px;
 
 .request-bar {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) 60px;
+  grid-template-columns: 80px minmax(0, 1fr) 80px;
   gap: 2px;
 
   width: 100%;
@@ -3798,6 +3798,10 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 
 }
 
+.authorization-input input {
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+}
 /* Same spacing as select */
 
 /* =====================================================
@@ -3879,6 +3883,13 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   outline: none;
   box-sizing: border-box;
   max-width: 440px;
+}
+
+.authorization-input input {
+  width: 100%;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .workspace-actions-wrapper{
@@ -4131,37 +4142,46 @@ color:white;
    ========================================================= */
 
 .sidebar {
-  min-width: 0;
-  display: flex;
-  flex-direction: row;
-  padding: 2px 2px;
-  overflow-y: auto;
-  background: #171c22;
-  font-size: 70%;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
+    display: flex;
+    flex-direction: row;
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    background: #171c22;
 }
+
 
 /* =========================================================
    LEFT NAVIGATION RAIL
    ========================================================= */
 
+
 .sidebar-navigation {
     width: 72px;
     min-width: 72px;
+
     height: 100%;
+
     display: flex;
     flex-direction: column;
     align-items: center;
+
     padding-top: 18px;
     gap: 8px;
+
+    overflow: hidden;
 
     border-right: 1px solid #2d3742;
 
     background: #151b21;
 }
+
 
 /* =========================================================
    NAVIGATION BUTTON
@@ -4231,16 +4251,39 @@ color:white;
 /* =========================================================
    SIDEBAR CONTENT
    ========================================================= */
-
 .sidebar-content {
     flex: 1;
+
     min-width: 0;
     min-height: 0;
+
+    height: 100%;
 
     display: flex;
     flex-direction: column;
 
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background: #171c22;
+}
+
+
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: #171c22;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: #3d4b5a;
+    border-radius: 999px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: #566779;
 }
 
 .historical-request-label {
@@ -4801,4 +4844,14 @@ color:white;
   min-height: 0;   /* add this — was min-height: 100px */
   overflow: hidden;
   background: #12171d;
+}
+
+
+.environment-variable-key{
+    color: #2196f3;
+}
+
+.environment-variables-table td input.environment-variable-key {
+    color: rgb(113, 222, 252) !important;
+    font-family: Consolas, "Courier New", monospace, Consolas, "Courier New", monospace;
 }

@@ -1170,6 +1170,8 @@ environmentPanel={
   environmentPanelOpen ? (
     <EnvironmentPanel
       environments={environments}
+        activeRequest={collectionState.selectedRequest}
+
       onEnvironmentChange={handleEnvironmentChange}
       onEnvironmentsChange={handleEnvironmentsChange}
       onImportEnvironment={handleImportEnvironment}

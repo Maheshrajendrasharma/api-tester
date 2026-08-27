@@ -11,6 +11,7 @@ import {
 
 function EnvironmentPanel({
     environments,
+    activeRequest,
     onEnvironmentChange,
     onEnvironmentsChange,
 
@@ -26,7 +27,55 @@ function EnvironmentPanel({
         environments.find((environment) => environment.active)
         ?? environments[0];
 
-    const variables = activeEnvironment?.variables ?? []
+const variables = activeEnvironment?.variables ?? []
+
+
+// Convert the current request into text so we can find {{variables}}
+const requestText =
+    activeRequest
+        ? JSON.stringify(activeRequest)
+        : ""
+
+
+// Find variables used in the current request
+const variablePattern =
+    /\{\{\s*([^{}]+?)\s*\}\}/g
+
+const usedVariableKeys = new Set()
+
+let match
+
+while (
+    (match = variablePattern.exec(requestText)) !== null
+) {
+    usedVariableKeys.add(
+        match[1].trim()
+    )
+}
+
+
+// Only sort the DISPLAYED variables.
+// The original environment.variables array is not modified.
+const sortedVariables =
+    [...variables].sort((a, b) => {
+
+        const aUsed =
+            usedVariableKeys.has(
+                String(a.key ?? "").trim()
+            )
+
+        const bUsed =
+            usedVariableKeys.has(
+                String(b.key ?? "").trim()
+            )
+
+        if (aUsed === bUsed) {
+            return 0
+        }
+
+        return aUsed ? -1 : 1
+    })
+
 
     const [showMenu, setShowMenu] = useState(false);
 
@@ -176,14 +225,15 @@ function EnvironmentPanel({
 
                     <tbody>
 
-                        {activeEnvironment?.variables.map((variable) => (
+                        {sortedVariables.map((variable) => (
 
                             <tr key={variable.id}>
 
                                 <td>
-                                    <input
-                                        value={variable.key}
-                                        onChange={(e) =>
+                                <input
+                                    className="environment-variable-key"
+                                    value={variable.key}
+                                            onChange={(e) =>
                                             updateVariable(
                                                 variable.id,
                                                 "key",

@@ -142,6 +142,70 @@ export function normalizeCollectionData(
     return normalizePostmanCollection(raw, fallbackName)
   }
 
+
+if (Array.isArray(raw.children)) {
+
+  const baseCollection =
+    createCollection(
+      sanitizeName(
+        raw.name || fallbackName,
+        fallbackName
+      )
+    )
+
+
+  const requests = []
+  const folders = []
+
+
+  raw.children.forEach(child => {
+
+    if(child.children){
+
+      folders.push({
+        id:createId(),
+        name:child.name,
+        requests: child.children.map(
+          request =>
+            normalizeRequestData(
+              request,
+              request.name || 'New Request'
+            )
+        ),
+        folders:[]
+      })
+
+    }
+    else {
+
+      requests.push(
+        normalizeRequestData(
+          child,
+          child.name || 'New Request'
+        )
+      )
+
+    }
+
+  })
+
+
+  return {
+    ...baseCollection,
+    id:createId(),
+    name:sanitizeName(
+      raw.name || fallbackName,
+      fallbackName
+    ),
+    expanded:true,
+    folders,
+    requests
+  }
+
+}
+
+
+
   if (raw.requests || raw.name || raw.folders || raw.id || raw.expanded) {
     const baseCollection = createCollection(sanitizeName(raw.name || fallbackName, fallbackName))
     const collectionRequests = Array.isArray(raw.requests)
