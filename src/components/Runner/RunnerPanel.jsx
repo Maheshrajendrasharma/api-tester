@@ -1,5 +1,10 @@
-import React, { useMemo, useState } from 'react'
 import './runner.css'
+
+import React, {
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import RunnerTree from './RunnerTree'
 import RunnerConfig from './RunnerConfig'
@@ -26,15 +31,15 @@ const [selectedNode, setSelectedNode] = useState(null)
 
 const [state, setState] = useState(null)
 
+const [paused, setPaused] = useState(false)
+
+
 const [running, setRunning] = useState(false)
 
 const [executionMap, setExecutionMap] = useState({})
 
 
-  const controller = useMemo(
-    () => createRunnerController(),
-    [open]
-  )
+const controllerRef = useRef(null)
 
 
 
@@ -53,223 +58,392 @@ const [executionMap, setExecutionMap] = useState({})
 
 
 
-  function handleRun({ config, dataRows }) {
+function handleRun({ config, dataRows }) {
+
+  console.log('========== RUNNER START ==========')
+  console.log('[RUNNER] config =', config)
+  console.log('[RUNNER] dataRows =', dataRows)
+  console.log('[RUNNER] selectedNode =', selectedNode)
+
+  // --------------------------------------------------
+  // Create a NEW controller for every Run
+  // --------------------------------------------------
+  const runnerController = createRunnerController()
+
+  controllerRef.current = runnerController
+
+  console.log('[RUNNER] controller created')
+  console.log(
+    '[RUNNER] initially paused =',
+    runnerController.isPaused()
+  )
+  console.log(
+    '[RUNNER] initially aborted =',
+    runnerController.signal.aborted
+  )
 
 
-    const node = selectedNode || null
+  // --------------------------------------------------
+  // Selected node
+  // --------------------------------------------------
+  const node = selectedNode || null
+
+  console.log('[RUNNER] node =', node)
 
 
+  // --------------------------------------------------
+  // Find collection
+  // --------------------------------------------------
+  const collectionId =
+    initialCollectionId ||
+    collections.find((collection) =>
+      collection.id === node?.id ||
+      Boolean(
+        node &&
+        collection.children?.some(
+          (child) => child.id === node.id
+        )
+      )
+    )?.id
 
-    const collectionId =
+  console.log(
+    '[RUNNER] collectionId =',
+    collectionId
+  )
 
-      initialCollectionId ||
 
-      collections.find((collection) =>
+  // --------------------------------------------------
+  // Determine node ID
+  // --------------------------------------------------
+  const nodeId =
+    node?.id ||
+    initialNodeId ||
+    collectionId
 
-        collection.id === node?.id ||
+  console.log(
+    '[RUNNER] nodeId =',
+    nodeId
+  )
 
-        Boolean(
+  console.log(
+    '[RUNNER] scope =',
+    config.scope
+  )
 
-          node &&
 
-          collection.children?.some(
+  // --------------------------------------------------
+  // Validate collection
+  // --------------------------------------------------
+  if (!collectionId) {
 
-            (child) => child.id === node.id
+    console.error(
+      '[RUNNER] No collectionId found'
+    )
 
-          )
+    setRunning(false)
+    setPaused(false)
 
+    return
+  }
+
+
+  // --------------------------------------------------
+  // Start runner UI
+  // --------------------------------------------------
+  setRunning(true)
+  setPaused(false)
+
+  setState({
+    status: 'running',
+    total: 0,
+    completed: 0,
+    passed: 0,
+    failed: 0,
+    results: []
+  })
+
+
+  console.log(
+    '[RUNNER] ABOUT TO CALL runNode()'
+  )
+
+
+  // --------------------------------------------------
+  // START RUNNER
+  // --------------------------------------------------
+  runNode({
+
+    collections,
+
+    collectionId,
+
+    nodeId,
+
+    config,
+
+    dataRows,
+
+    executeRequest,
+
+    signal:
+      runnerController.signal,
+
+    waitIfPaused:
+      runnerController.waitIfPaused,
+
+
+    // ------------------------------------------------
+    // PROGRESS
+    // ------------------------------------------------
+    onProgress: (progress) => {
+
+      console.log(
+        '[RUNNER PROGRESS]',
+        progress
+      )
+
+      setState(progress)
+
+
+      if (
+        progress.event ===
+        'request-start'
+      ) {
+
+        console.log(
+          '[RUNNER REQUEST START]',
+          progress.requestId
         )
 
-      )?.id
+        setExecutionMap(
+          (previous) => ({
 
+            ...previous,
 
+            [progress.requestId]: {
 
+              status: 'running'
 
-    const nodeId =
+            }
 
-      node?.id ||
+          })
+        )
+      }
 
-      initialNodeId ||
 
-      collectionId
+      if (
+        progress.event ===
+        'request-complete'
+      ) {
 
+        console.log(
+          '[RUNNER REQUEST COMPLETE]',
+          progress.requestId,
+          progress.requestStatus
+        )
 
+        setExecutionMap(
+          (previous) => ({
 
+            ...previous,
 
-    if (!collectionId) {
+            [progress.requestId]: {
 
-      
+              status:
+                progress.requestStatus
 
-      return
+            }
 
-    }
+          })
+        )
+      }
 
+    },
 
 
+    // ------------------------------------------------
+    // RESULT
+    // ------------------------------------------------
+    onResult: (runnerResult) => {
 
-    setRunning(true)
+      console.log(
+        '[RUNNER RESULT]',
+        runnerResult
+      )
 
 
+      onRunnerHistoryEntry?.({
 
-    setState({
+        name:
+          runnerResult.requestName ||
+          'Unnamed Request',
 
-      status: 'running',
+        method:
+          runnerResult.request?.method ||
+          'GET',
 
-      total: 0,
+        url:
+          runnerResult.request?.url ||
+          '',
 
-      completed: 0,
+        resolvedUrl:
+          runnerResult.request?.url ||
+          '',
 
-      passed: 0,
+        statusCode:
+          runnerResult.statusCode,
 
-      failed: 0,
+        statusText:
+          runnerResult.status,
 
-      results: []
+        responseTime:
+          runnerResult.responseTime,
 
-    })
+        responseBody:
 
+          typeof runnerResult.response === 'string'
 
+            ? runnerResult.response
 
+            : JSON.stringify(
+                runnerResult.response ??
+                {},
+                null,
+                2
+              ),
 
-
-runNode({
-
-  collections,
-
-  collectionId,
-
-  nodeId,
-
-  config,
-
-  dataRows,
-
-  executeRequest,
-
-  signal: controller.signal,
-
-
-  onProgress: (progress) => {
-
-    setState(progress)
-
-
-    if (progress.event === 'request-start') {
-
-      setExecutionMap(previous => ({
-
-        ...previous,
-
-        [progress.requestId]: {
-
-          status: 'running'
-
-        }
-
-      }))
-
-    }
-
-
-    if (progress.event === 'request-complete') {
-
-      setExecutionMap(previous => ({
-
-        ...previous,
-
-        [progress.requestId]: {
-
-          status: progress.requestStatus
-
-        }
-
-      }))
-
-    }
-
-  },
-
-
-  onResult: (runnerResult) => {
-
-
-    
-
-
-    onRunnerHistoryEntry?.({
-
-      name:
-        runnerResult.requestName ||
-        'Unnamed Request',
-
-
-      method:
-        runnerResult.request?.method ||
-        'GET',
-
-
-      url:
-        runnerResult.request?.url ||
-        '',
-
-
-      resolvedUrl:
-        runnerResult.request?.url ||
-        '',
-
-
-      statusCode:
-        runnerResult.statusCode,
-
-
-      statusText:
-        runnerResult.status,
-
-
-      responseTime:
-        runnerResult.responseTime,
-
-
-      responseBody:
-
-        typeof runnerResult.response === 'string'
-
-        ? runnerResult.response
-
-        :
-
-        JSON.stringify(
-          runnerResult.response ?? {},
+        error:
+          runnerResult.error ||
           null,
-          2
-        ),
 
+        runner: true,
+
+        iteration:
+          runnerResult.iteration
+
+      })
+
+    }
+
+  })
+
+  .then((finalState) => {
+
+    console.log(
+      '[RUNNER] runNode() completed',
+      finalState
+    )
+
+  })
+
+  .catch((error) => {
+
+    console.error(
+      '========== RUNNER ERROR =========='
+    )
+
+    console.error(
+      error
+    )
+
+    setState((previous) => ({
+
+      ...(previous || {}),
+
+      status: 'failed',
 
       error:
-        runnerResult.error || null,
+        error instanceof Error
+          ? error.message
+          : String(error)
+
+    }))
+
+  })
+
+  .finally(() => {
+
+    console.log(
+      '[RUNNER] FINISHED'
+    )
+
+    setRunning(false)
+
+    setPaused(false)
+
+    controllerRef.current = null
+
+  })
+
+}
 
 
-      runner:true,
+function handlePause() {
+  controllerRef.current?.pause()
+  setPaused(true)
+}
+
+function handleResume() {
+  controllerRef.current?.resume()
+  setPaused(false)
+}
+
+async function handleCancel() {
+
+  console.log(
+    '[RUNNER CANCEL] requested'
+  )
 
 
-      iteration:
-        runnerResult.iteration
+  // Cancel the runner controller
+  controllerRef.current?.cancel()
 
-    })
+
+  // Get currently running request
+  const requestId =
+    state?.currentRequestId
+
+
+  console.log(
+    '[RUNNER CANCEL] current requestId =',
+    requestId
+  )
+
+
+  // Cancel active Electron HTTP request
+  if (
+    requestId &&
+    window.apiTester?.cancelRequest
+  ) {
+
+    try {
+
+      const result =
+        await window.apiTester.cancelRequest(
+          requestId
+        )
+
+      console.log(
+        '[RUNNER CANCEL] Electron cancel result =',
+        result
+      )
+
+    } catch (error) {
+
+      console.error(
+        '[RUNNER CANCEL] Electron cancellation failed:',
+        error
+      )
+
+    }
 
   }
 
-
-})
-.finally(() => {
 
   setRunning(false)
+  setPaused(false)
 
-})
-
-
-  }
-
-
+}
 
 
 
@@ -344,14 +518,12 @@ runNode({
 
 
 <RunnerConfig
-
-
-onRun={handleRun}
-
-
-disabled={running}
-
-
+  onRun={handleRun}
+  onPause={handlePause}
+  onResume={handleResume}
+  onCancel={handleCancel}
+  running={running}
+  paused={paused}
 />
 
 

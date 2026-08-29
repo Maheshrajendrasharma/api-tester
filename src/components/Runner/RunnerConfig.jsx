@@ -8,7 +8,14 @@ import {
   parseRunnerDataFile,
 } from '../../services/runnerDataSource'
 
-export default function RunnerConfig({ onRun, disabled = false }) {
+export default function RunnerConfig({
+  onRun,
+  onPause,
+  onResume,
+  onCancel,
+  running = false,
+  paused = false,
+}) {
   const [config, setConfig] = useState(createRunnerConfig())
   const [dataMode, setDataMode] = useState('none')
   const [manualVariable, setManualVariable] = useState('')
@@ -104,7 +111,7 @@ export default function RunnerConfig({ onRun, disabled = false }) {
           Timeout (ms)
           <input
             type="number"
-            min="100"
+            min="1"
             value={config.timeoutMs}
             onChange={(event) => update('timeoutMs', Number(event.target.value) || 30000)}
           />
@@ -187,14 +194,62 @@ export default function RunnerConfig({ onRun, disabled = false }) {
         <label><input type="checkbox" checked={config.persistEnvironmentVariables} onChange={(e) => update('persistEnvironmentVariables', e.target.checked)} /> Persist environment variables</label>
       </div>
 
+<div className="runner-action-buttons">
+
+  {/* IDLE */}
+  {!running && !paused && (
+    <button
+      type="button"
+      className="runner-primary-button runner-run-button"
+      onClick={submit}
+    >
+      ▶ Run
+    </button>
+  )}
+
+  {/* RUNNING */}
+  {running && !paused && (
+    <>
       <button
         type="button"
-        className="runner-primary-button"
-        disabled={disabled}
-        onClick={submit}
+        className="runner-primary-button runner-pause-button"
+        onClick={onPause}
       >
-        ▶ Run
+        ⏸ Pause
       </button>
+
+      <button
+        type="button"
+        className="runner-cancel-button"
+        onClick={onCancel}
+      >
+        Cancel
+      </button>
+    </>
+  )}
+
+  {/* PAUSED */}
+  {running && paused && (
+    <>
+      <button
+        type="button"
+        className="runner-primary-button runner-resume-button"
+        onClick={onResume}
+      >
+        ▶ Resume
+      </button>
+
+      <button
+        type="button"
+        className="runner-cancel-button"
+        onClick={onCancel}
+      >
+        Cancel
+      </button>
+    </>
+  )}
+
+</div>
     </div>
   )
 }

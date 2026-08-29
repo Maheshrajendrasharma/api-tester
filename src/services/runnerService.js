@@ -4,9 +4,38 @@ import {
 } from '../models/runnerModel'
 import { resolveRunnerRequests } from '../utils/runnerTree'
 
-function sleep(ms) {
-  if (!ms) return Promise.resolve()
-  return new Promise((resolve) => setTimeout(resolve, ms))
+function sleep(ms, signal) {
+
+  if (!ms) {
+    return Promise.resolve()
+  }
+
+  if (signal?.aborted) {
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => {
+
+    const timer = setTimeout(
+      resolve,
+      ms
+    )
+
+    const handleAbort = () => {
+
+      clearTimeout(timer)
+
+      resolve()
+
+    }
+
+    signal?.addEventListener(
+      'abort',
+      handleAbort,
+      { once: true }
+    )
+
+  })
 }
 
 export async function runNode({
@@ -19,10 +48,46 @@ export async function runNode({
   onProgress,
   onResult,
   signal,
+  waitIfPaused,
 }) {
+
+    console.log('========== runNode START ==========')
+
+  console.log(
+    '[runNode] collectionId =',
+    collectionId
+  )
+
+  console.log(
+    '[runNode] nodeId =',
+    nodeId
+  )
+
+  console.log(
+    '[runNode] scope =',
+    config?.scope
+  )
+
+  console.log(
+    '[runNode] iterations =',
+    config?.iterations
+  )
+
+  console.log(
+    '[runNode] dataRows =',
+    dataRows
+  )
+
   if (typeof executeRequest !== 'function') {
     throw new Error('Runner requires an executeRequest function.')
   }
+
+
+  console.log(
+  '[runNode] BEFORE resolveRunnerRequests'
+)
+
+
 
   const resolved = resolveRunnerRequests({
     collections,
@@ -30,6 +95,38 @@ export async function runNode({
     nodeId,
     scope: config.scope,
   })
+
+  console.log(
+  '[runNode] AFTER resolveRunnerRequests'
+)
+
+console.log(
+  '[runNode] resolved =',
+  resolved
+)
+
+console.log(
+  '[runNode] request count =',
+  resolved?.requests?.length
+)
+
+if (!resolved) {
+  throw new Error(
+    'Runner could not resolve the selected target.'
+  )
+}
+
+if (!Array.isArray(resolved.requests)) {
+  throw new Error(
+    'Runner target resolution did not return a requests array.'
+  )
+}
+
+if (resolved.requests.length === 0) {
+  throw new Error(
+    `No requests found for ${config.scope} target.`
+  )
+}
 
   const iterations = Math.max(1, Number(config.iterations) || 1)
   const rows = dataRows.length ? dataRows : [{}]
@@ -49,31 +146,43 @@ export async function runNode({
 
   onProgress?.({ ...state })
 
-  for (const item of plan) {
-    if (signal?.aborted) {
-      state.status = 'cancelled'
-      break
+for (const item of plan) {
+
+  console.log(
+    '[runNode] NEXT ITEM',
+    {
+      requestId: item.request?.id,
+      iteration: item.iteration,
     }
+  )
 
-const started = performance.now()
+  await waitIfPaused?.()
 
-state.currentRequestId = item.request.id
-state.currentIteration = item.iteration
+  if (signal?.aborted) {
+
+    console.log(
+      '[runNode] ABORT DETECTED'
+    )
+
+    state.status = 'cancelled'
+
+    break
+  }
 
 
-onProgress?.({
+  const started = performance.now()
 
-  ...state,
+  state.currentRequestId = item.request.id
+  state.currentIteration = item.iteration
 
-  event: "request-start",
+  onProgress?.({
+    ...state,
+    event: 'request-start',
+    requestId: item.request.id,
+    requestStatus: 'running',
+  })
 
-  requestId: item.request.id,
-
-  requestStatus: "running"
-
-})
-
-    try {
+  try {
       console.log(
   "========== RUNNER ITEM REQUEST =========="
 )
@@ -96,9 +205,10 @@ console.log(
  "BODY:",
  item.request.body
 )
-const result = await executeRequest(
-    item.request
-)
+const result = await executeRequest({
+  ...item.request,
+  __requestId: item.request.id,
+})
 
 console.log("RUNNER EXECUTE RESPONSE", result)
 
@@ -174,6 +284,19 @@ onProgress?.({
         break
       }
     } catch (error) {
+
+        if (
+    signal?.aborted ||
+    error?.name === 'AbortError'
+  ) {
+    console.log(
+      '[runNode] REQUEST ABORTED / RUNNER CANCELLED'
+    )
+
+    state.status = 'cancelled'
+    break
+  }
+  
       const runnerResult = createRunnerResult({
         request: item.request,
         iteration: item.iteration,
@@ -213,7 +336,10 @@ onProgress?.({
       }
     }
 
-    await sleep(config.delayMs)
+    await sleep(
+  config.delayMs,
+  signal
+)
   }
 
   if (state.status === 'running') {
@@ -228,9 +354,100 @@ onProgress?.({
 }
 
 export function createRunnerController() {
+
   const controller = new AbortController()
+
+  let paused = false
+
+  let resumeResolver = null
+
+
+  function pause() {
+
+    if (controller.signal.aborted) {
+      return
+    }
+
+    paused = true
+
+    console.log('[RUNNER CONTROLLER] PAUSED')
+  }
+
+
+  function resume() {
+
+    paused = false
+
+    console.log('[RUNNER CONTROLLER] RESUMED')
+
+    if (resumeResolver) {
+
+      const resolve =
+        resumeResolver
+
+      resumeResolver = null
+
+      resolve()
+    }
+  }
+
+
+  async function waitIfPaused() {
+
+    if (!paused) {
+      return
+    }
+
+    if (controller.signal.aborted) {
+      return
+    }
+
+    await new Promise((resolve) => {
+
+      resumeResolver = resolve
+
+    })
+
+  }
+
+
+  function cancel() {
+
+    console.log(
+      '[RUNNER CONTROLLER] CANCEL'
+    )
+
+    paused = false
+
+    if (resumeResolver) {
+
+      const resolve =
+        resumeResolver
+
+      resumeResolver = null
+
+      resolve()
+    }
+
+    controller.abort()
+  }
+
+
   return {
-    signal: controller.signal,
-    cancel: () => controller.abort(),
+
+    signal:
+      controller.signal,
+
+    cancel,
+
+    pause,
+
+    resume,
+
+    waitIfPaused,
+
+    isPaused:
+      () => paused,
+
   }
 }

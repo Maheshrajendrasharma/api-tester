@@ -1041,3 +1041,37 @@
     display: none;
   }
 }
+
+.runner-action-buttons {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.runner-action-buttons button {
+  height: 44px;
+}
+
+/* IDLE */
+
+.runner-run-button {
+  width: 100%;
+}
+
+
+/* RUNNING + PAUSED */
+
+.runner-pause-button,
+.runner-resume-button,
+.runner-cancel-button {
+  flex: 1;
+}
+
+
+.runner-cancel-button {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+} 
