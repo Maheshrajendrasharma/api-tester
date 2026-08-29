@@ -59,16 +59,12 @@ contextBridge.exposeInMainWorld("apiTester", {
 // ---------------------------------------
 
 minimizeWindow: () => {
-    console.log("PRELOAD: MINIMIZE");
-
     return ipcRenderer.invoke(
         "api-tester:minimize-window"
     );
 },
 
 maximizeWindow: () => {
-    console.log("PRELOAD: MAXIMIZE");
-
     return ipcRenderer.invoke(
         "api-tester:maximize-window"
     );

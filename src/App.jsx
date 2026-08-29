@@ -31,6 +31,13 @@ import { useEffect, useRef, useState } from 'react'
     } from './services/workspaceService'
 
     import { exportEnvironment as exportEnvironmentData, importEnvironmentFromFile } from './services/importExportService'
+    import {
+        forceCloseRuntimeWindow,
+        onRuntimeMenuAction,
+        onRuntimeRequestClose,
+        pickTextFile,
+        saveTextFile,
+    } from './services/runtimeService'
 
 
 
@@ -91,12 +98,8 @@ import { useEffect, useRef, useState } from 'react'
 
 useEffect(() => {
 
-    if (!window.apiTester?.onRequestClose) {
-        return
-    }
-
     const removeCloseListener =
-        window.apiTester.onRequestClose(() => {
+        onRuntimeRequestClose(() => {
 
             const currentSnapshot =
                 JSON.stringify(workspaces)
@@ -114,7 +117,7 @@ useEffect(() => {
                 return
             }
 
-            window.apiTester?.forceCloseWindow?.()
+            forceCloseRuntimeWindow()
 
         })
 
@@ -1106,21 +1109,12 @@ const {
     }
 
     async function handleImportEnvironment() {
-        const dialog = await window.apiTester?.showOpenDialog?.({
-        properties: ['openFile'],
-        filters: [{ name: 'JSON Files', extensions: ['json'] }],
-        })
-
-        if (!dialog || dialog.canceled || !dialog.filePaths?.[0]) return
-
-        const content = await window.apiTester?.readFile?.(dialog.filePaths[0])
-        if (!content) return
+        const file = await pickTextFile()
+        if (!file) return
 
         try {
     const importedEnvironment = await importEnvironmentFromFile(
-        new File([content], 'environment.json', {
-        type: 'application/json',
-        }),
+        file,
     )
 
     
@@ -1209,20 +1203,18 @@ const {
 
         try {
         const content = await exportEnvironmentData(activeEnvironment)
-        const dialog = await window.apiTester?.showSaveDialog?.({
+        await saveTextFile({
+            content,
+            filename: `${activeEnvironment.name}.json`,
             filters: [{ name: 'JSON Files', extensions: ['json'] }],
-            defaultPath: `${activeEnvironment.name}.json`,
         })
-
-        if (!dialog || dialog.canceled || !dialog.filePath) return
-        await window.apiTester?.writeFile?.(dialog.filePath, content)
         } catch (error) {
         setDialogState({ open: true, type: 'confirm', title: 'Export failed', message: error?.message || 'Export failed.', initialValue: '', options: [], confirmLabel: 'OK', cancelLabel: '', onConfirm: () => setDialogState((current) => ({ ...current, open: false })), onCancel: () => setDialogState((current) => ({ ...current, open: false })) })
         }
     }
 
     useEffect(() => {
-        const off = window.apiTester?.onMenuAction?.((action) => {
+        const off = onRuntimeMenuAction((action) => {
         switch (action) {
             case 'menu:new-collection':
             collectionState.createNewCollection()
@@ -1509,7 +1501,7 @@ onConfirm={async () => {
 
         setCloseRequested(false)
 
-        window.apiTester?.forceCloseWindow?.()
+        forceCloseRuntimeWindow()
 
     } catch (error) {
 
@@ -1553,7 +1545,7 @@ onConfirm={async () => {
 
                 setCloseRequested(false)
 
-                window.apiTester?.forceCloseWindow?.()
+                forceCloseRuntimeWindow()
 
             } catch (error) {
 

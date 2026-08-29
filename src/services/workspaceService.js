@@ -138,6 +138,8 @@ function normalizeWorkspace(workspace){
 
 export function loadWorkspaces(){
 
+    performance.mark?.('api-tester:workspace-load-start')
+
     const data =
         localStorage.getItem(
             STORAGE_KEY
@@ -155,9 +157,11 @@ export function loadWorkspaces(){
     )
 
 
-    return [
+    const workspaces = [
         migrated
     ]
+    performance.mark?.('api-tester:workspace-load-finished')
+    return workspaces
 
 }
 
@@ -177,9 +181,11 @@ export function loadWorkspaces(){
         }
 
 
-        return parsed.map(
+        const workspaces = parsed.map(
             normalizeWorkspace
         )
+        performance.mark?.('api-tester:workspace-load-finished')
+        return workspaces
 
 
     }
@@ -206,10 +212,12 @@ export function saveWorkspaces(
     workspaces
 ){
 
+    performance.mark?.('api-tester:workspace-save-start')
     localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(workspaces)
     )
+    performance.mark?.('api-tester:workspace-save-finished')
 
 }
 

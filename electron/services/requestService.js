@@ -9,6 +9,11 @@ const supportedMethods = new Set([
 ])
 
 const activeRequestControllers = new Map()
+const isDebug = process.env.API_TESTER_DEBUG === 'true'
+
+function debugLog(...args) {
+  if (isDebug) console.info(...args)
+}
 
 
 
@@ -246,14 +251,7 @@ export async function execute(request) {
     __requestId,
   } = request ?? {}
 
-  console.log('================================')
-  console.log('API REQUEST')
-  console.log('METHOD:', method)
-  console.log('URL:', url)
-  console.log('RAW HEADERS:', headers)
-  console.log('BODY:', body)
-  console.log('AUTHORIZATION:', authorization)
-  console.log('================================')
+  debugLog('[REQUEST] started', method)
 
   // ---------------------------------------
   // Validate method
@@ -271,9 +269,7 @@ export async function execute(request) {
 
   try {
     parsedUrl = new URL(url)
-  } catch (error) {
-    console.error('INVALID URL:', url)
-
+  } catch {
     throw new Error(
       `Please enter a valid request URL: ${url}`
     )
@@ -305,15 +301,6 @@ applyAuthorization(
     authorization,
     request.environment
 )
-  console.log(
-    'FINAL URL:',
-    parsedUrl.toString()
-  )
-
-  console.log(
-    'FINAL HEADERS:',
-    requestHeaders
-  )
 
   // ---------------------------------------
   // Build fetch options
@@ -335,10 +322,6 @@ applyAuthorization(
     requestOptions.body = body
   }
 
-  console.log(
-    'FETCH OPTIONS:',
-    requestOptions
-  )
 
 // ---------------------------------------
 // Execute request
@@ -378,7 +361,7 @@ try {
         await response.text()
 
 
-    return {
+    const result = {
 
         status:
             response.status,
@@ -405,6 +388,8 @@ try {
             ),
 
     }
+    debugLog('[REQUEST] completed', method, response.status, result.responseTime)
+    return result
 
 } catch (error) {
 
@@ -438,17 +423,7 @@ try {
 }
 
 export function cancelRequest(requestId) {
-
-    console.log(
-        "[CANCEL SERVICE] requestId =",
-        requestId
-    )
-
     if (!requestId) {
-
-        console.log(
-            "[CANCEL SERVICE] No requestId"
-        )
 
         return false
     }
@@ -458,20 +433,13 @@ export function cancelRequest(requestId) {
             requestId
         )
 
-    console.log(
-        "[CANCEL SERVICE] controller found =",
-        !!controller
-    )
-
     if (!controller) {
         return false
     }
 
     controller.abort()
 
-    console.log(
-        "[CANCEL SERVICE] controller.abort() called"
-    )
+    debugLog('[REQUEST] cancelled')
 
     activeRequestControllers.delete(
         requestId

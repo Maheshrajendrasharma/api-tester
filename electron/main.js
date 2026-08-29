@@ -1,5 +1,3 @@
-console.log("electron/main.js started");
-
 import path from "node:path";
 import {
     app,
@@ -15,7 +13,10 @@ import { readFile, writeFile } from "node:fs/promises";
 import * as requestService from "./services/requestService.js";
 import * as storageService from "./services/storageService.js";
 
-console.log("Registering IPC handlers...");
+const isDebug = process.env.API_TESTER_DEBUG === "true";
+const debugLog = (...args) => {
+    if (isDebug) console.info(...args);
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,20 +44,12 @@ ipcMain.handle(
     "api-tester:cancel-request",
     (_event, requestId) => {
 
-        console.log(
-            "[CANCEL IPC] requestId =",
-            requestId
-        )
-
         const result =
             requestService.cancelRequest(
                 requestId
             )
 
-        console.log(
-            "[CANCEL IPC] result =",
-            result
-        )
+        debugLog("[CANCEL IPC]", Boolean(result))
 
         return result
     }
@@ -145,19 +138,10 @@ ipcMain.handle(
     "api-tester:minimize-window",
     (event) => {
 
-        console.log(
-            "MAIN: MINIMIZE IPC RECEIVED"
-        );
-
         const window =
             BrowserWindow.fromWebContents(
                 event.sender
             );
-
-        console.log(
-            "MAIN: WINDOW =",
-            !!window
-        );
 
         if (window) {
             window.minimize();
@@ -174,19 +158,10 @@ ipcMain.handle(
     "api-tester:maximize-window",
     (event) => {
 
-        console.log(
-            "MAIN: MAXIMIZE IPC RECEIVED"
-        );
-
         const window =
             BrowserWindow.fromWebContents(
                 event.sender
             );
-
-        console.log(
-            "MAIN: WINDOW =",
-            !!window
-        );
 
         if (!window) {
             return;
@@ -194,17 +169,9 @@ ipcMain.handle(
 
         if (window.isMaximized()) {
 
-            console.log(
-                "MAIN: RESTORING WINDOW"
-            );
-
             window.unmaximize();
 
         } else {
-
-            console.log(
-                "MAIN: MAXIMIZING WINDOW"
-            );
 
             window.maximize();
         }
@@ -254,8 +221,6 @@ ipcMain.handle(
 );
 
 
-console.log("IPC handlers registered");
-
 
 // =====================================================
 // CREATE WINDOW
@@ -293,12 +258,9 @@ function createWindow() {
     });
 
 
-    mainWindow.webContents.openDevTools();
-
-    console.log(
-        "PRELOAD PATH:",
-        path.join(__dirname, "preload.cjs")
-    );
+    if (isDebug || !app.isPackaged) {
+        mainWindow.webContents.openDevTools();
+    }
 
     mainWindow.loadURL(
         "http://localhost:5173"
@@ -350,10 +312,6 @@ function buildMenu() {
 // =====================================================
 
 app.whenReady().then(() => {
-
-    console.log(
-        "ELECTRON APP READY"
-    );
 
     buildMenu();
 

@@ -11,6 +11,7 @@ import {
   exportCollection as exportCollectionData,
   importCollectionFromFile,
 } from '../services/importExportService'
+import { saveTextFile } from '../services/runtimeService'
 
 import { isDuplicateName } from '../utils/validators'
 
@@ -386,19 +387,6 @@ useEffect(() => {
             ? workspaceCollections
             : []
 
-   
-    console.log('[COLLECTIONS] workspaceId:', workspaceId)
-    console.log(
-        '[COLLECTIONS] initialSelectedRequestId:',
-        initialSelectedRequestId
-    )
-    console.log(
-        '[COLLECTIONS] collections count:',
-        currentCollections.length
-    )
-    console.log('================================')
-
-
     // =====================================================
     // CASE 1:
     // We already have a saved request ID.
@@ -408,16 +396,6 @@ useEffect(() => {
 
     if (initialSelectedRequestId) {
 
-
-console.log(
-  "CURRENT COLLECTION REQUESTS:",
-  JSON.stringify(
-    currentCollections,
-    null,
-    2
-  )
-)
-      
 
     const savedRequest =
         findRequestInCollections(
@@ -433,11 +411,6 @@ console.log(
 
         return
     }
-
-
-    console.log(
-        '[COLLECTIONS] Saved request removed. Selecting first request.'
-    )
 
 
     const firstRequest =
@@ -468,10 +441,6 @@ console.log(
 
     if (currentCollections.length === 0) {
 
-        console.log(
-            '[COLLECTIONS] No collections available yet.'
-        )
-
         return
     }
 
@@ -484,16 +453,6 @@ console.log(
 
     const fallbackRequestId =
         firstRequest?.id ?? null
-
-
-    console.log(
-        '[COLLECTIONS] NO SAVED REQUEST.'
-    )
-
-    console.log(
-        '[COLLECTIONS] USING FIRST REQUEST:',
-        fallbackRequestId
-    )
 
 
     setSelectedRequestId(
@@ -788,32 +747,11 @@ console.log(
           collection
         )
 
-      const dialog =
-        await window.apiTester
-          ?.showSaveDialog?.({
-            filters: [
-              {
-                name: 'JSON Files',
-                extensions: ['json'],
-              },
-            ],
-            defaultPath:
-              `${collection.name}.json`,
-          })
-
-      if (
-        !dialog ||
-        dialog.canceled ||
-        !dialog.filePath
-      ) {
-        return
-      }
-
-      await window.apiTester
-        ?.writeFile?.(
-          dialog.filePath,
-          content
-        )
+      await saveTextFile({
+        content,
+        filename: `${collection.name}.json`,
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      })
     } catch (error) {
       showValidationError(
         error?.message ||
@@ -922,11 +860,6 @@ console.log(
      ======================================================= */
 
 function createNewRequest(parentId) {
-
-  console.log(
-    "CREATE REQUEST CLICKED PARENT ID:",
-    parentId
-  )
   if (!parentId) {
     return null
   }
@@ -1399,32 +1332,11 @@ async function exportFolder(folderId) {
     2
   )
 
-  const dialog =
-    await window.apiTester
-      ?.showSaveDialog?.({
-        filters: [
-          {
-            name: 'JSON Files',
-            extensions: ['json'],
-          },
-        ],
-        defaultPath:
-          `${folder.name || 'Folder'}.json`,
-      })
-
-  if (
-    !dialog ||
-    dialog.canceled ||
-    !dialog.filePath
-  ) {
-    return
-  }
-
-  await window.apiTester
-    ?.writeFile?.(
-      dialog.filePath,
-      content
-    )
+  await saveTextFile({
+    content,
+    filename: `${folder.name || 'Folder'}.json`,
+    filters: [{ name: 'JSON Files', extensions: ['json'] }],
+  })
 }
 
 

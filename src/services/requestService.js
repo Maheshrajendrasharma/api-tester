@@ -1,6 +1,12 @@
+import {
+  cancelRuntimeRequest,
+  executeRuntimeRequest,
+} from './runtimeService'
+
 export async function executeRequest(request) {
-  if (!window.apiTester?.sendRequest) {
-    throw new Error('Electron API bridge not available. Please run inside the Electron desktop application.')
-  }
-  return window.apiTester.sendRequest(request)
+  return executeRuntimeRequest(request)
+}
+
+export async function cancelRequest(requestId) {
+  return cancelRuntimeRequest(requestId)
 }

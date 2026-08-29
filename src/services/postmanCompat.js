@@ -103,13 +103,6 @@ export const pm = {
             const resolved =
                 replaceDynamicVariable(value)
 
-            console.log(
-                "[PM] variables.replaceIn:",
-                value,
-                "=>",
-                resolved
-            )
-
             return resolved
         },
 
@@ -133,13 +126,6 @@ export const pm = {
     environment: {
 
         set(key, value) {
-
-            console.log(
-                "[PM] environment.set:",
-                key,
-                "=",
-                value
-            )
 
             /*
              * For Phase 1 we store the value

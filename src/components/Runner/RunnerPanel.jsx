@@ -1,7 +1,6 @@
 import './runner.css'
 
 import React, {
-  useMemo,
   useRef,
   useState
 } from 'react'
@@ -13,6 +12,7 @@ import {
   runNode,
   createRunnerController
 } from '../../services/runnerService'
+import { cancelRequest as cancelRuntimeRequest } from '../../services/requestService'
 
 
 export default function RunnerPanel({
@@ -58,11 +58,7 @@ const controllerRef = useRef(null)
 
 
 function handleRun({ config, dataRows }) {
-
-  console.log('========== RUNNER START ==========')
-  console.log('[RUNNER] config =', config)
-  console.log('[RUNNER] dataRows =', dataRows)
-  console.log('[RUNNER] selectedNode =', selectedNode)
+  performance.mark?.('api-tester:runner-start')
 
   // --------------------------------------------------
   // Create a NEW controller for every Run
@@ -71,15 +67,6 @@ function handleRun({ config, dataRows }) {
 
   controllerRef.current = runnerController
 
-  console.log('[RUNNER] controller created')
-  console.log(
-    '[RUNNER] initially paused =',
-    runnerController.isPaused()
-  )
-  console.log(
-    '[RUNNER] initially aborted =',
-    runnerController.signal.aborted
-  )
 
 
   // --------------------------------------------------
@@ -87,7 +74,6 @@ function handleRun({ config, dataRows }) {
   // --------------------------------------------------
   const node = selectedNode || null
 
-  console.log('[RUNNER] node =', node)
 
 
   // --------------------------------------------------
@@ -105,10 +91,6 @@ function handleRun({ config, dataRows }) {
       )
     )?.id
 
-  console.log(
-    '[RUNNER] collectionId =',
-    collectionId
-  )
 
 
   // --------------------------------------------------
@@ -119,15 +101,6 @@ function handleRun({ config, dataRows }) {
     initialNodeId ||
     collectionId
 
-  console.log(
-    '[RUNNER] nodeId =',
-    nodeId
-  )
-
-  console.log(
-    '[RUNNER] scope =',
-    config.scope
-  )
 
 
   // --------------------------------------------------
@@ -164,10 +137,6 @@ setState({
 })
 
 
-  console.log(
-    '[RUNNER] ABOUT TO CALL runNode()'
-  )
-
 
   // --------------------------------------------------
   // START RUNNER
@@ -198,11 +167,6 @@ setState({
     // ------------------------------------------------
     onProgress: (progress) => {
 
-  console.log(
-    '[RUNNER PROGRESS]',
-    progress
-  )
-
   setState(progress)
 
 
@@ -213,11 +177,6 @@ setState({
   if (
     progress.event === 'request-start'
   ) {
-
-    console.log(
-      '[RUNNER REQUEST START]',
-      progress.requestId
-    )
 
     setExecutionMap(
       (previous) => ({
@@ -245,12 +204,6 @@ setState({
     progress.event === 'request-complete'
   ) {
 
-    console.log(
-      '[RUNNER REQUEST COMPLETE]',
-      progress.requestId,
-      progress.requestStatus
-    )
-
     setExecutionMap(
       (previous) => ({
 
@@ -275,11 +228,6 @@ setState({
     // RESULT
     // ------------------------------------------------
     onResult: (runnerResult, executionMeta) => {
-
-      console.log(
-        '[RUNNER RESULT]',
-        runnerResult
-      )
 
 const requestId =
   executionMeta?.requestId ||
@@ -363,24 +311,13 @@ setExecutionMap((previous) => ({
 
   })
 
-  .then((finalState) => {
-
-    console.log(
-      '[RUNNER] runNode() completed',
-      finalState
-    )
+  .then(() => {
 
   })
 
   .catch((error) => {
 
-    console.error(
-      '========== RUNNER ERROR =========='
-    )
-
-    console.error(
-      error
-    )
+    console.error('[RUNNER] failed:', error instanceof Error ? error.message : String(error))
 
     setState((previous) => ({
 
@@ -399,9 +336,7 @@ setExecutionMap((previous) => ({
 
   .finally(() => {
 
-    console.log(
-      '[RUNNER] FINISHED'
-    )
+    performance.mark?.('api-tester:runner-finished')
 
     setRunning(false)
 
@@ -426,11 +361,6 @@ function handleResume() {
 
 async function handleCancel() {
 
-  console.log(
-    '[RUNNER CANCEL] requested'
-  )
-
-
   // Cancel the runner controller
   controllerRef.current?.cancel()
 
@@ -440,36 +370,15 @@ async function handleCancel() {
     state?.currentRequestId
 
 
-  console.log(
-    '[RUNNER CANCEL] current requestId =',
-    requestId
-  )
-
-
-  // Cancel active Electron HTTP request
-  if (
-    requestId &&
-    window.apiTester?.cancelRequest
-  ) {
+  if (requestId) {
 
     try {
 
-      const result =
-        await window.apiTester.cancelRequest(
-          requestId
-        )
-
-      console.log(
-        '[RUNNER CANCEL] Electron cancel result =',
-        result
-      )
+      await cancelRuntimeRequest(requestId)
 
     } catch (error) {
 
-      console.error(
-        '[RUNNER CANCEL] Electron cancellation failed:',
-        error
-      )
+      console.error('[RUNNER] cancellation failed:', error?.message || String(error))
 
     }
 
