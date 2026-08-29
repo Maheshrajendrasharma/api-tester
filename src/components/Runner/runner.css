@@ -1,1112 +1,1064 @@
-/* =========================================================
-   API TESTER - RUNNER
-   Standalone Runner styles
-   ========================================================= */
+  /* =========================================================
+    API TESTER - RUNNER
+    Standalone Runner styles
+    ========================================================= */
 
 
-/* =========================================================
-   OVERLAY / ROOT
-   ========================================================= */
+  /* =========================================================
+    OVERLAY / ROOT
+    ========================================================= */
 
-.runner-overlay {
-  position: absolute;
-  inset: 0;
+  .runner-overlay {
+    position: absolute;
+    inset: 0;
 
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 
-  display: flex;
+    display: flex;
 
-  overflow: hidden;
+    overflow: hidden;
 
-  background: #12171d;
+    background: #12171d;
 
-  z-index: 20;
-}
+    z-index: 20;
+  }
 
 
-.runner-panel {
-  width: 100%;
-  height: 100%;
+  .runner-panel {
+    width: 100%;
+    height: 100%;
 
-  min-width: 0;
-  min-height: 0;
+    min-width: 0;
+    min-height: 0;
 
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-  overflow: hidden;
+    overflow: hidden;
 
-  color: #dbe5ee;
-  background: #12171d;
+    color: #dbe5ee;
+    background: #12171d;
 
-  box-sizing: border-box;
-}
+    box-sizing: border-box;
+  }
 
 
-/* =========================================================
-   HEADER
-   ========================================================= */
+  /* =========================================================
+    HEADER
+    ========================================================= */
 
-.runner-header {
-  flex: 0 0 54px;
+  .runner-header {
+    flex: 0 0 54px;
 
-  min-height: 54px;
+    min-height: 54px;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-  padding: 0 16px;
+    padding: 0 16px;
 
-  background: #171c22;
+    background: #171c22;
 
-  border-bottom: 1px solid #29323c;
+    border-bottom: 1px solid #29323c;
 
-  box-sizing: border-box;
-}
+    box-sizing: border-box;
+  }
 
 
-.runner-title {
-  color: #edf3f8;
+  .runner-title {
+    color: #edf3f8;
 
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.2;
-}
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
 
 
-.runner-subtitle {
-  margin-top: 4px;
+  .runner-subtitle {
+    margin-top: 4px;
 
-  color: #7f8d9c;
+    color: #7f8d9c;
 
-  font-size: 11px;
-  line-height: 1.2;
-}
+    font-size: 11px;
+    line-height: 1.2;
+  }
 
 
-.runner-close {
-  width: 30px;
-  height: 30px;
+  .runner-close {
+    width: 30px;
+    height: 30px;
 
-  display: grid;
-  place-items: center;
+    display: grid;
+    place-items: center;
 
-  padding: 0;
+    padding: 0;
 
-  color: #9aa8b7;
+    color: #9aa8b7;
 
-  background: transparent;
+    background: transparent;
 
-  border: 0;
-  border-radius: 6px;
+    border: 0;
+    border-radius: 6px;
 
-  cursor: pointer;
+    cursor: pointer;
 
-  font: inherit;
-  font-size: 22px;
-  line-height: 1;
-}
+    font: inherit;
+    font-size: 22px;
+    line-height: 1;
+  }
 
 
-.runner-close:hover {
-  color: #edf3f8;
-  background: #27313c;
-}
+  .runner-close:hover {
+    color: #edf3f8;
+    background: #27313c;
+  }
 
 
-/* =========================================================
-   Two COLUMNS
-   ========================================================= */
+  /* =========================================================
+    Two COLUMNS
+    ========================================================= */
 
-.runner-layout {
-  flex: 1 1 auto;
+  .runner-layout {
+    flex: 1 1 auto;
 
-  min-width: 0;
-  min-height: 0;
+    min-width: 0;
+    min-height: 0;
 
-  display: grid;
+    display: grid;
 
-  grid-template-columns:
-    minmax(340px, 38%)
-    minmax(0, 62%);
+    grid-template-columns:
+      minmax(340px, 38%)
+      minmax(0, 62%);
 
-  overflow: hidden;
-}
-/* =========================================================
-   LEFT - TREE
-   ========================================================= */
+    overflow: hidden;
+  }
+  /* =========================================================
+    LEFT - TREE
+    ========================================================= */
 
 
 
-.runner-left > .runner-section-title {
-  flex: 0 0 42px;
+  .runner-left > .runner-section-title {
+    flex: 0 0 42px;
 
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 
-  margin: 0;
+    margin: 0;
 
-  padding: 0 12px;
+    padding: 0 12px;
 
-  color: #99a5b4;
+    color: #99a5b4;
 
-  border-bottom: 1px solid #29323c;
+    border-bottom: 1px solid #29323c;
 
-  font-size: 10px;
-  font-weight: 700;
+    font-size: 10px;
+    font-weight: 700;
 
-  letter-spacing: .12em;
+    letter-spacing: .12em;
 
-  text-transform: uppercase;
-}
+    text-transform: uppercase;
+  }
 
 
-/* =========================================================
-   TREE SCROLL
-   ========================================================= */
+  /* =========================================================
+    TREE SCROLL
+    ========================================================= */
 
-.runner-left > .runner-tree {
-  flex: 1 1 auto;
+  .runner-left > .runner-tree {
+    flex: 1 1 auto;
 
-  min-height: 0;
+    min-height: 0;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 
-  padding: 6px 0;
+    padding: 6px 0;
 
-  box-sizing: border-box;
+    box-sizing: border-box;
 
-  scrollbar-width: thin;
-  scrollbar-color: #465363 #171c22;
-}
+    scrollbar-width: thin;
+    scrollbar-color: #465363 #171c22;
+  }
 
 
-.runner-left > .runner-tree::-webkit-scrollbar {
-  width: 8px;
-}
+  .runner-left > .runner-tree::-webkit-scrollbar {
+    width: 8px;
+  }
 
 
-.runner-left > .runner-tree::-webkit-scrollbar-track {
-  background: #171c22;
-}
+  .runner-left > .runner-tree::-webkit-scrollbar-track {
+    background: #171c22;
+  }
 
 
-.runner-left > .runner-tree::-webkit-scrollbar-thumb {
-  background: #465363;
+  .runner-left > .runner-tree::-webkit-scrollbar-thumb {
+    background: #465363;
 
-  border: 2px solid #171c22;
+    border: 2px solid #171c22;
 
-  border-radius: 999px;
-}
+    border-radius: 999px;
+  }
 
 
-.runner-left > .runner-tree::-webkit-scrollbar-thumb:hover {
-  background: #59697a;
-}
+  .runner-left > .runner-tree::-webkit-scrollbar-thumb:hover {
+    background: #59697a;
+  }
 
 
-/* Root tree */
-.runner-tree {
-  width: 100%;
-  min-width: 0;
+  /* Root tree */
+  .runner-tree {
+    width: 100%;
+    min-width: 0;
 
-  box-sizing: border-box;
-}
+    box-sizing: border-box;
+  }
 
 
-/* =========================================================
-   TREE ROW
-   ========================================================= */
+  /* =========================================================
+    TREE ROW
+    ========================================================= */
 
-.runner-tree-row {
-  width: 100%;
-  min-width: 0;
+  .runner-tree-row {
+    width: 80%;
+    min-width: 0;
 
-  height: 30px;
-  min-height: 30px;
+    height: 30px;
+    min-height: 10px;
 
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 
-  gap: 7px;
+    gap: 7px;
 
-  padding: 0 10px;
+    padding: 0 0px;
 
-  box-sizing: border-box;
+    box-sizing: border-box;
+
+    color: #c4ced8;
+
+    background: transparent;
+
+    border: 0;
+    border-left: 2px solid transparent;
+
+    border-radius: 0;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 13px;
+
+    text-align: left;
+
+    transition:
+      background 120ms ease,
+      color 120ms ease,
+      border-color 120ms ease;
+  }
+
+
+  .runner-tree-row:hover {
+    color: #edf3f8;
+
+    background: #222b35;
+  }
+
+
+  .runner-tree-row.selected {
+    color: #f5f8fb;
+
+    background: #2a3642;
+
+    border-left-color: #6ee7b7;
+  }
+
+
+  /* =========================================================
+    TREE ICON
+    ========================================================= */
+
+  .runner-tree-icon {
+    width: 20px;
+    height: 20px;
+
+    flex: 0 0 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #eabf72;
+
+    font-size: 14px;
+  }
+
+
+  /* =========================================================
+    TREE NAME
+    ========================================================= */
+
+.runner-tree-name {
+  flex: 1 1 100%;
+  min-width: 100px;
+  max-width:200px;
 
   color: #c4ced8;
 
-  background: transparent;
-
-  border: 0;
-  border-left: 2px solid transparent;
-
-  border-radius: 0;
-
-  cursor: pointer;
-
-  font: inherit;
-  font-size: 13px;
-
-  text-align: left;
-
-  transition:
-    background 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease;
-}
-
-
-.runner-tree-row:hover {
-  color: #edf3f8;
-
-  background: #222b35;
-}
-
-
-.runner-tree-row.selected {
-  color: #f5f8fb;
-
-  background: #2a3642;
-
-  border-left-color: #6ee7b7;
-}
-
-
-/* =========================================================
-   TREE ICON
-   ========================================================= */
-
-.runner-tree-icon {
-  width: 20px;
-  height: 20px;
-
-  flex: 0 0 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #eabf72;
-
-  font-size: 14px;
-}
-
-
-/* =========================================================
-   TREE NAME
-   ========================================================= */
-
-.runner-tree-name {
-  min-width: 0;
-
-  flex: 1 1 auto;
-
   overflow: hidden;
-
-  color: inherit;
-
   text-overflow: ellipsis;
-
   white-space: nowrap;
+
+  font-size: 13px;
+  font-weight: 500;
 }
 
 
-/* =========================================================
-   METHOD
-   ========================================================= */
+  /* =========================================================
+    METHOD
+    ========================================================= */
 
-.runner-tree-method {
+  .runner-tree-method {
 
-  width:40px;
+    width:30px;
 
-  flex-shrink:0;
+    flex-shrink:0;
 
-  color:#6fc9ff;
+    color:#6fc9ff;
 
-  font-size:11px;
+    font-size:11px;
 
-  font-weight:800;
+    font-weight:800;
 
-}
-
-
-/* =========================================================
-   RUNTIME STATUS
-   ========================================================= */
-
-.runner-status {
-  display: inline-flex;
-
-  align-items: center;
-  justify-content: center;
-
-  min-width: 54px;
-  height: 18px;
-
-  flex: 0 0 auto;
-
-  padding: 0 6px;
-
-  box-sizing: border-box;
-
-  border-radius: 9px;
-
-  font-size: 9px;
-  font-weight: 700;
-
-  text-transform: uppercase;
-}
-
-
-/* Running */
-
-.runner-tree-row.status-running {
-  background: #283538;
-
-  border-left-color: #f1bf71;
-}
-
-
-.runner-tree-row.status-running .runner-status {
-  color: #f1bf71;
-
-  background: #3b3221;
-}
-
-
-.runner-tree-row.status-running .runner-status::before {
-  content: '';
-
-  width: 6px;
-  height: 6px;
-
-  margin-right: 5px;
-
-  border-radius: 50%;
-
-  background: #f1bf71;
-
-  animation: runner-status-pulse 1s ease-in-out infinite;
-}
-
-
-/* Success */
-
-.runner-tree-row.status-success .runner-status {
-  color: #6ee7b7;
-
-  background: #18382f;
-}
-
-
-/* Failed */
-
-.runner-tree-row.status-failed .runner-status {
-  color: #f38b91;
-
-  background: #3b2024;
-}
-
-
-/* Pending */
-
-.runner-tree-row.status-pending .runner-status {
-  color: #9ba8b7;
-
-  background: #252c34;
-}
-
-
-@keyframes runner-status-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
   }
 
-  50% {
-    opacity: .35;
-    transform: scale(.75);
+
+  /* =========================================================
+    RUNTIME STATUS
+    ========================================================= */
+
+
+
+  /* Running */
+
+  .runner-tree-row.status-running {
+    background: #283538;
+
+    border-left-color: #f1bf71;
   }
-}
 
 
-/* =========================================================
-   CENTER - CONFIG
+  .runner-tree-row.status-running .runner-status {
+    color: #f1bf71;
+
+    background: #3b3221;
+  }
+
+
+  .runner-tree-row.status-running .runner-status::before {
+    content: '';
+
+    width: 6px;
+    height: 6px;
+
+    margin-right: 5px;
+
+    border-radius: 50%;
+
+    background: #f1bf71;
+
+    animation: runner-status-pulse 1s ease-in-out infinite;
+  }
+
+
+  /* Success */
+
+  .runner-tree-row.status-success .runner-status {
+    color: #6ee7b7;
+
+    background: #18382f;
+  }
+
+
+  /* Failed */
+
+  .runner-tree-row.status-failed .runner-status {
+    color: #f38b91;
+
+    background: #3b2024;
+  }
+
+
+  /* Pending */
+
+  .runner-tree-row.status-pending .runner-status {
+    color: #9ba8b7;
+
+    background: #252c34;
+  }
+
+
+  @keyframes runner-status-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: .35;
+      transform: scale(.75);
+    }
+  }
+
+
+  /* =========================================================
+    CENTER - CONFIG
+    ========================================================= */
+
+  .runner-middle {
+    min-width: 0;
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 14px;
+
+    background: #12171d;
+
+    border-right: 1px solid #29323c;
+
+    box-sizing: border-box;
+
+    scrollbar-width: thin;
+    scrollbar-color: #465363 #12171d;
+  }
+
+
+  .runner-middle::-webkit-scrollbar {
+    width: 8px;
+  }
+
+
+  .runner-middle::-webkit-scrollbar-track {
+    background: #12171d;
+  }
+
+
+  .runner-middle::-webkit-scrollbar-thumb {
+    background: #465363;
+
+    border: 2px solid #12171d;
+
+    border-radius: 999px;
+  }
+
+
+  .runner-middle::-webkit-scrollbar-thumb:hover {
+    background: #59697a;
+  }
+
+
+  /* =========================================================
+    SECTION TITLE
+    ========================================================= */
+
+  .runner-middle .runner-section-title {
+    margin: 0 0 8px;
+
+    color: #99a5b4;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .12em;
+
+    text-transform: uppercase;
+  }
+
+
+  /* =========================================================
+    RUN CONFIG
+    ========================================================= */
+
+  .runner-config {
+    width: 100%;
+
+    box-sizing: border-box;
+  }
+
+
+  /* Scope */
+
+  .runner-scope-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    margin-bottom: 18px;
+
+    padding: 10px 12px;
+
+    background: #171c22;
+
+    border: 1px solid #29323c;
+    border-radius: 7px;
+  }
+
+
+  .runner-radio-row {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    color: #c7d0da;
+
+    font-size: 12px;
+
+    cursor: pointer;
+  }
+
+
+  .runner-radio-row input {
+    margin: 0;
+
+    accent-color: #6ee7b7;
+  }
+
+
+  /* =========================================================
+    ITERATION GRID
+    ========================================================= */
+
+  .runner-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+  }
+
+
+  .runner-grid label,
+  .runner-data-card label {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+
+    color: #8997a6;
+
+    font-size: 11px;
+  }
+
+
+  .runner-grid input,
+  .runner-data-card input,
+  .runner-data-card textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    color: #dbe5ee;
+
+    background: #151b21;
+
+    border: 1px solid #2c3640;
+
+    border-radius: 6px;
+
+    font: inherit;
+  }
+
+
+  .runner-grid input {
+    height: 32px;
+
+    padding: 0 9px;
+  }
+
+
+  .runner-data-card input {
+    height: 32px;
+
+    padding: 0 9px;
+  }
+
+
+  .runner-data-card textarea {
+    min-height: 110px;
+
+    padding: 9px;
+
+    resize: vertical;
+  }
+
+
+  .runner-grid input:focus,
+  .runner-data-card input:focus,
+  .runner-data-card textarea:focus {
+    border-color: #5fa98b;
+
+    outline: none;
+
+    box-shadow:
+      0 0 0 2px rgb(110 231 183 / 10%);
+  }
+
+
+  /* =========================================================
+    DATA SOURCE
+    ========================================================= */
+
+  .runner-data-mode {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    margin-bottom: 12px;
+  }
+
+
+  .runner-data-mode label {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    color: #c7d0da;
+
+    font-size: 12px;
+
+    cursor: pointer;
+  }
+
+
+  .runner-data-mode input {
+    margin: 0;
+
+    accent-color: #6ee7b7;
+  }
+
+
+  .runner-data-card {
+    margin-bottom: 16px;
+
+    padding: 12px;
+
+    background: #171c22;
+
+    border: 1px solid #29323c;
+
+    border-radius: 7px;
+  }
+
+
+  .runner-file-name {
+    margin-top: 8px;
+
+    color: #6ee7b7;
+
+    font-size: 11px;
+  }
+
+
+  .runner-columns {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin-top: 10px;
+  }
+
+
+  .runner-columns span {
+    padding: 3px 7px;
+
+    color: #aeb9c6;
+
+    background: #222b35;
+
+    border: 1px solid #303c48;
+
+    border-radius: 4px;
+
+    font-size: 10px;
+  }
+
+
+  .runner-error {
+    margin-top: 8px;
+
+    color: #f38b91;
+
+    font-size: 11px;
+  }
+
+
+  /* =========================================================
+    OPTIONS
+    ========================================================= */
+
+  .runner-options {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px 14px;
+
+    margin-bottom: 18px;
+
+    padding: 12px;
+
+    background: #171c22;
+
+    border: 1px solid #29323c;
+
+    border-radius: 7px;
+  }
+
+
+  .runner-options label {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #c7d0da;
+
+    font-size: 11px;
+
+    cursor: pointer;
+  }
+
+
+  .runner-options input {
+    margin: 0;
+
+    accent-color: #6ee7b7;
+  }
+
+
+  /* =========================================================
+    RUN BUTTON
+    ========================================================= */
+
+  .runner-primary-button {
+    width: 100%;
+    height: 36px;
+
+    color: #09261d;
+
+    background: #6ee7b7;
+
+    border: 0;
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+
+  .runner-primary-button:hover {
+    background: #8aefc7;
+  }
+
+
+  .runner-primary-button:disabled {
+    cursor: not-allowed;
+
+    opacity: .55;
+  }
+
+
+  /* =========================================================
+    RIGHT - EXECUTION
+    ========================================================= */
+
+
+
+
+
+
+  /* =========================================================
+    RESULTS
+    ========================================================= */
+
+  .runner-results-empty {
+    padding: 14px;
+
+    color: #758393;
+
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+
+  .runner-result-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-bottom: 10px;
+  }
+
+
+  .runner-result-summary span {
+    padding: 4px 7px;
+
+    color: #aeb9c6;
+
+    background: #171c22;
+
+    border: 1px solid #29323c;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+  }
+
+
+  .runner-result-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+  }
+
+
+  .runner-result-row {
+    display: grid;
+
+    grid-template-columns:
+      22px
+      minmax(0, 1fr)
+      45px
+      65px;
+
+    gap: 8px;
+
+    align-items: center;
+
+    min-height: 42px;
+
+    padding: 7px 8px;
+
+    background: #171c22;
+
+    border: 1px solid #29323c;
+
+    border-radius: 6px;
+
+    box-sizing: border-box;
+  }
+
+
+  .runner-result-row.passed {
+    border-left: 2px solid #6ee7b7;
+  }
+
+
+  .runner-result-row.failed {
+    border-left: 2px solid #f38b91;
+  }
+
+
+  .runner-result-icon {
+    font-weight: 800;
+  }
+
+
+  .runner-result-row.passed .runner-result-icon {
+    color: #6ee7b7;
+  }
+
+
+  .runner-result-row.failed .runner-result-icon {
+    color: #f38b91;
+  }
+
+
+  .runner-result-main {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+  }
+
+
+  .runner-result-main strong {
+    overflow: hidden;
+
+    color: #dbe5ee;
+
+    font-size: 11px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  .runner-result-main span {
+    color: #758393;
+
+    font-size: 9px;
+  }
+
+
+
+
+  /* =========================================================
+    TARGET + EXECUTION
+    ========================================================= */
+
+  .runner-target-panel {
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background: #12171d;
+  }
+
+
+  .runner-target-panel > .runner-section-title {
+    flex: 0 0 42px;
+
+    display: flex;
+    align-items: center;
+
+    margin: 0;
+
+    padding: 0 12px;
+
+    color: #99a5b4;
+
+    background: #171c22;
+
+    border-bottom: 1px solid #29323c;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .12em;
+
+    text-transform: uppercase;
+  }
+
+
+  /* SUMMARY */
+
+  .runner-inline-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    padding: 10px 12px;
+
+    background: #12171d;
+
+    border-bottom: 1px solid #29323c;
+  }
+
+
+  .runner-inline-summary span {
+    padding: 4px 8px;
+
+    color: #aeb9c6;
+
+    background: #171c22;
+
+    border: 1px solid #29323c;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+  }
+
+
+  /* TREE */
+
+  .runner-target-tree {
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 6px 0;
+
+    box-sizing: border-box;
+  }
+
+
+  /* =========================================================
+   TARGET TREE SCROLLBAR
    ========================================================= */
 
-.runner-middle {
-  min-width: 0;
-  min-height: 0;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  padding: 14px;
-
-  background: #12171d;
-
-  border-right: 1px solid #29323c;
-
-  box-sizing: border-box;
-
+.runner-target-tree {
   scrollbar-width: thin;
   scrollbar-color: #465363 #12171d;
 }
 
-
-.runner-middle::-webkit-scrollbar {
+.runner-target-tree::-webkit-scrollbar {
   width: 8px;
 }
 
-
-.runner-middle::-webkit-scrollbar-track {
+.runner-target-tree::-webkit-scrollbar-track {
   background: #12171d;
 }
 
-
-.runner-middle::-webkit-scrollbar-thumb {
+.runner-target-tree::-webkit-scrollbar-thumb {
   background: #465363;
-
   border: 2px solid #12171d;
-
   border-radius: 999px;
 }
 
-
-.runner-middle::-webkit-scrollbar-thumb:hover {
+.runner-target-tree::-webkit-scrollbar-thumb:hover {
   background: #59697a;
 }
-
-
-/* =========================================================
-   SECTION TITLE
-   ========================================================= */
-
-.runner-middle .runner-section-title {
-  margin: 0 0 8px;
-
-  color: #99a5b4;
-
-  font-size: 10px;
-  font-weight: 700;
-
-  letter-spacing: .12em;
-
-  text-transform: uppercase;
-}
-
-
-/* =========================================================
-   RUN CONFIG
-   ========================================================= */
-
-.runner-config {
-  width: 100%;
-
-  box-sizing: border-box;
-}
-
-
-/* Scope */
-
-.runner-scope-group {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-
-  margin-bottom: 18px;
-
-  padding: 10px 12px;
-
-  background: #171c22;
-
-  border: 1px solid #29323c;
-  border-radius: 7px;
-}
-
-
-.runner-radio-row {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 6px;
-
-  color: #c7d0da;
-
-  font-size: 12px;
-
-  cursor: pointer;
-}
-
-
-.runner-radio-row input {
-  margin: 0;
-
-  accent-color: #6ee7b7;
-}
-
-
-/* =========================================================
-   ITERATION GRID
-   ========================================================= */
-
-.runner-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap: 10px;
-
-  margin-bottom: 18px;
-}
-
-
-.runner-grid label,
-.runner-data-card label {
-  display: flex;
-  flex-direction: column;
-
-  gap: 6px;
-
-  color: #8997a6;
-
-  font-size: 11px;
-}
-
-
-.runner-grid input,
-.runner-data-card input,
-.runner-data-card textarea {
-  width: 100%;
-
-  box-sizing: border-box;
-
-  color: #dbe5ee;
-
-  background: #151b21;
-
-  border: 1px solid #2c3640;
-
-  border-radius: 6px;
-
-  font: inherit;
-}
-
-
-.runner-grid input {
-  height: 32px;
-
-  padding: 0 9px;
-}
-
-
-.runner-data-card input {
-  height: 32px;
-
-  padding: 0 9px;
-}
-
-
-.runner-data-card textarea {
-  min-height: 110px;
-
-  padding: 9px;
-
-  resize: vertical;
-}
-
-
-.runner-grid input:focus,
-.runner-data-card input:focus,
-.runner-data-card textarea:focus {
-  border-color: #5fa98b;
-
-  outline: none;
-
-  box-shadow:
-    0 0 0 2px rgb(110 231 183 / 10%);
-}
-
-
-/* =========================================================
-   DATA SOURCE
-   ========================================================= */
-
-.runner-data-mode {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-
-  margin-bottom: 12px;
-}
-
-
-.runner-data-mode label {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 6px;
-
-  color: #c7d0da;
-
-  font-size: 12px;
-
-  cursor: pointer;
-}
-
-
-.runner-data-mode input {
-  margin: 0;
-
-  accent-color: #6ee7b7;
-}
-
-
-.runner-data-card {
-  margin-bottom: 16px;
-
-  padding: 12px;
-
-  background: #171c22;
-
-  border: 1px solid #29323c;
-
-  border-radius: 7px;
-}
-
-
-.runner-file-name {
-  margin-top: 8px;
-
-  color: #6ee7b7;
-
-  font-size: 11px;
-}
-
-
-.runner-columns {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 5px;
-
-  margin-top: 10px;
-}
-
-
-.runner-columns span {
-  padding: 3px 7px;
-
-  color: #aeb9c6;
-
-  background: #222b35;
-
-  border: 1px solid #303c48;
-
-  border-radius: 4px;
-
-  font-size: 10px;
-}
-
-
-.runner-error {
-  margin-top: 8px;
-
-  color: #f38b91;
-
-  font-size: 11px;
-}
-
-
-/* =========================================================
-   OPTIONS
-   ========================================================= */
-
-.runner-options {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap: 8px 14px;
-
-  margin-bottom: 18px;
-
-  padding: 12px;
-
-  background: #171c22;
-
-  border: 1px solid #29323c;
-
-  border-radius: 7px;
-}
-
-
-.runner-options label {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 7px;
-
-  color: #c7d0da;
-
-  font-size: 11px;
-
-  cursor: pointer;
-}
-
-
-.runner-options input {
-  margin: 0;
-
-  accent-color: #6ee7b7;
-}
-
-
-/* =========================================================
-   RUN BUTTON
-   ========================================================= */
-
-.runner-primary-button {
-  width: 100%;
-  height: 36px;
-
-  color: #09261d;
-
-  background: #6ee7b7;
-
-  border: 0;
-  border-radius: 6px;
-
-  cursor: pointer;
-
-  font: inherit;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-
-.runner-primary-button:hover {
-  background: #8aefc7;
-}
-
-
-.runner-primary-button:disabled {
-  cursor: not-allowed;
-
-  opacity: .55;
-}
-
-
-/* =========================================================
-   RIGHT - EXECUTION
-   ========================================================= */
-
-
-
-
-
-
-/* =========================================================
-   RESULTS
-   ========================================================= */
-
-.runner-results-empty {
-  padding: 14px;
-
-  color: #758393;
-
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-
-.runner-result-summary {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 7px;
-
-  margin-bottom: 10px;
-}
-
-
-.runner-result-summary span {
-  padding: 4px 7px;
-
-  color: #aeb9c6;
-
-  background: #171c22;
-
-  border: 1px solid #29323c;
-
-  border-radius: 5px;
-
-  font-size: 10px;
-}
-
-
-.runner-result-list {
-  display: flex;
-  flex-direction: column;
-
-  gap: 6px;
-}
-
-
-.runner-result-row {
-  display: grid;
-
-  grid-template-columns:
-    22px
-    minmax(0, 1fr)
-    45px
-    65px;
-
-  gap: 8px;
-
-  align-items: center;
-
-  min-height: 42px;
-
-  padding: 7px 8px;
-
-  background: #171c22;
-
-  border: 1px solid #29323c;
-
-  border-radius: 6px;
-
-  box-sizing: border-box;
-}
-
-
-.runner-result-row.passed {
-  border-left: 2px solid #6ee7b7;
-}
-
-
-.runner-result-row.failed {
-  border-left: 2px solid #f38b91;
-}
-
-
-.runner-result-icon {
-  font-weight: 800;
-}
-
-
-.runner-result-row.passed .runner-result-icon {
-  color: #6ee7b7;
-}
-
-
-.runner-result-row.failed .runner-result-icon {
-  color: #f38b91;
-}
-
-
-.runner-result-main {
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-
-.runner-result-main strong {
-  overflow: hidden;
-
-  color: #dbe5ee;
-
-  font-size: 11px;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-.runner-result-main span {
-  color: #758393;
-
-  font-size: 9px;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 1000px) {
-  .runner-layout {
-    grid-template-columns:
-      250px
-      minmax(320px, 1fr)
-      280px;
-  }
-
-  .runner-options {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-@media (max-width: 800px) {
-  .runner-layout {
-    grid-template-columns:
-      230px
-      minmax(320px, 1fr);
-  }
-
-}
-
-.runner-action-buttons {
-  display: flex;
-  width: 100%;
-  gap: 10px;
-}
-
-.runner-action-buttons button {
-  height: 44px;
-}
-
-/* IDLE */
-
-.runner-run-button {
-  width: 100%;
-}
-
-
-/* RUNNING + PAUSED */
-
-.runner-pause-button,
-.runner-resume-button,
-.runner-cancel-button {
-  flex: 1;
-}
-
-
-.runner-cancel-button {
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-} 
-
-
-/* =========================================================
-   TARGET + EXECUTION
-   ========================================================= */
-
-.runner-target-panel {
-  min-width: 0;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-
-  background: #12171d;
-}
-
-
-.runner-target-panel > .runner-section-title {
-  flex: 0 0 42px;
-
-  display: flex;
-  align-items: center;
-
-  margin: 0;
-
-  padding: 0 12px;
-
-  color: #99a5b4;
-
-  background: #171c22;
-
-  border-bottom: 1px solid #29323c;
-
-  font-size: 10px;
-  font-weight: 700;
-
-  letter-spacing: .12em;
-
-  text-transform: uppercase;
-}
-
-
-/* SUMMARY */
-
-.runner-inline-summary {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 7px;
-
-  padding: 10px 12px;
-
-  background: #12171d;
-
-  border-bottom: 1px solid #29323c;
-}
-
-
-.runner-inline-summary span {
-  padding: 4px 8px;
-
-  color: #aeb9c6;
-
-  background: #171c22;
-
-  border: 1px solid #29323c;
-
-  border-radius: 5px;
-
-  font-size: 10px;
-}
-
-
-/* TREE */
-
-.runner-target-tree {
-  flex: 1 1 auto;
-
-  min-height: 0;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  padding: 6px 0;
-
-  box-sizing: border-box;
-}
-
 
 .runner-tree-execution {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
 
-  gap: 10px;
+  gap: 8px;
 
   flex: 0 0 auto;
+  min-width: 0;
 
   margin-left: 10px;
+
+  white-space: nowrap;
 }
 
 
 .runner-tree-execution-status {
+  order: 1;
+
   min-width: 72px;
 
   text-align: center;
@@ -1118,42 +1070,46 @@
 }
 
 
-.runner-tree-execution-status.running {
-  color: #f1bf71;
-}
+  .runner-tree-execution-status.running {
+    color: #f1bf71;
+  }
 
 
-.runner-tree-execution-status.success {
-  color: #6ee7b7;
-}
+  .runner-tree-execution-status.success {
+    color: #6ee7b7;
+  }
 
 
-.runner-tree-execution-status.failed {
-  color: #f38b91;
-}
+  .runner-tree-execution-status.failed {
+    color: #f38b91;
+  }
 
 
 .runner-tree-http-status {
-  min-width: 32px;
+  order: 2;
 
-  text-align: right;
+  min-width: 5px;
+
+  text-align: left;
 
   font-size: 10px;
   font-weight: 700;
 }
 
 
-.runner-tree-http-status.success {
-  color: #6ee7b7;
-}
+  .runner-tree-http-status.success {
+    color: #6ee7b7;
+  }
 
 
-.runner-tree-http-status.failed {
-  color: #f38b91;
-}
+  .runner-tree-http-status.failed {
+    color: #f38b91;
+  }
 
 
 .runner-tree-response-time {
+  order: 3;
+
   min-width: 58px;
 
   text-align: right;
@@ -1164,54 +1120,106 @@
 }
 
 
-.runner-tree-not-run {
-  min-width: 72px;
+  .runner-tree-not-run {
+    min-width: 72px;
 
-  color: #596675;
+    color: #596675;
 
-  text-align: center;
+    text-align: center;
 
-  font-size: 10px;
+    font-size: 10px;
+  }
+
+  .runner-tree-row {
+    width: 100%;
+    min-width: 0;
+
+    min-height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 0px;
+
+    box-sizing: border-box;
+
+    color: #c4ced8;
+
+    background: transparent;
+
+    border: 0;
+    border-left: 2px solid transparent;
+
+    border-radius: 0;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 13px;
+
+    text-align: left;
+
+    transition:
+      background 120ms ease,
+      color 120ms ease,
+      border-color 120ms ease;
+  }
+
+
+
+
+@media (max-width: 950px) {
+
+  .runner-tree-response-time {
+    display: none;
+  }
+
 }
 
-.runner-tree-row {
-  width: 100%;
-  min-width: 0;
+@media (max-width: 800px) {
 
-  min-height: 38px;
+  .runner-tree-http-status {
+    display: none;
+  }
 
-  display: flex;
-  align-items: center;
+}
 
-  gap: 7px;
+@media (max-width: 650px) {
 
-  padding: 0 10px;
+  .runner-tree-execution-status {
+    min-width: auto;
+    font-size: 0;
+  }
 
-  box-sizing: border-box;
+  .runner-tree-execution-status.success::before {
+    content: '✓';
+    font-size: 12px;
+  }
 
-  color: #c4ced8;
+  .runner-tree-execution-status.failed::before {
+    content: '✕';
+    font-size: 12px;
+  }
 
-  background: transparent;
+  .runner-tree-execution-status.running::before {
+    content: '⏳';
+    font-size: 12px;
+  }
 
-  border: 0;
-  border-left: 2px solid transparent;
+}
 
-  border-radius: 0;
-
-  cursor: pointer;
-
-  font: inherit;
-  font-size: 13px;
-
-  text-align: left;
-
-  transition:
-    background 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease;
+/* Hide iteration on narrow Runner */
+@media (max-width: 1100px) {
+  .runner-tree-iteration {
+    display: none !important;
+  }
 }
 
 .runner-tree-iteration {
+  order: 4;
+
   min-width: 72px;
 
   color: #758393;

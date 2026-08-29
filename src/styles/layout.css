@@ -4270,7 +4270,7 @@ color:white;
 
 
 .sidebar-content::-webkit-scrollbar {
-    width: 6px;
+    width:6px;
 }
 
 .sidebar-content::-webkit-scrollbar-track {

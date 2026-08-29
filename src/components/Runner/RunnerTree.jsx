@@ -42,7 +42,7 @@ function RunnerTreeNode({
         `}
         style={{
           paddingLeft:
-            `${12 + level * 18}px`
+            `${5 + level * 0}px`
         }}
         onClick={() => onSelect(node)}
       >

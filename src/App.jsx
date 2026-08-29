@@ -1496,18 +1496,81 @@ const {
     items={getChangedRequestItems()}
     confirmLabel="Save All"
 
+onConfirm={async () => {
 
+    try {
 
-    onCancel={(action) => {
+        await Promise.resolve(
+            saveWorkspaces(workspaces)
+        )
+
+        savedWorkspaceSnapshotRef.current =
+            JSON.stringify(workspaces)
+
+        setCloseRequested(false)
+
+        window.apiTester?.forceCloseWindow?.()
+
+    } catch (error) {
+
+        console.error(
+            '[CLOSE] Save All failed:',
+            error
+        )
+
+    }
+
+}}
+
+    onCancel={async (action) => {
+
+        // =========================================
+        // DON'T SAVE
+        // =========================================
 
         if (action === 'dont-save') {
 
-            setCloseRequested(false)
+            try {
 
-            window.apiTester?.forceCloseWindow?.()
+                const savedSnapshot =
+                    savedWorkspaceSnapshotRef.current
+
+                if (savedSnapshot) {
+
+                    const restoredWorkspaces =
+                        JSON.parse(savedSnapshot)
+
+                    setWorkspaces(
+                        restoredWorkspaces
+                    )
+
+                    await Promise.resolve(
+                        saveWorkspaces(
+                            restoredWorkspaces
+                        )
+                    )
+                }
+
+                setCloseRequested(false)
+
+                window.apiTester?.forceCloseWindow?.()
+
+            } catch (error) {
+
+                console.error(
+                    '[CLOSE] Failed to discard changes:',
+                    error
+                )
+
+            }
 
             return
         }
+
+
+        // =========================================
+        // CANCEL
+        // =========================================
 
         if (action === 'cancel') {
 
@@ -1516,12 +1579,15 @@ const {
             return
         }
 
-        // Top-right × button
+
+        // =========================================
+        // TOP-RIGHT X
+        // =========================================
+
         setCloseRequested(false)
 
     }}
 />
-
         </>
         )
     }
