@@ -2,182 +2,212 @@ import React from 'react'
 
 
 function RunnerTreeNode({
-
   node,
-
   selectedId,
-
   executionMap = {},
-
   onSelect,
-
   level = 0
-
 }) {
-
 
   if (!node) return null
 
+  const isRequest =
+    node.type === 'request'
 
-  const isRequest = node.type === 'request'
+  const isSelected =
+    selectedId === node.id
 
-  const isSelected = selectedId === node.id
+  const execution =
+    executionMap[node.id] || {}
 
   const executionStatus =
-executionMap[node.id]?.status
+    execution.status
+
+  const hasResult =
+    executionStatus === 'success' ||
+    executionStatus === 'failed'
+
 
   return (
 
     <div>
 
-
       <div
-
-className={`
- runner-tree-row
-
- ${isSelected ? 'selected' : ''}
-
- ${executionStatus 
- ? `status-${executionStatus}` 
- : ''}
-
-`}
-
+        className={`
+          runner-tree-row
+          ${isSelected ? 'selected' : ''}
+          ${executionStatus
+            ? `status-${executionStatus}`
+            : ''}
+        `}
         style={{
-          paddingLeft: `${12 + level * 18}px`
+          paddingLeft:
+            `${12 + level * 18}px`
         }}
-
         onClick={() => onSelect(node)}
-
       >
 
+        {/* ICON */}
 
-<span className="runner-tree-icon">
-  {isRequest ? '' : node.type === 'collection' ? '📁' : '📂'}
-</span>
+        <span className="runner-tree-icon">
+
+          {isRequest
+            ? ''
+            : node.type === 'collection'
+              ? '📁'
+              : '📂'}
+
+        </span>
 
 
-{
-  isRequest && (
+        {/* METHOD */}
 
-    <span className="runner-tree-method">
+        {isRequest && (
 
-      {node.method || 'GET'}
+          <span className="runner-tree-method">
 
+            {node.method || 'GET'}
+
+          </span>
+
+        )}
+
+
+        {/* NAME */}
+
+        <span className="runner-tree-name">
+
+          {node.name}
+
+        </span>
+
+
+        {/* EXECUTION INFO */}
+
+{isRequest && (
+
+  <div className="runner-tree-execution">
+
+    {/* ITERATION */}
+
+    <span className="runner-tree-iteration">
+      {execution.iteration != null
+        ? `Iteration ${execution.iteration}`
+        : '—'}
     </span>
 
-  )
-}
+
+    {/* STATUS */}
+
+    {!executionStatus && (
+      <span className="runner-tree-not-run">
+        —
+      </span>
+    )}
+
+    {executionStatus === 'running' && (
+      <span className="runner-tree-execution-status running">
+        ⏳ Running
+      </span>
+    )}
+
+    {hasResult && (
+      <span
+        className={`
+          runner-tree-execution-status
+          ${executionStatus}
+        `}
+      >
+        {executionStatus === 'success'
+          ? '✓ Success'
+          : '✕ Failed'}
+      </span>
+    )}
 
 
-<span className="runner-tree-name">
+    {/* HTTP STATUS */}
 
-  {node.name}
+    {hasResult && (
+      <span
+        className={`runner-tree-http-status ${executionStatus}`}
+      >
+        {execution.statusCode ?? '—'}
+      </span>
+    )}
 
-</span>
 
+    {/* RESPONSE TIME */}
 
+    {hasResult && (
+      <span className="runner-tree-response-time">
+        {execution.responseTime != null
+          ? `${execution.responseTime} ms`
+          : '—'}
+      </span>
+    )}
 
-{
- executionStatus &&
+  </div>
 
- <span className="runner-status">
-
-   {executionStatus}
-
- </span>
-}
-
+)}
       </div>
 
 
+      {/* CHILDREN */}
 
-
-      {
-        !isRequest &&
+      {!isRequest &&
         Array.isArray(node.children) &&
         node.children.length > 0 && (
 
-
           <div>
 
-            {
-              node.children.map((child) => (
+            {node.children.map((child) => (
 
-                <RunnerTreeNode
+              <RunnerTreeNode
+                key={child.id}
+                node={child}
+                selectedId={selectedId}
+                executionMap={executionMap}
+                onSelect={onSelect}
+                level={level + 1}
+              />
 
-  key={child.id}
-
-  node={child}
-
-  selectedId={selectedId}
-
-  executionMap={executionMap}
-
-  onSelect={onSelect}
-
-  level={level + 1}
-
-/>
-
-              ))
-            }
-
+            ))}
 
           </div>
 
-
-        )
-      }
-
+        )}
 
     </div>
 
   )
-
 }
 
 
-
-
 export default function RunnerTree({
-
- collections = [],
-
- selectedId,
-
- executionMap = {},
-
- onSelect
-
+  collections = [],
+  selectedId,
+  executionMap = {},
+  onSelect
 }) {
-
 
   return (
 
     <div className="runner-tree">
 
+      {collections.map((collection) => (
 
-      {
-        collections.map((collection) => (
+        <RunnerTreeNode
+          key={collection.id}
+          node={collection}
+          selectedId={selectedId}
+          executionMap={executionMap}
+          onSelect={onSelect}
+        />
 
-
-<RunnerTreeNode
-  key={collection.id}
-  node={collection}
-  selectedId={selectedId}
-  executionMap={executionMap}
-  onSelect={onSelect}
-/>
-
-
-        ))
-      }
-
+      ))}
 
     </div>
 
-  ) 
+  )
 
 }

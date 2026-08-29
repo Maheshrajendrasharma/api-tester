@@ -260,7 +260,8 @@ statusCode: hasHttpStatus
 onResult?.(
   runnerResult,
   {
-    ...state
+    ...state,
+    requestId: item.request.id,
   }
 )
 
@@ -296,7 +297,7 @@ onProgress?.({
     state.status = 'cancelled'
     break
   }
-  
+
       const runnerResult = createRunnerResult({
         request: item.request,
         iteration: item.iteration,
@@ -313,10 +314,10 @@ onProgress?.({
 onResult?.(
   runnerResult,
   {
-    ...state
+    ...state,
+    requestId: item.request.id,
   }
 )
-
 
 onProgress?.({
 

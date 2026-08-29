@@ -8,7 +8,6 @@ import React, {
 
 import RunnerTree from './RunnerTree'
 import RunnerConfig from './RunnerConfig'
-import RunnerResults from './RunnerResults'
 
 import {
   runNode,
@@ -150,17 +149,19 @@ function handleRun({ config, dataRows }) {
   // --------------------------------------------------
   // Start runner UI
   // --------------------------------------------------
-  setRunning(true)
-  setPaused(false)
+setRunning(true)
+setPaused(false)
 
-  setState({
-    status: 'running',
-    total: 0,
-    completed: 0,
-    passed: 0,
-    failed: 0,
-    results: []
-  })
+setExecutionMap({})
+
+setState({
+  status: 'running',
+  total: 0,
+  completed: 0,
+  passed: 0,
+  failed: 0,
+  results: []
+})
 
 
   console.log(
@@ -197,82 +198,117 @@ function handleRun({ config, dataRows }) {
     // ------------------------------------------------
     onProgress: (progress) => {
 
-      console.log(
-        '[RUNNER PROGRESS]',
-        progress
-      )
+  console.log(
+    '[RUNNER PROGRESS]',
+    progress
+  )
 
-      setState(progress)
-
-
-      if (
-        progress.event ===
-        'request-start'
-      ) {
-
-        console.log(
-          '[RUNNER REQUEST START]',
-          progress.requestId
-        )
-
-        setExecutionMap(
-          (previous) => ({
-
-            ...previous,
-
-            [progress.requestId]: {
-
-              status: 'running'
-
-            }
-
-          })
-        )
-      }
+  setState(progress)
 
 
-      if (
-        progress.event ===
-        'request-complete'
-      ) {
+  // -----------------------------------------------
+  // REQUEST START
+  // -----------------------------------------------
 
-        console.log(
-          '[RUNNER REQUEST COMPLETE]',
-          progress.requestId,
-          progress.requestStatus
-        )
+  if (
+    progress.event === 'request-start'
+  ) {
 
-        setExecutionMap(
-          (previous) => ({
+    console.log(
+      '[RUNNER REQUEST START]',
+      progress.requestId
+    )
 
-            ...previous,
+    setExecutionMap(
+      (previous) => ({
 
-            [progress.requestId]: {
+        ...previous,
 
-              status:
-                progress.requestStatus
+        [progress.requestId]: {
 
-            }
+          ...(previous[progress.requestId] || {}),
 
-          })
-        )
-      }
+          status: 'running'
 
-    },
+        }
 
+      })
+    )
+  }
+
+
+  // -----------------------------------------------
+  // REQUEST COMPLETE
+  // -----------------------------------------------
+
+  if (
+    progress.event === 'request-complete'
+  ) {
+
+    console.log(
+      '[RUNNER REQUEST COMPLETE]',
+      progress.requestId,
+      progress.requestStatus
+    )
+
+    setExecutionMap(
+      (previous) => ({
+
+        ...previous,
+
+        [progress.requestId]: {
+
+          ...(previous[progress.requestId] || {}),
+
+          status:
+            progress.requestStatus
+
+        }
+
+      })
+    )
+  }
+
+},
 
     // ------------------------------------------------
     // RESULT
     // ------------------------------------------------
-    onResult: (runnerResult) => {
+    onResult: (runnerResult, executionMeta) => {
 
       console.log(
         '[RUNNER RESULT]',
         runnerResult
       )
 
+const requestId =
+  executionMeta?.requestId ||
+  runnerResult.request?.id
 
+setExecutionMap((previous) => ({
+  ...previous,
+
+  [requestId]: {
+    ...(previous[requestId] || {}),
+
+    status:
+      runnerResult.status === 'passed'
+        ? 'success'
+        : 'failed',
+
+    statusCode:
+      runnerResult.statusCode ?? null,
+
+    responseTime:
+      runnerResult.responseTime ?? null,
+
+    iteration:
+      runnerResult.iteration ?? null,
+  },
+}))
       onRunnerHistoryEntry?.({
+
+
 
         name:
           runnerResult.requestName ||
@@ -505,106 +541,90 @@ async function handleCancel() {
 
 
         {/* BODY */}
+<div className="runner-layout">
 
-        <div className="runner-layout">
+  {/* -------------------------------------------------
+      LEFT - CONFIG
+  ------------------------------------------------- */}
 
+  <section className="runner-middle">
 
+    <RunnerConfig
+      onRun={handleRun}
+      onPause={handlePause}
+      onResume={handleResume}
+      onCancel={handleCancel}
+      running={running}
+      paused={paused}
+    />
 
-
-
-        {/* LEFT CONFIG */}
-
-<section className="runner-middle">
-
-
-<RunnerConfig
-  onRun={handleRun}
-  onPause={handlePause}
-  onResume={handleResume}
-  onCancel={handleCancel}
-  running={running}
-  paused={paused}
-/>
+  </section>
 
 
-</section>
+  {/* -------------------------------------------------
+      RIGHT - TARGET + EXECUTION
+  ------------------------------------------------- */}
+
+  <section className="runner-target-panel">
+
+    <div className="runner-section-title">
+      Select Target & Execution
+    </div>
 
 
+    {/* -----------------------------------------------
+        EXECUTION SUMMARY
+    ------------------------------------------------ */}
+
+    {state && (
+
+      <div className="runner-inline-summary">
+
+        <span>
+          {state.total ?? 0} total
+        </span>
+
+        <span>
+          ✓ {state.passed ?? 0}
+        </span>
+
+        <span>
+          ✕ {state.failed ?? 0}
+        </span>
+
+        <span>
+          {state.completed ?? 0} completed
+        </span>
+
+      </div>
+
+    )}
 
 
+    {/* -----------------------------------------------
+        TARGET TREE
+    ------------------------------------------------ */}
 
+    <div className="runner-target-tree">
 
+      <RunnerTree
+        collections={collections}
 
-{/* CENTER TREE */}
+        selectedId={
+          selectedNode?.id ||
+          initialNodeId
+        }
 
-<section className="runner-left">
+        executionMap={executionMap}
 
+        onSelect={setSelectedNode}
+      />
 
-<div className="runner-section-title">
+    </div>
 
-Select target
+  </section>
 
 </div>
-
-
-
-<div className="runner-tree">
-
-
-<RunnerTree
-
-collections={collections}
-
-selectedId={
- selectedNode?.id ||
- initialNodeId
-}
-
-executionMap={executionMap}
-
-onSelect={setSelectedNode}
-
-/>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-          {/* RIGHT RESULT */}
-
-          <section className="runner-right">
-
-
-            <div className="runner-section-title">
-
-              Execution
-
-            </div>
-
-
-
-            <RunnerResults
-
-              state={state}
-
-            />
-
-
-          </section>
-
-
-
-
-        </div>
-
 
       </div>
 

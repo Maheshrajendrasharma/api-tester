@@ -117,11 +117,10 @@
 
 
 /* =========================================================
-   THREE COLUMNS
+   Two COLUMNS
    ========================================================= */
 
 .runner-layout {
-
   flex: 1 1 auto;
 
   min-width: 0;
@@ -129,39 +128,16 @@
 
   display: grid;
 
-  /*
-     Select Target | Run Scope | Execution
-  */
-
   grid-template-columns:
-
     minmax(340px, 38%)
-
-    minmax(280px, 22%)
-
-    minmax(260px, 30%);
-
+    minmax(0, 62%);
 
   overflow: hidden;
-
 }
 /* =========================================================
    LEFT - TREE
    ========================================================= */
 
-.runner-left {
-  min-width: 0;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-
-  background: #171c22;
-
-  border-right: 1px solid #29323c;
-}
 
 
 .runner-left > .runner-section-title {
@@ -832,55 +808,9 @@
    RIGHT - EXECUTION
    ========================================================= */
 
-.runner-right {
-  min-width: 0;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-
-  background: #12171d;
-}
 
 
-.runner-right > .runner-section-title {
-  flex: 0 0 42px;
 
-  display: flex;
-  align-items: center;
-
-  margin: 0;
-
-  padding: 0 12px;
-
-  color: #99a5b4;
-
-  background: #171c22;
-
-  border-bottom: 1px solid #29323c;
-
-  font-size: 10px;
-  font-weight: 700;
-
-  letter-spacing: .12em;
-
-  text-transform: uppercase;
-}
-
-
-.runner-right .runner-results {
-  flex: 1;
-
-  min-height: 0;
-
-  overflow-y: auto;
-
-  padding: 10px;
-
-  box-sizing: border-box;
-}
 
 
 /* =========================================================
@@ -1037,9 +967,6 @@
       minmax(320px, 1fr);
   }
 
-  .runner-right {
-    display: none;
-  }
 }
 
 .runner-action-buttons {
@@ -1075,3 +1002,223 @@
   font-size: 14px;
   font-weight: 700;
 } 
+
+
+/* =========================================================
+   TARGET + EXECUTION
+   ========================================================= */
+
+.runner-target-panel {
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #12171d;
+}
+
+
+.runner-target-panel > .runner-section-title {
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+
+  margin: 0;
+
+  padding: 0 12px;
+
+  color: #99a5b4;
+
+  background: #171c22;
+
+  border-bottom: 1px solid #29323c;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: .12em;
+
+  text-transform: uppercase;
+}
+
+
+/* SUMMARY */
+
+.runner-inline-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  padding: 10px 12px;
+
+  background: #12171d;
+
+  border-bottom: 1px solid #29323c;
+}
+
+
+.runner-inline-summary span {
+  padding: 4px 8px;
+
+  color: #aeb9c6;
+
+  background: #171c22;
+
+  border: 1px solid #29323c;
+
+  border-radius: 5px;
+
+  font-size: 10px;
+}
+
+
+/* TREE */
+
+.runner-target-tree {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 6px 0;
+
+  box-sizing: border-box;
+}
+
+
+.runner-tree-execution {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  flex: 0 0 auto;
+
+  margin-left: 10px;
+}
+
+
+.runner-tree-execution-status {
+  min-width: 72px;
+
+  text-align: center;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+
+.runner-tree-execution-status.running {
+  color: #f1bf71;
+}
+
+
+.runner-tree-execution-status.success {
+  color: #6ee7b7;
+}
+
+
+.runner-tree-execution-status.failed {
+  color: #f38b91;
+}
+
+
+.runner-tree-http-status {
+  min-width: 32px;
+
+  text-align: right;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+
+.runner-tree-http-status.success {
+  color: #6ee7b7;
+}
+
+
+.runner-tree-http-status.failed {
+  color: #f38b91;
+}
+
+
+.runner-tree-response-time {
+  min-width: 58px;
+
+  text-align: right;
+
+  color: #8997a6;
+
+  font-size: 9px;
+}
+
+
+.runner-tree-not-run {
+  min-width: 72px;
+
+  color: #596675;
+
+  text-align: center;
+
+  font-size: 10px;
+}
+
+.runner-tree-row {
+  width: 100%;
+  min-width: 0;
+
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 10px;
+
+  box-sizing: border-box;
+
+  color: #c4ced8;
+
+  background: transparent;
+
+  border: 0;
+  border-left: 2px solid transparent;
+
+  border-radius: 0;
+
+  cursor: pointer;
+
+  font: inherit;
+  font-size: 13px;
+
+  text-align: left;
+
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.runner-tree-iteration {
+  min-width: 72px;
+
+  color: #758393;
+
+  font-size: 9px;
+
+  text-align: center;
+
+  white-space: nowrap;
+}
