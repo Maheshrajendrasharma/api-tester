@@ -13,6 +13,7 @@ function Workspace({
   onSend,
   response,
   request,
+  onCancel,
   onRequestChange,
   showRunner,
   runnerProps
@@ -89,6 +90,7 @@ showRunner ? (
       onSend={onSend}
       request={request}
       onRequestChange={onRequestChange}
+      onCancel={onCancel}
     />
 
     <div
@@ -102,6 +104,8 @@ showRunner ? (
 
     <ResponsePanel
       response={response}
+      isSending={isSending}
+      onCancel={onCancel}
       environment={environment}
     />
   </>

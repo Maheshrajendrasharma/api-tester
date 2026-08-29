@@ -386,8 +386,7 @@ useEffect(() => {
             ? workspaceCollections
             : []
 
-    console.log('================================')
-    console.log('[COLLECTIONS] RESTORE SELECTION')
+   
     console.log('[COLLECTIONS] workspaceId:', workspaceId)
     console.log(
         '[COLLECTIONS] initialSelectedRequestId:',

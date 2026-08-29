@@ -4,6 +4,8 @@ import { formatResponseBody } from '../utils/formatters'
 function ResponsePanel({
   response,
   environment,
+  isSending,
+  onCancel
 }) {
   const hasResponse =
     response && !response.error
@@ -24,35 +26,50 @@ function ResponsePanel({
       aria-label="Response"
     >
 
-      <div className="response-header">
+<div className="response-header">
 
-        <h2 className="response-heading">
-          Response
-        </h2>
+    <h2 className="response-heading">
+        Response
+    </h2>
 
-        {hasResponse && (
-          <div className="response-meta">
+    <div className="response-header-right">
 
-            <span>
-              Status{' '}
-              <strong>
-                {response.status}{' '}
-                {response.statusText}
-              </strong>
-            </span>
-
-            <span>
-              Time {response.responseTime} ms
-            </span>
-
-            <span>
-              Size {response.responseSize} B
-            </span>
-
-          </div>
+        {isSending && (
+            <button
+                type="button"
+                className="response-cancel-button"
+                onClick={() => onCancel?.()}
+            >
+                Cancel Request
+            </button>
         )}
 
-      </div>
+        {hasResponse && (
+            <div className="response-meta">
+
+                <span>
+                    Status
+                    <strong>
+                        {response.status}
+                        {' '}
+                        {response.statusText}
+                    </strong>
+                </span>
+
+                <span>
+                    Time {response.responseTime} ms
+                </span>
+
+                <span>
+                    Size {response.responseSize} B
+                </span>
+
+            </div>
+        )}
+
+    </div>
+
+</div>    
 
 
       <div

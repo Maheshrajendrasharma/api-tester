@@ -40,7 +40,7 @@ const [executionMap, setExecutionMap] = useState({})
 
   if (!open) {
 
-    console.log("Runner closed")
+    
 
     return null
 
@@ -48,7 +48,7 @@ const [executionMap, setExecutionMap] = useState({})
 
 
 
-  console.log("Runner OPEN")
+  
 
 
 
@@ -98,7 +98,7 @@ const [executionMap, setExecutionMap] = useState({})
 
     if (!collectionId) {
 
-      console.log("No collection selected")
+      
 
       return
 
@@ -128,10 +128,7 @@ const [executionMap, setExecutionMap] = useState({})
     })
 
 
-console.log(
-  "RUNNER EXECUTOR",
-  executeRequest
-)
+
 
 
 runNode({
@@ -195,10 +192,7 @@ runNode({
   onResult: (runnerResult) => {
 
 
-    console.log(
-      "[RUNNER RESULT]",
-      runnerResult
-    )
+    
 
 
     onRunnerHistoryEntry?.({

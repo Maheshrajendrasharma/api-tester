@@ -23,9 +23,8 @@ const __dirname = path.dirname(__filename);
 // =====================================================
 // MAIN WINDOW
 // =====================================================
-
 let mainWindow = null;
-
+let allowClose = false;
 
 // =====================================================
 // API REQUEST
@@ -37,6 +36,31 @@ ipcMain.handle(
         requestService.execute(request)
 );
 
+
+
+
+ipcMain.handle(
+    "api-tester:cancel-request",
+    (_event, requestId) => {
+
+        console.log(
+            "[CANCEL IPC] requestId =",
+            requestId
+        )
+
+        const result =
+            requestService.cancelRequest(
+                requestId
+            )
+
+        console.log(
+            "[CANCEL IPC] result =",
+            result
+        )
+
+        return result
+    }
+)
 
 // =====================================================
 // COLLECTIONS
@@ -189,29 +213,42 @@ ipcMain.handle(
 
 
 // =====================================================
-// WINDOW - CLOSE
+// WINDOW - CLOSE REQUEST
+// =====================================================
+ipcMain.handle(
+    "api-tester:close-window",
+    () => {
+
+        if (mainWindow) {
+
+            mainWindow.webContents.send(
+                "api-tester:request-close"
+            );
+
+        }
+
+        return true;
+    }
+);
+
+
+
+
+// =====================================================
+// WINDOW - FORCE CLOSE
 // =====================================================
 
 ipcMain.handle(
-    "api-tester:close-window",
+    "api-tester:force-close",
     (event) => {
-
-        console.log(
-            "MAIN: CLOSE IPC RECEIVED"
-        );
 
         const window =
             BrowserWindow.fromWebContents(
                 event.sender
             );
 
-        console.log(
-            "MAIN: WINDOW =",
-            !!window
-        );
-
         if (window) {
-            window.close();
+            window.destroy();
         }
     }
 );
@@ -266,6 +303,26 @@ function createWindow() {
     mainWindow.loadURL(
         "http://localhost:5173"
     );
+
+
+
+    mainWindow.on(
+    "close",
+    (event) => {
+
+        if (allowClose) {
+            return;
+        }
+
+        event.preventDefault();
+
+        mainWindow.webContents.send(
+            "api-tester:request-close"
+        );
+    }
+);
+
+
 
     mainWindow.on(
         "closed",

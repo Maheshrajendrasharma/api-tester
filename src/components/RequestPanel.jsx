@@ -13,7 +13,7 @@ import { api } from "../services/scriptApi"
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body','Scripts']
 
-function RequestPanel({ environment, isSending, onSend, request, onRequestChange }) {
+function RequestPanel({ environment, isSending, onSend,onCancel, request, onRequestChange }) {
   const [activeTab, setActiveTab] = useState('Body')
   const [activeScriptTab, setActiveScriptTab] = useState("Pre-request")
   const [generatedParameters, setGeneratedParameters] = useState([])
@@ -30,11 +30,7 @@ if (!request) {
   )
 }
 
-console.log({
-    id: request.id,
-    name: request.name,
-    body: request.body
-})
+
 
 if (!request) {
   return (
@@ -103,7 +99,22 @@ if (!request) {
           {HTTP_METHODS.map((item) => <option key={item}>{item}</option>)}
         </select>
         <VariableField environment={environment} aria-label="Request URL" className="url-input" value={request.url} onChange={(event) => updateRequest({ url: event.target.value })} />
-        <button className="send-button" type="button" onClick={sendRequest} disabled={isSending}>{isSending ? 'Sending…' : 'Send'}</button>
+        <button
+    className={`send-button ${
+        isSending ? 'send-button-cancel' : ''
+    }`}
+    type="button"
+    onClick={() => {
+        if (isSending) {
+            onCancel?.()
+        } else {
+            onSend(request)
+        }
+    }}
+>
+    {isSending ? 'Cancel' : 'Send'}
+</button>
+
       </div>
       <div className="tabs" role="tablist" aria-label="Request options">
         {tabs.map((tab) => (

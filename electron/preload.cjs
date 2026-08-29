@@ -3,6 +3,12 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("apiTester", {
     version: "0.1.0",
 
+
+
+    
+
+
+
     // ---------------------------------------
     // API REQUEST
     // ---------------------------------------
@@ -10,9 +16,21 @@ contextBridge.exposeInMainWorld("apiTester", {
     sendRequest: (request) =>
         ipcRenderer.invoke("api-tester:send-request", request),
 
+
+    cancelRequest: (requestId) =>
+    ipcRenderer.invoke(
+        "api-tester:cancel-request",
+        requestId
+    ),
+
+
+    
+
     // ---------------------------------------
     // COLLECTIONS
     // ---------------------------------------
+
+
 
     loadCollections: () =>
         ipcRenderer.invoke("api-tester:load-collections"),
@@ -36,24 +54,58 @@ contextBridge.exposeInMainWorld("apiTester", {
     writeFile: (filePath, content) =>
         ipcRenderer.invoke("api-tester:write-file", filePath, content),
 
-    // ---------------------------------------
-    // WINDOW CONTROLS
-    // ---------------------------------------
+// ---------------------------------------
+// WINDOW CONTROLS
+// ---------------------------------------
 
-    minimizeWindow: () => {
-        console.log("PRELOAD: MINIMIZE");
-        return ipcRenderer.invoke("api-tester:minimize-window");
-    },
+minimizeWindow: () => {
+    console.log("PRELOAD: MINIMIZE");
 
-    maximizeWindow: () => {
-        console.log("PRELOAD: MAXIMIZE");
-        return ipcRenderer.invoke("api-tester:maximize-window");
-    },
+    return ipcRenderer.invoke(
+        "api-tester:minimize-window"
+    );
+},
 
-    closeWindow: () => {
-        console.log("PRELOAD: CLOSE");
-        return ipcRenderer.invoke("api-tester:close-window");
-    },
+maximizeWindow: () => {
+    console.log("PRELOAD: MAXIMIZE");
+
+    return ipcRenderer.invoke(
+        "api-tester:maximize-window"
+    );
+},
+
+closeWindow: () => {
+    return ipcRenderer.invoke(
+        "api-tester:close-window"
+    );
+},
+
+forceCloseWindow: () => {
+    return ipcRenderer.invoke(
+        "api-tester:force-close"
+    );
+},
+
+onRequestClose: (callback) => {
+
+    const listener = () => {
+        callback();
+    };
+
+    ipcRenderer.on(
+        "api-tester:request-close",
+        listener
+    );
+
+    return () => {
+
+        ipcRenderer.removeListener(
+            "api-tester:request-close",
+            listener
+        );
+
+    };
+},
 
     // ---------------------------------------
     // MENU ACTION

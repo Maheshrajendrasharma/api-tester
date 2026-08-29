@@ -1,11 +1,14 @@
 const supportedMethods = new Set([
-  'GET',
-  'POST',
-  'PUT',
-  'PATCH',
-  'DELETE',
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'HEAD',
+    'OPTIONS'
 ])
 
+const activeRequestControllers = new Map()
 
 
 
@@ -240,6 +243,7 @@ export async function execute(request) {
     headers = [],
     body = '',
     authorization,
+    __requestId,
   } = request ?? {}
 
   console.log('================================')
@@ -295,12 +299,12 @@ export async function execute(request) {
   // Apply Authorization
   // ---------------------------------------
 
-  applyAuthorization(
+applyAuthorization(
     requestHeaders,
     parsedUrl,
-    authorization
-  )
-
+    authorization,
+    request.environment
+)
   console.log(
     'FINAL URL:',
     parsedUrl.toString()
@@ -336,89 +340,142 @@ export async function execute(request) {
     requestOptions
   )
 
-  // ---------------------------------------
-  // Execute request
-  // ---------------------------------------
+// ---------------------------------------
+// Execute request
+// ---------------------------------------
 
-  const startedAt = performance.now()
+const startedAt =
+    performance.now()
 
-  let response
+const controller =
+    new AbortController()
 
-  try {
-    response = await fetch(
-      parsedUrl,
-      requestOptions
+if (__requestId) {
+
+    activeRequestControllers.set(
+        __requestId,
+        controller
     )
-  } catch (error) {
-    console.error(
-      '================================'
-    )
+}
 
-    console.error(
-      'FETCH FAILED'
-    )
+try {
 
-    console.error(
-      'Error name:',
-      error?.name
-    )
+    const response =
+        await fetch(
+            parsedUrl,
+            {
+                ...requestOptions,
+                signal: controller.signal,
+            }
+        )
 
-    console.error(
-      'Error message:',
-      error?.message
-    )
 
-    console.error(
-      'Error cause:',
-      error?.cause
-    )
+    // ---------------------------------------
+    // Read response
+    // ---------------------------------------
 
-    console.error(
-      'Error stack:',
-      error?.stack
-    )
+    const responseBody =
+        await response.text()
 
-    console.error(
-      '================================'
-    )
+
+    return {
+
+        status:
+            response.status,
+
+        statusText:
+            response.statusText,
+
+        headers:
+            Object.fromEntries(
+                response.headers.entries()
+            ),
+
+        responseBody,
+
+        responseTime:
+            Math.round(
+                performance.now() - startedAt
+            ),
+
+        responseSize:
+            Buffer.byteLength(
+                responseBody,
+                'utf8'
+            ),
+
+    }
+
+} catch (error) {
+
+    if (
+        error?.name === 'AbortError'
+    ) {
+
+        throw error
+    }
 
     throw new Error(
-      `Request failed: ${
-        error?.cause?.message ||
-        error?.message ||
-        'Unknown network error'
-      }`
+        `Request failed: ${
+            error?.cause?.message ||
+            error?.message ||
+            'Unknown network error'
+        }`
     )
+
+} finally {
+
+    if (__requestId) {
+
+        activeRequestControllers.delete(
+            __requestId
+        )
+
+    }
+
   }
 
-  // ---------------------------------------
-  // Read response
-  // ---------------------------------------
+}
 
-  const responseBody =
-    await response.text()
+export function cancelRequest(requestId) {
 
-  return {
-    status: response.status,
+    console.log(
+        "[CANCEL SERVICE] requestId =",
+        requestId
+    )
 
-    statusText: response.statusText,
+    if (!requestId) {
 
-    headers:
-      Object.fromEntries(
-        response.headers.entries()
-      ),
+        console.log(
+            "[CANCEL SERVICE] No requestId"
+        )
 
-    responseBody,
+        return false
+    }
 
-    responseTime:
-      Math.round(
-        performance.now() - startedAt
-      ),
+    const controller =
+        activeRequestControllers.get(
+            requestId
+        )
 
-    responseSize:
-      Buffer.byteLength(
-        responseBody,
-        'utf8'
-      ),
-  }
+    console.log(
+        "[CANCEL SERVICE] controller found =",
+        !!controller
+    )
+
+    if (!controller) {
+        return false
+    }
+
+    controller.abort()
+
+    console.log(
+        "[CANCEL SERVICE] controller.abort() called"
+    )
+
+    activeRequestControllers.delete(
+        requestId
+    )
+
+    return true
 }

@@ -39,12 +39,7 @@ const dynamicValue =
 
 if (dynamicValue !== undefined) {
 
-    console.log(
-        "[VARIABLE] DYNAMIC:",
-        normalizedKey,
-        "=>",
-        dynamicValue
-    )
+    
 
     return dynamicValue
 }

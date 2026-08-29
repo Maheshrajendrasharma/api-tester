@@ -43,6 +43,11 @@ export function useRequest(
         useState(false)
 
 
+
+    const [sendingRequestId, setSendingRequestId] =
+    useState(null)
+
+
     /*
      * =========================================================
      * CHANGE DISPLAYED RESPONSE WHEN REQUEST SELECTION CHANGES
@@ -82,10 +87,20 @@ export function useRequest(
     ])
 
 
+
+
+
     async function sendRequest(request) {
 
-        setIsSending(true)
+         setIsSending(true)
 
+            const requestId =
+        request?.id
+
+
+        setSendingRequestId(
+    requestId ?? null
+)
 
         /*
          * Capture the request ID at the moment
@@ -96,24 +111,14 @@ export function useRequest(
          * is still running.
          */
 
-        const requestId =
-            request?.id
-
 
         try {
 
-            console.log('================================')
-            console.log('[REQUEST] START')
-            console.log('================================')
 
 
             // =================================================
             // 1. PRE-REQUEST SCRIPT
-            // =================================================
-
-            console.log(
-                '[REQUEST] RUNNING PRE-REQUEST SCRIPT'
-            )
+            // ================================================
 
             await runPreRequestScript(
                 request?.scripts?.preRequest
@@ -360,17 +365,18 @@ export function useRequest(
                 '[REQUEST] SENDING HTTP REQUEST'
             )
 
-            const result =
-                await executeRequest({
+const result =
+    await executeRequest({
+        ...resolvedRequest,
 
-                    ...resolvedRequest,
+        __requestId:
+            requestId,
 
-                    headers:
-                        getRequestHeaders(
-                            resolvedRequest.headers ?? []
-                        ),
-
-                })
+        headers:
+            getRequestHeaders(
+                resolvedRequest.headers ?? []
+            ),
+    })
 
 
             console.log(
@@ -595,12 +601,50 @@ export function useRequest(
 
         } finally {
 
-            setIsSending(false)
+    setIsSending(false)
 
-        }
+    setSendingRequestId(null)
+
+}
 
     }
 
+
+async function cancelRequest() {
+
+    console.log(
+        '[CANCEL] sendingRequestId =',
+        sendingRequestId
+    )
+
+    if (!sendingRequestId) {
+        return
+    }
+
+    if (
+        !window.apiTester ||
+        typeof window.apiTester.cancelRequest !== 'function'
+    ) {
+
+        console.error(
+            '[CANCEL] apiTester.cancelRequest is NOT available'
+        )
+
+        return
+    }
+
+    console.log(
+        '[CANCEL] calling Electron cancelRequest()'
+    )
+
+    await window.apiTester.cancelRequest(
+        sendingRequestId
+    )
+
+    console.log(
+        '[CANCEL] Electron cancelRequest() returned'
+    )
+}
 
     return {
 
@@ -609,6 +653,7 @@ export function useRequest(
         isSending,
 
         sendRequest,
+        cancelRequest,
 
     }
 

@@ -20,10 +20,7 @@ export function setRuntimeVariable(key, value) {
         value
     )
 
-    console.log(
-        `[SCRIPT RUNTIME] SET ${normalizedKey} =`,
-        value
-    )
+    
 }
 
 
@@ -34,10 +31,7 @@ export function getRuntimeVariable(key) {
     const value =
         scriptStore.get(normalizedKey)
 
-    console.log(
-        `[SCRIPT RUNTIME] GET ${normalizedKey} =`,
-        value
-    )
+    
 
     return value
 }
@@ -50,10 +44,7 @@ export function hasRuntimeVariable(key) {
     const exists =
         scriptStore.has(normalizedKey)
 
-    console.log(
-        `[SCRIPT RUNTIME] HAS ${normalizedKey} =`,
-        exists
-    )
+    
 
     return exists
 }
@@ -63,9 +54,7 @@ export function removeRuntimeVariable(key) {
 
     const normalizedKey = String(key)
 
-    console.log(
-        `[SCRIPT RUNTIME] REMOVE ${normalizedKey}`
-    )
+    
 
     scriptStore.delete(
         normalizedKey
@@ -75,9 +64,7 @@ export function removeRuntimeVariable(key) {
 
 export function clearRuntimeVariables() {
 
-    console.log(
-        '[SCRIPT RUNTIME] CLEAR ALL VARIABLES'
-    )
+    
 
     scriptStore.clear()
 }
@@ -146,26 +133,18 @@ export async function runPreRequestScript(script) {
         !script.trim()
     ) {
 
-        console.log(
-            '[SCRIPT] No pre-request script'
-        )
+        
 
         return
 
     }
 
 
-    console.log(
-        '================================'
-    )
+    
 
-    console.log(
-        '[SCRIPT] PRE-REQUEST START'
-    )
+    
 
-    console.log(
-        '================================'
-    )
+    
 
 
     try {
@@ -190,13 +169,9 @@ export async function runPreRequestScript(script) {
         )
 
 
-        console.log(
-            '[SCRIPT] PRE-REQUEST END'
-        )
+        
 
-        console.log(
-            '================================'
-        )
+        
 
     } catch (error) {
 
@@ -228,26 +203,18 @@ export async function runPostResponseScript(
         !script.trim()
     ) {
 
-        console.log(
-            '[SCRIPT] No post-response script'
-        )
+        
 
         return
 
     }
 
 
-    console.log(
-        '================================'
-    )
+    
 
-    console.log(
-        '[SCRIPT] POST-RESPONSE START'
-    )
+    
 
-    console.log(
-        '================================'
-    )
+    
 
 
     try {
@@ -274,13 +241,9 @@ export async function runPostResponseScript(
         )
 
 
-        console.log(
-            '[SCRIPT] POST-RESPONSE END'
-        )
+        
 
-        console.log(
-            '================================'
-        )
+        
 
     } catch (error) {
 

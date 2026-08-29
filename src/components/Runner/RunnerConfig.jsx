@@ -95,9 +95,9 @@ export default function RunnerConfig({ onRun, disabled = false }) {
           Delay (ms)
           <input
             type="number"
-            min="100"
+            min="1"
             value={config.delayMs}
-            onChange={(event) => update('delayMs', Number(event.target.value) || 100)}
+            onChange={(event) => update('delayMs', Number(event.target.value) || 1)}
           />
         </label>
         <label>

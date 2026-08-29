@@ -266,13 +266,7 @@ onDrop={(event) => {
   label: 'Run',
   onClick: () => {
 
-    console.log(
-      "REQUEST RUN CLICK",
-      {
-        request,
-        onRunNodeExists: !!onRunNode
-      }
-    )
+    
 
       onRunNode?.(
     collectionId,
@@ -445,11 +439,7 @@ onDragStart={(event) => {
 label: 'Run',
 onClick: () => {
 
-  console.log("SIDEBAR RUN CLICK", {
-    collectionId,
-    nodeId: node.id,
-    onRunNodeExists: !!onRunNode
-  })
+  
 
   onRunNode?.(
     collectionId,

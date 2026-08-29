@@ -52,19 +52,7 @@ const [showWorkspaceActions, setShowWorkspaceActions] =
     const menuRef = useRef(null);
 
 
-    console.log({
-
-    onCreateWorkspace,
-
-    onRenameWorkspace,
-
-    onDeleteWorkspace,
-
-    onImportWorkspace,
-
-    onExportWorkspace
-
-});
+    
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -144,7 +132,7 @@ setShowWorkspaceActions(false);
                         className="workspace-selector-button"
 onClick={() => {
 
-    console.log("workspace clicked")
+    
 
     setShowWorkspaceMenu(
         previous => !previous
@@ -235,9 +223,7 @@ onClick={() => {
 
 onClick={() => {
 
-    console.log(
-        "three dot clicked"
-    )
+    
 
     setShowWorkspaceActions(
         previous => !previous
@@ -269,9 +255,7 @@ showWorkspaceActions && (
 
         e.stopPropagation()
 
-        console.log(
-            "NEW WORKSPACE CLICKED"
-        )
+        
 
         if(onCreateWorkspace){
             onCreateWorkspace()
@@ -295,9 +279,7 @@ showWorkspaceActions && (
 
         e.stopPropagation()
 
-        console.log(
-            "RENAME WORKSPACE CLICKED"
-        )
+        
 
         onRenameWorkspace?.()
 
@@ -319,9 +301,7 @@ showWorkspaceActions && (
 
         e.stopPropagation()
 
-        console.log(
-            "DELETE WORKSPACE CLICKED"
-        )
+        
 
         onDeleteWorkspace?.()
 
@@ -343,9 +323,7 @@ showWorkspaceActions && (
 
         e.stopPropagation()
 
-        console.log(
-            "IMPORT WORKSPACE CLICKED"
-        )
+        
 
         onImportWorkspace?.()
 
@@ -364,9 +342,7 @@ showWorkspaceActions && (
 
         e.stopPropagation()
 
-        console.log(
-            "EXPORT WORKSPACE CLICKED"
-        )
+        
 
         onExportWorkspace?.()
 
