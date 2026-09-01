@@ -1,4 +1,6 @@
 {
+  "version": 1,
+  "revision": 14,
   "workspaces": [
     {
       "id": "04e6d9a6-eb96-4eac-82bf-7f152aeaf7e4",
@@ -38,7 +40,7 @@
                 "apiValue": "{{apkey_value}}",
                 "apiKeyLocation": "Header"
               },
-              "body": "{\n    \"reqid\": \"{{$randomCountryCode}}{{$timestamp}}\",\n    \"org\": \"PL\",\n    \"ts\": \"{{$isoTimestamp}}\",\n    \"txn\": {\n        \"ts\": \"{{$isoTimestamp}}\",\n        \"id\": \"{{$timestamp}}~UPI_Offline\",\n        \"org_txn_id\": \"\",\n        \"note\": \"online purchase\",\n        \"type\": \"PAY\",\n        \"class\": \"UPI\",\n        \"attribs\": {\n            \"txn_type\": \"Online\",\n            \"is_domestic\": 1,\n            \"bin\": \"491866\",\n            \"payment_mode_id\": \"\",\n            \"acquirer_name\": \"HDFC\",\n            \"is_token_txn\": \"\",\n            \"moto_eci_indicator\": \"\",\n            \"3ds\": \"\",\n            \"isMiniTxn\" : true,\n            \"settlement_T0\": \"\",\n            \"is_emv_fallback\": \"0\",\n            \"card_entry_mode_name\": \"CARD_CHIP\",\n            \"host_terminal_id\": \"10012411\",\n            \"card_type_name\": \"VISA\",\n            \"hardware_type_id\": \"85\",\n            \"txn_type_str\": \"SALE\",\n            \"is_reversed\": \"0\",\n            \"is_dcc\": \"\",\n            \"tid\": \"{{$randomUUID}}\"\n        }\n    },\n    \"payer\": {\n        \"addr\": \"{{payerAddr}}\",\n        \"type\": \"PERSON\",\n        \"amount\": {{amount}},\n        \"currency\": \"365\"\n    },\n    \"payee\": {\n        \"addr\": \"{{payeeAddr}}\",\n        \"type\": \"ENTITY\",\n        \"amount\": {{amount}},\n        \"currency\": \"INR\"\n    }\n}",
+              "body": "{\n    \"reqid\": \"{{$randomCountryCode}}{{$timestamp}}\",s\n    \"org\": \"PL\",\n    \"ts\": \"{{$isoTimestamp}}\",\n    \"txn\": {\n        \"ts\": \"{{$isoTimestamp}}\",\n        \"id\": \"{{$timestamp}}~UPI_Offline\",\n        \"org_txn_id\": \"\",\n        \"note\": \"online purchase\",\n        \"type\": \"PAY\",\n        \"class\": \"UPI\",\n        \"attribs\": {\n            \"txn_type\": \"Online\",\n            \"is_domestic\": 1,\n            \"bin\": \"491866\",\n            \"payment_mode_id\": \"\",\n            \"acquirer_name\": \"HDFC\",\n            \"is_token_txn\": \"\",\n            \"moto_eci_indicator\": \"\",\n            \"3ds\": \"\",\n            \"isMiniTxn\" : true,\n            \"settlement_T0\": \"\",\n            \"is_emv_fallback\": \"0\",\n            \"card_entry_mode_name\": \"CARD_CHIP\",\n            \"host_terminal_id\": \"10012411\",\n            \"card_type_name\": \"VISA\",\n            \"hardware_type_id\": \"85\",\n            \"txn_type_str\": \"SALE\",\n            \"is_reversed\": \"0\",\n            \"is_dcc\": \"\",\n            \"tid\": \"{{$randomUUID}}\"\n        }\n    },\n    \"payer\": {\n        \"addr\": \"{{payerAddr}}\",\n        \"type\": \"PERSON\",\n        \"amount\": {{amount}},\n        \"currency\": \"365\"\n    },\n    \"payee\": {\n        \"addr\": \"{{payeeAddr}}\",\n        \"type\": \"ENTITY\",\n        \"amount\": {{amount}},\n        \"currency\": \"INR\"\n    }\n}",
               "scripts": {
                 "preRequest": "",
                 "postResponse": ""
@@ -2985,6 +2987,6 @@
       "selectedRequestId": null
     }
   ],
-  "activeWorkspaceId": "5726a8a4-81e9-48c3-a47a-59d3ccbf4ea3",
-  "updatedAt": "2026-09-01T07:27:02.062Z"
+  "activeWorkspaceId": "04e6d9a6-eb96-4eac-82bf-7f152aeaf7e4",
+  "updatedAt": "2026-09-01T12:53:48.586Z"
 }

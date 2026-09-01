@@ -32,6 +32,7 @@ import {
     syncWorkspaceFromGoogleDrive,
     getGoogleDriveStatus,
     disconnectGoogleDrive,
+    compareWorkspaceWithGoogleDrive,
     saveActiveWorkspaceId
 } from './services/workspaceService'
 
@@ -103,6 +104,14 @@ const [googleDriveSyncing, setGoogleDriveSyncing] =
     useState(false)
 
 
+
+const [saveStatus, setSaveStatus] =
+    useState({
+        state: "idle",
+        message: ""
+    })
+
+
 async function saveCurrentWorkspaceChanges() {
 
     if (!isWorkspacesLoaded) {
@@ -119,7 +128,7 @@ async function saveCurrentWorkspaceChanges() {
 
 
     /*
-     * Nothing changed since the last successful save.
+     * Nothing changed.
      */
 
     if (
@@ -132,19 +141,78 @@ async function saveCurrentWorkspaceChanges() {
     }
 
 
+    setSaveStatus({
+        state: "saving",
+        message: "Saving..."
+    })
+
+
     try {
 
-        await saveWorkspaces(
-            workspaces
-        )
+        const result =
+            await saveWorkspaces(
+                workspaces
+            )
+
+
+        /*
+         * Local save succeeded.
+         */
+
+        if (
+            result?.localSaved
+        ) {
+
+            if (
+                result?.googleDrive?.synced
+            ) {
+
+                setSaveStatus({
+
+                    state:
+                        "saved",
+
+                    message:
+                        "Saved and synced to Google Drive"
+
+                })
+
+            }
+            else if (
+                result?.googleDrive?.skipped
+            ) {
+
+                setSaveStatus({
+
+                    state:
+                        "saved-local",
+
+                    message:
+                        "Saved locally"
+
+                })
+
+            }
+            else {
+
+                setSaveStatus({
+
+                    state:
+                        "saved",
+
+                    message:
+                        "Saved"
+
+                })
+
+            }
+
+        }
 
 
         /*
          * IMPORTANT:
-         * Mark this exact state as saved.
-         *
-         * This is what makes the
-         * "Unsaved changes" dialog disappear.
+         * Mark this exact state as successfully saved.
          */
 
         savedWorkspaceSnapshotRef.current =
@@ -162,12 +230,51 @@ async function saveCurrentWorkspaceChanges() {
         )
 
 
+        /*
+         * Local may already have been saved while
+         * Google Drive sync failed.
+         */
+
+        if (
+            String(
+                error?.message || ""
+            ).includes(
+                "Google Drive sync failed"
+            )
+        ) {
+
+            setSaveStatus({
+
+                state:
+                    "cloud-error",
+
+                message:
+                    "Saved locally — Google Drive sync failed"
+
+            })
+
+        }
+        else {
+
+            setSaveStatus({
+
+                state:
+                    "error",
+
+                message:
+                    error?.message ||
+                    "Save failed"
+
+            })
+
+        }
+
+
         return false
 
     }
 
 }
-
 
 useEffect(() => {
 
@@ -437,6 +544,18 @@ const remoteState =
                     : []
 
 
+
+
+                    const comparison =
+    await compareWorkspaceWithGoogleDrive(
+        remoteState
+    )
+
+
+console.log(
+    "[GOOGLE DRIVE] Workspace comparison:",
+    comparison
+)
             /*
              * -----------------------------------------
              * DRIVE IS EMPTY
@@ -557,7 +676,23 @@ const remoteState =
              * -----------------------------------------
              * DRIVE HAS DATA
              * -----------------------------------------
+             * 
              */
+
+            if (
+    comparison.status ===
+    "SAME"
+) {
+
+    console.log(
+        "[GOOGLE DRIVE] Local and Drive revisions are identical:",
+        comparison.localRevision
+    )
+
+    return
+}
+
+
 
             setDialogState({
 
@@ -565,36 +700,56 @@ const remoteState =
 
                 type: "choice",
 
-                title:
-                    "Google Drive Workspace",
+title:
+    comparison.status === "LOCAL_NEWER"
+        ? "Local Workspace Is Newer"
+        : "Google Drive Workspace",
 
-                message:
-                    "Google Drive contains workspace data. Which data do you want to use?",
+message:
+    comparison.status === "LOCAL_NEWER"
+        ? `Your local workspace is newer than Google Drive.
+
+Local revision: ${comparison.localRevision}
+Google Drive revision: ${comparison.driveRevision}
+
+What would you like to do?`
+        : `Google Drive contains a newer workspace.
+
+Local revision: ${comparison.localRevision}
+Google Drive revision: ${comparison.driveRevision}
+
+What would you like to do?`,
 
                 initialValue:
                     "drive",
 
-                options: [
+options: [
 
-                    {
-                        label:
-                            "Use Google Drive Data",
+    {
+        label:
+            comparison.status === "LOCAL_NEWER"
+                ? "Keep Local Data and Upload to Google Drive"
+                : "Use Google Drive Data",
 
-                        value:
-                            "drive"
+        value:
+            comparison.status === "LOCAL_NEWER"
+                ? "local"
+                : "drive"
+    },
 
-                    },
+    {
+        label:
+            comparison.status === "LOCAL_NEWER"
+                ? "Use Google Drive Data"
+                : "Keep Local Data and Upload to Google Drive",
 
-                    {
-                        label:
-                            "Keep Local Data and Upload to Google Drive",
+        value:
+            comparison.status === "LOCAL_NEWER"
+                ? "drive"
+                : "local"
+    }
 
-                        value:
-                            "local"
-
-                    }
-
-                ],
+],
 
                 confirmLabel:
                     "Continue",
@@ -631,6 +786,10 @@ if (
             ? remoteState.workspaces
             : []
 
+
+
+
+    
 
     const activeId =
         remoteState.activeWorkspaceId ??
@@ -2424,6 +2583,10 @@ async function handleDisconnectGoogleDrive() {
         }
 
         onConnectGoogleDrive={handleConnectGoogleDrive}
+
+        saveStatus={
+    saveStatus
+}
 
         googleDriveStatus={
     googleDriveStatus
