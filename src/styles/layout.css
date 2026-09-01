@@ -907,8 +907,39 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
   .request-panel, .response-panel { padding: 5px; }
   .request-bar { grid-template-columns: 82px minmax(0, 1fr) 78px; }
   .response-header { align-items: flex-start; flex-direction: column; }
+
+    .app-layout {
+    --environment-panel-width: 0px !important;
+    --environment-divider-width: 0px !important;
+  }
+
+  .environment-panel {
+    display: none;
+  }
+
+  .environment-collapse-handle,
+  .environment-panel-expand-handle {
+    display: none !important;
+  }
 }
 
+@media (max-width: 700px) {
+
+  .app-layout {
+    --sidebar-width: 0px !important;
+    --sidebar-divider-width: 0px !important;
+    --sidebar-handle-left: 0px !important;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .sidebar-collapse-handle {
+    display: none !important;
+  }
+
+}
 
 
 .app-layout-main{

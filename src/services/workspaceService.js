@@ -653,10 +653,13 @@ export async function syncWorkspaceFromGoogleDrive() {
         null
 
 
-    await applyGoogleDriveWorkspaceLocally(
-        workspaces,
-        activeWorkspaceId
-    )
+await applyGoogleDriveWorkspaceLocally(
+    workspaces,
+    activeWorkspaceId,
+    driveState.revision,
+    driveState.version,
+    driveState.updatedAt
+)
 
 
     return {
@@ -692,7 +695,10 @@ export async function syncWorkspaceFromGoogleDrive() {
 
 export async function applyGoogleDriveWorkspaceLocally(
     workspaces,
-    activeWorkspaceId
+    activeWorkspaceId,
+    revision = 0,
+    version = 1,
+    updatedAt = null
 ) {
 
     const normalizedWorkspaces =
@@ -711,15 +717,74 @@ export async function applyGoogleDriveWorkspaceLocally(
         null
 
 
-    return saveWorkspaceState({
+    const response =
+        await fetch(
+            "http://localhost:3001/api/workspace-state/apply-remote",
+            {
 
-        workspaces:
-            normalizedWorkspaces,
+                method:
+                    "POST",
 
-        activeWorkspaceId:
-            nextActiveWorkspaceId
+                headers: {
 
-    })
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify({
+
+                        version,
+
+                        revision,
+
+                        workspaces:
+                            normalizedWorkspaces,
+
+                        activeWorkspaceId:
+                            nextActiveWorkspaceId,
+
+                        updatedAt
+
+                    })
+
+            }
+        )
+
+
+    if (!response.ok) {
+
+        let message =
+            "Failed to apply Google Drive workspace locally"
+
+
+        try {
+
+            const error =
+                await response.json()
+
+
+            if (error?.error) {
+
+                message =
+                    error.error
+
+            }
+
+        }
+        catch {
+        }
+
+
+        throw new Error(
+            message
+        )
+
+    }
+
+
+    return response.json()
 
 }
 /*

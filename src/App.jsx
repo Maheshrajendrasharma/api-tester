@@ -1437,14 +1437,444 @@ function handleDeleteWorkspace() {
     })
 
 }
-    function handleImportWorkspace(){
 
-        alert(
-            "Import workspace coming next"
-        );
+
+async function handleImportWorkspace() {
+
+    try {
+
+        const input =
+            document.createElement(
+                "input"
+            )
+
+        input.type =
+            "file"
+
+        input.accept =
+            ".json,application/json"
+
+
+        input.onchange =
+            async (event) => {
+
+                const file =
+                    event.target.files?.[0]
+
+                if (!file) {
+                    return
+                }
+
+
+                try {
+
+                    const text =
+                        await file.text()
+
+
+                    const importedData =
+                        JSON.parse(
+                            text
+                        )
+
+
+                    /*
+                     * -----------------------------------------
+                     * ACCEPT BOTH FORMATS
+                     * -----------------------------------------
+                     *
+                     * 1. Single workspace:
+                     *
+                     * {
+                     *     id,
+                     *     name,
+                     *     collections,
+                     *     environments
+                     * }
+                     *
+                     * 2. Complete workspace export:
+                     *
+                     * {
+                     *     version,
+                     *     workspaces,
+                     *     activeWorkspaceId
+                     * }
+                     */
+
+                    let importedWorkspaces = []
+
+
+                    let importedActiveWorkspaceId =
+                        null
+
+
+                    if (
+                        Array.isArray(
+                            importedData?.workspaces
+                        )
+                    ) {
+
+                        importedWorkspaces =
+                            importedData.workspaces
+
+                        importedActiveWorkspaceId =
+                            importedData.activeWorkspaceId ??
+                            importedWorkspaces[0]?.id ??
+                            null
+
+                    }
+                    else if (
+                        importedData &&
+                        typeof importedData ===
+                            "object"
+                    ) {
+
+                        importedWorkspaces =
+                            [
+                                importedData
+                            ]
+
+                        importedActiveWorkspaceId =
+                            importedData.id ??
+                            null
+
+                    }
+                    else {
+
+                        throw new Error(
+                            "Invalid workspace JSON format."
+                        )
+
+                    }
+
+
+                    if (
+                        importedWorkspaces.length ===
+                        0
+                    ) {
+
+                        throw new Error(
+                            "The selected file contains no workspace data."
+                        )
+
+                    }
+
+
+                    /*
+                     * -----------------------------------------
+                     * NORMALIZE WORKSPACES
+                     * -----------------------------------------
+                     */
+
+                    const normalizedWorkspaces =
+                        importedWorkspaces.map(
+                            workspace => ({
+
+                                id:
+                                    workspace?.id ??
+                                    crypto.randomUUID(),
+
+                                name:
+                                    String(
+                                        workspace?.name ??
+                                        "Imported Workspace"
+                                    ).trim() ||
+                                    "Imported Workspace",
+
+                                collections:
+                                    Array.isArray(
+                                        workspace?.collections
+                                    )
+                                        ? workspace.collections
+                                        : [],
+
+                                environments:
+                                    Array.isArray(
+                                        workspace?.environments
+                                    )
+                                        ? workspace.environments
+                                        : [],
+
+                                selectedRequestId:
+                                    workspace?.selectedRequestId ??
+                                    null
+
+                            })
+                        )
+
+
+                    /*
+                     * -----------------------------------------
+                     * ASK HOW TO IMPORT
+                     * -----------------------------------------
+                     */
+
+                    setDialogState({
+
+                        open:
+                            true,
+
+                        type:
+                            "choice",
+
+                        title:
+                            "Import Workspace",
+
+                        message:
+                            importedWorkspaces.length === 1
+                                ? `Import workspace "${normalizedWorkspaces[0].name}"?`
+                                : `Import ${normalizedWorkspaces.length} workspaces?`,
+
+                        initialValue:
+                            "add",
+
+                        options: [
+
+                            {
+                                label:
+                                    "Add to Current Workspaces",
+
+                                value:
+                                    "add"
+                            },
+
+                            {
+                                label:
+                                    "Replace Current Workspaces",
+
+                                value:
+                                    "replace"
+                            }
+
+                        ],
+
+                        confirmLabel:
+                            "Import",
+
+                        cancelLabel:
+                            "Cancel",
+
+
+                        onConfirm:
+                            async (mode) => {
+
+                                setDialogState(
+                                    current => ({
+                                        ...current,
+                                        open: false
+                                    })
+                                )
+
+
+                                try {
+
+                                    let nextWorkspaces
+
+
+                                    let nextActiveWorkspaceId
+
+
+                                    if (
+                                        mode ===
+                                        "replace"
+                                    ) {
+
+                                        nextWorkspaces =
+                                            normalizedWorkspaces
+
+                                        nextActiveWorkspaceId =
+                                            importedActiveWorkspaceId ??
+                                            normalizedWorkspaces[0]?.id ??
+                                            null
+
+                                    }
+                                    else {
+
+                                        nextWorkspaces =
+                                            [
+                                                ...workspaces,
+                                                ...normalizedWorkspaces
+                                            ]
+
+                                        nextActiveWorkspaceId =
+                                            importedActiveWorkspaceId ??
+                                            normalizedWorkspaces[0]?.id ??
+                                            null
+
+                                    }
+
+
+                                    await saveWorkspaces(
+                                        nextWorkspaces
+                                    )
+
+
+                                    setWorkspaces(
+                                        nextWorkspaces
+                                    )
+
+
+                                    setActiveWorkspaceId(
+                                        nextActiveWorkspaceId
+                                    )
+
+
+                                    savedWorkspaceSnapshotRef.current =
+                                        JSON.stringify(
+                                            nextWorkspaces
+                                        )
+
+
+                                    console.log(
+                                        "[WORKSPACE] Workspace import completed."
+                                    )
+
+                                }
+                                catch (error) {
+
+                                    console.error(
+                                        "[WORKSPACE] Import save failed:",
+                                        error
+                                    )
+
+
+                                    setDialogState({
+
+                                        open:
+                                            true,
+
+                                        type:
+                                            "confirm",
+
+                                        title:
+                                            "Import failed",
+
+                                        message:
+                                            error?.message ||
+                                            "Failed to save imported workspace.",
+
+                                        initialValue:
+                                            "",
+
+                                        options:
+                                            [],
+
+                                        confirmLabel:
+                                            "OK",
+
+                                        cancelLabel:
+                                            "",
+
+                                        onConfirm:
+                                            () =>
+                                                setDialogState(
+                                                    current => ({
+                                                        ...current,
+                                                        open: false
+                                                    })
+                                                ),
+
+                                        onCancel:
+                                            () =>
+                                                setDialogState(
+                                                    current => ({
+                                                        ...current,
+                                                        open: false
+                                                    })
+                                                )
+
+                                    })
+
+                                }
+
+                            },
+
+
+                        onCancel:
+                            () =>
+                                setDialogState(
+                                    current => ({
+                                        ...current,
+                                        open: false
+                                    })
+                                )
+
+                    })
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "[WORKSPACE] Invalid import file:",
+                        error
+                    )
+
+
+                    setDialogState({
+
+                        open:
+                            true,
+
+                        type:
+                            "confirm",
+
+                        title:
+                            "Import failed",
+
+                        message:
+                            error?.message ||
+                            "Invalid workspace file.",
+
+                        initialValue:
+                            "",
+
+                        options:
+                            [],
+
+                        confirmLabel:
+                            "OK",
+
+                        cancelLabel:
+                            "",
+
+                        onConfirm:
+                            () =>
+                                setDialogState(
+                                    current => ({
+                                        ...current,
+                                        open: false
+                                    })
+                                ),
+
+                        onCancel:
+                            () =>
+                                setDialogState(
+                                    current => ({
+                                        ...current,
+                                        open: false
+                                    })
+                                )
+
+                    })
+
+                }
+
+            }
+
+
+        input.click()
+
+    }
+    catch (error) {
+
+        console.error(
+            "[WORKSPACE] Could not open import dialog:",
+            error
+        )
 
     }
 
+}
 
     function handleExportWorkspace(){
 
@@ -2011,11 +2441,113 @@ function handleEnvironmentsChange(
 
 
 
-    function handleExportAllEnvironments() {
+async function handleExportAllEnvironments() {
 
-        alert("Export All Environments - Coming Soon");
+    if (
+        !Array.isArray(environments) ||
+        environments.length === 0
+    ) {
+
+        setDialogState({
+            open: true,
+            type: "confirm",
+            title: "Export Environments",
+            message: "There are no environments to export.",
+            initialValue: "",
+            options: [],
+            confirmLabel: "OK",
+            cancelLabel: "",
+            onConfirm: () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                ),
+            onCancel: () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                )
+        })
+
+        return
+    }
+
+
+    try {
+
+        const content =
+            JSON.stringify(
+                {
+                    version: 1,
+                    environments
+                },
+                null,
+                2
+            )
+
+
+        await saveTextFile({
+            content,
+            filename:
+                "environments.json",
+            filters: [
+                {
+                    name: "JSON Files",
+                    extensions: ["json"]
+                }
+            ]
+        })
 
     }
+    catch (error) {
+
+        setDialogState({
+
+            open: true,
+
+            type: "confirm",
+
+            title: "Export failed",
+
+            message:
+                error?.message ||
+                "Failed to export environments.",
+
+            initialValue: "",
+
+            options: [],
+
+            confirmLabel: "OK",
+
+            cancelLabel: "",
+
+            onConfirm:
+                () =>
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    ),
+
+            onCancel:
+                () =>
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    )
+
+        })
+
+    }
+
+}
 
 
 
@@ -2248,18 +2780,14 @@ async function handleSyncGoogleDrive() {
     if (
         !googleDriveStatus?.authenticated
     ) {
-
         return
-
     }
 
 
     if (
         googleDriveSyncing
     ) {
-
         return
-
     }
 
 
@@ -2275,50 +2803,80 @@ async function handleSyncGoogleDrive() {
         )
 
 
-        const result =
-            await syncWorkspaceFromGoogleDrive()
+        /*
+         * =========================================
+         * STEP 1 — LOAD DRIVE
+         * =========================================
+         */
 
+        const remoteState =
+            await loadWorkspaceFromGoogleDrive()
+
+
+        const remoteWorkspaces =
+            Array.isArray(
+                remoteState?.workspaces
+            )
+                ? remoteState.workspaces
+                : []
+
+
+        /*
+         * =========================================
+         * STEP 2 — DRIVE EMPTY
+         * =========================================
+         */
 
         if (
-            result?.empty
+            remoteWorkspaces.length === 0
         ) {
 
             setDialogState({
 
-                open: true,
+                open:
+                    true,
 
                 type:
-                    "confirm",
+                    "choice",
 
                 title:
                     "Google Drive is empty",
 
                 message:
-                    "There is no workspace data in Google Drive.",
+                    "There is no workspace data in Google Drive. Save your current local workspace to Google Drive?",
 
                 initialValue:
-                    "",
+                    "upload",
 
-                options:
-                    [],
+                options: [
+
+                    {
+                        label:
+                            "Save Local Data to Google Drive",
+
+                        value:
+                            "upload"
+                    },
+
+                    {
+                        label:
+                            "Cancel",
+
+                        value:
+                            "cancel"
+                    }
+
+                ],
 
                 confirmLabel:
-                    "OK",
+                    "Continue",
 
                 cancelLabel:
-                    "",
+                    "Cancel",
 
                 onConfirm:
-                    () =>
-                        setDialogState(
-                            current => ({
-                                ...current,
-                                open: false
-                            })
-                        ),
+                    async (choice) => {
 
-                onCancel:
-                    () =>
                         setDialogState(
                             current => ({
                                 ...current,
@@ -2326,33 +2884,305 @@ async function handleSyncGoogleDrive() {
                             })
                         )
 
+
+                        if (
+                            choice !==
+                            "upload"
+                        ) {
+                            return
+                        }
+
+
+                        try {
+
+                            await saveWorkspaces(
+                                workspaces
+                            )
+
+
+                            savedWorkspaceSnapshotRef.current =
+                                JSON.stringify(
+                                    workspaces
+                                )
+
+
+                            console.log(
+                                "[GOOGLE DRIVE] Local workspace uploaded."
+                            )
+
+                        }
+                        catch (error) {
+
+                            console.error(
+                                "[GOOGLE DRIVE] Initial upload failed:",
+                                error
+                            )
+
+                        }
+
+                    }
+
             })
 
 
             return
-
         }
 
 
-        setWorkspaces(
-            result.workspaces
-        )
+        /*
+         * =========================================
+         * STEP 3 — COMPARE LOCAL VS DRIVE
+         * =========================================
+         */
 
-
-        setActiveWorkspaceId(
-            result.activeWorkspaceId
-        )
-
-
-        savedWorkspaceSnapshotRef.current =
-            JSON.stringify(
-                result.workspaces
+        const comparison =
+            await compareWorkspaceWithGoogleDrive(
+                remoteState
             )
 
 
         console.log(
-            "[GOOGLE DRIVE] Manual sync completed."
+            "[GOOGLE DRIVE] Manual sync comparison:",
+            comparison
         )
+
+
+        /*
+         * =========================================
+         * STEP 4 — ALREADY SYNCHRONIZED
+         * =========================================
+         */
+
+        if (
+            comparison.status ===
+            "SAME"
+        ) {
+
+            console.log(
+                "[GOOGLE DRIVE] Local and Drive are already synchronized.",
+                {
+                    revision:
+                        comparison.localRevision
+                }
+            )
+
+
+            setSaveStatus({
+
+                state:
+                    "saved",
+
+                message:
+                    "Already synchronized with Google Drive"
+
+            })
+
+
+            return
+        }
+
+
+        /*
+         * =========================================
+         * STEP 5 — ASK WHICH VERSION TO KEEP
+         * =========================================
+         */
+
+        setDialogState({
+
+            open:
+                true,
+
+            type:
+                "choice",
+
+            title:
+                comparison.status ===
+                "LOCAL_NEWER"
+                    ? "Local Workspace Is Newer"
+                    : "Google Drive Workspace",
+
+            message:
+                comparison.status ===
+                "LOCAL_NEWER"
+                    ? `Your local workspace is newer than Google Drive.
+
+Local revision: ${comparison.localRevision}
+Google Drive revision: ${comparison.driveRevision}
+
+Which version would you like to keep?`
+                    : `Google Drive contains a newer workspace.
+
+Local revision: ${comparison.localRevision}
+Google Drive revision: ${comparison.driveRevision}
+
+Which version would you like to keep?`,
+
+            initialValue:
+                comparison.status ===
+                "LOCAL_NEWER"
+                    ? "local"
+                    : "drive",
+
+            options: [
+
+                {
+                    label:
+                        comparison.status ===
+                        "LOCAL_NEWER"
+                            ? "Keep Local Data and Upload to Google Drive"
+                            : "Use Google Drive Data",
+
+                    value:
+                        comparison.status ===
+                        "LOCAL_NEWER"
+                            ? "local"
+                            : "drive"
+                },
+
+                {
+                    label:
+                        comparison.status ===
+                        "LOCAL_NEWER"
+                            ? "Use Google Drive Data"
+                            : "Keep Local Data and Upload to Google Drive",
+
+                    value:
+                        comparison.status ===
+                        "LOCAL_NEWER"
+                            ? "drive"
+                            : "local"
+                }
+
+            ],
+
+            confirmLabel:
+                "Continue",
+
+            cancelLabel:
+                "Cancel",
+
+            onConfirm:
+                async (choice) => {
+
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    )
+
+
+                    /*
+                     * =================================
+                     * USE GOOGLE DRIVE
+                     * =================================
+                     */
+
+                    if (
+                        choice ===
+                        "drive"
+                    ) {
+
+                        const activeId =
+                            remoteState.activeWorkspaceId ??
+                            remoteWorkspaces[0]?.id ??
+                            null
+
+
+                        await applyGoogleDriveWorkspaceLocally(
+
+                            remoteWorkspaces,
+
+                            activeId,
+
+                            remoteState.revision,
+
+                            remoteState.version,
+
+                            remoteState.updatedAt
+
+                        )
+
+
+                        setWorkspaces(
+                            remoteWorkspaces
+                        )
+
+
+                        setActiveWorkspaceId(
+                            activeId
+                        )
+
+
+                        savedWorkspaceSnapshotRef.current =
+                            JSON.stringify(
+                                remoteWorkspaces
+                            )
+
+
+                        setSaveStatus({
+
+                            state:
+                                "saved",
+
+                            message:
+                                "Synced from Google Drive"
+
+                        })
+
+
+                        console.log(
+                            "[GOOGLE DRIVE] Drive workspace applied locally."
+                        )
+
+
+                        return
+                    }
+
+
+                    /*
+                     * =================================
+                     * KEEP LOCAL
+                     * =================================
+                     */
+
+                    if (
+                        choice ===
+                        "local"
+                    ) {
+
+                        await saveWorkspaces(
+                            workspaces
+                        )
+
+
+                        savedWorkspaceSnapshotRef.current =
+                            JSON.stringify(
+                                workspaces
+                            )
+
+
+                        setSaveStatus({
+
+                            state:
+                                "saved",
+
+                            message:
+                                "Local workspace uploaded to Google Drive"
+
+                        })
+
+
+                        console.log(
+                            "[GOOGLE DRIVE] Local workspace uploaded."
+                        )
+
+                    }
+
+                }
+
+        })
 
     }
     catch (error) {
@@ -2365,7 +3195,8 @@ async function handleSyncGoogleDrive() {
 
         setDialogState({
 
-            open: true,
+            open:
+                true,
 
             type:
                 "confirm",
@@ -2375,7 +3206,7 @@ async function handleSyncGoogleDrive() {
 
             message:
                 error?.message ||
-                "Unable to sync from Google Drive.",
+                "Unable to sync with Google Drive.",
 
             initialValue:
                 "",
@@ -2419,6 +3250,7 @@ async function handleSyncGoogleDrive() {
     }
 
 }
+
 
 async function handleDisconnectGoogleDrive() {
 
