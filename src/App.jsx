@@ -22,13 +22,18 @@ import { useEffect, useRef, useState } from 'react'
 
 
 
-    import {
-        loadWorkspaces,
-        saveWorkspaces,
-        createWorkspace,
-            loadActiveWorkspaceId,
-        saveActiveWorkspaceId
-    } from './services/workspaceService'
+import {
+    loadWorkspaces,
+    saveWorkspaces,
+    createWorkspace,
+    loadActiveWorkspaceId,
+    loadWorkspaceFromGoogleDrive,
+    applyGoogleDriveWorkspaceLocally,
+    syncWorkspaceFromGoogleDrive,
+    getGoogleDriveStatus,
+    disconnectGoogleDrive,
+    saveActiveWorkspaceId
+} from './services/workspaceService'
 
     import { exportEnvironment as exportEnvironmentData, importEnvironmentFromFile } from './services/importExportService'
     import {
@@ -59,9 +64,7 @@ import { useEffect, useRef, useState } from 'react'
     const [closeRequested, setCloseRequested] =
         useState(false);
 
-    const savedWorkspaceSnapshotRef =
-    useRef(null)
-
+   
 
 
 
@@ -75,9 +78,687 @@ import { useEffect, useRef, useState } from 'react'
 
 
     
-    const [workspaces, setWorkspaces] =
-        useState(() => loadWorkspaces())
+const [workspaces, setWorkspaces] =
+    useState([])
 
+const [activeWorkspaceId, setActiveWorkspaceId] =
+    useState(null)
+
+const [isWorkspacesLoaded, setIsWorkspacesLoaded] =
+    useState(false)
+
+const savedWorkspaceSnapshotRef =
+    useRef(null)
+
+
+
+const [googleDriveStatus, setGoogleDriveStatus] =
+    useState({
+        authenticated: false,
+        user: null
+    })
+
+
+const [googleDriveSyncing, setGoogleDriveSyncing] =
+    useState(false)
+
+
+async function saveCurrentWorkspaceChanges() {
+
+    if (!isWorkspacesLoaded) {
+        return false
+    }
+
+
+    const currentSnapshot =
+        JSON.stringify(workspaces)
+
+
+    const savedSnapshot =
+        savedWorkspaceSnapshotRef.current
+
+
+    /*
+     * Nothing changed since the last successful save.
+     */
+
+    if (
+        currentSnapshot ===
+        savedSnapshot
+    ) {
+
+        return true
+
+    }
+
+
+    try {
+
+        await saveWorkspaces(
+            workspaces
+        )
+
+
+        /*
+         * IMPORTANT:
+         * Mark this exact state as saved.
+         *
+         * This is what makes the
+         * "Unsaved changes" dialog disappear.
+         */
+
+        savedWorkspaceSnapshotRef.current =
+            currentSnapshot
+
+
+        return true
+
+    }
+    catch (error) {
+
+        console.error(
+            "[WORKSPACE] Save failed:",
+            error
+        )
+
+
+        return false
+
+    }
+
+}
+
+
+useEffect(() => {
+
+    function handleGlobalKeyDown(event) {
+
+        const isSaveShortcut =
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
+            event.key.toLowerCase() === "s"
+
+
+        if (!isSaveShortcut) {
+            return
+        }
+
+
+        event.preventDefault()
+        event.stopPropagation()
+
+
+        void saveCurrentWorkspaceChanges()
+
+    }
+
+
+    window.addEventListener(
+        "keydown",
+        handleGlobalKeyDown,
+        true
+    )
+
+
+    return () => {
+
+        window.removeEventListener(
+            "keydown",
+            handleGlobalKeyDown,
+            true
+        )
+
+    }
+
+}, [
+    workspaces,
+    isWorkspacesLoaded
+])
+
+
+
+
+
+/*
+ * =========================================================
+ * ASYNC WORKSPACE INITIALIZATION
+ * =========================================================
+ *
+ * Both Vite and Electron now use the same workspace API.
+ *
+ * loadWorkspaces() and loadActiveWorkspaceId() are async,
+ * so they must be loaded after the component mounts.
+ * =========================================================
+ */
+
+useEffect(() => {
+
+    let cancelled = false
+
+
+    async function initializeWorkspaces() {
+
+        try {
+
+            const loadedWorkspaces =
+                await loadWorkspaces()
+
+
+            const savedWorkspaceId =
+                await loadActiveWorkspaceId()
+
+
+            if (cancelled) {
+                return
+            }
+
+
+            const normalizedWorkspaces =
+                Array.isArray(
+                    loadedWorkspaces
+                )
+                    ? loadedWorkspaces
+                    : []
+
+
+            const savedWorkspaceExists =
+                normalizedWorkspaces.some(
+                    workspace =>
+                        workspace.id ===
+                        savedWorkspaceId
+                )
+
+
+            const initialActiveId =
+                savedWorkspaceExists
+                    ? savedWorkspaceId
+                    : (
+                        normalizedWorkspaces[0]?.id ??
+                        null
+                    )
+
+
+            setWorkspaces(
+                normalizedWorkspaces
+            )
+
+
+            setActiveWorkspaceId(
+                initialActiveId
+            )
+
+
+            savedWorkspaceSnapshotRef.current =
+                JSON.stringify(
+                    normalizedWorkspaces
+                )
+
+
+            setIsWorkspacesLoaded(
+                true
+            )
+
+        }
+        catch (error) {
+
+            console.error(
+                "[WORKSPACE] Failed to initialize:",
+                error
+            )
+
+
+            if (!cancelled) {
+
+                setWorkspaces([])
+
+                setActiveWorkspaceId(null)
+
+                setIsWorkspacesLoaded(true)
+
+            }
+
+        }
+
+    }
+
+
+    initializeWorkspaces()
+
+
+    return () => {
+
+        cancelled = true
+
+    }
+
+}, [])
+
+
+useEffect(() => {
+
+    let cancelled = false
+
+
+    async function loadGoogleDriveStatus() {
+
+        try {
+
+            const status =
+                await getGoogleDriveStatus()
+
+
+            if (cancelled) {
+                return
+            }
+
+
+            setGoogleDriveStatus(
+                status
+            )
+
+        }
+        catch (error) {
+
+            console.error(
+                "[GOOGLE DRIVE] Failed to load status:",
+                error
+            )
+
+        }
+
+    }
+
+
+    loadGoogleDriveStatus()
+
+
+    return () => {
+
+        cancelled = true
+
+    }
+
+}, [])
+
+
+useEffect(() => {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        )
+
+
+    const googleDriveStatus =
+        params.get(
+            "googleDrive"
+        )
+
+
+    if (
+        googleDriveStatus !==
+        "connected"
+    ) {
+
+        return
+
+    }
+
+
+    async function handleGoogleDriveConnected() {
+
+        try {
+
+console.log(
+    "[GOOGLE DRIVE] Authentication successful."
+)
+
+
+const status =
+    await getGoogleDriveStatus()
+
+
+setGoogleDriveStatus(
+    status
+)
+
+
+const remoteState =
+    await loadWorkspaceFromGoogleDrive()
+
+
+            const remoteWorkspaces =
+                Array.isArray(
+                    remoteState?.workspaces
+                )
+                    ? remoteState.workspaces
+                    : []
+
+
+            /*
+             * -----------------------------------------
+             * DRIVE IS EMPTY
+             * -----------------------------------------
+             */
+
+            if (
+                remoteWorkspaces.length === 0
+            ) {
+
+                console.log(
+                    "[GOOGLE DRIVE] Drive workspace is empty."
+                )
+
+
+                setDialogState({
+
+                    open: true,
+
+                    type: "choice",
+
+                    title:
+                        "Google Drive workspace is empty",
+
+                    message:
+                        "There is no workspace data in Google Drive. Save your current local workspace to Google Drive?",
+
+                    initialValue:
+                        "upload",
+
+                    options: [
+
+                        {
+                            label:
+                                "Save Local Data to Google Drive",
+
+                            value:
+                                "upload"
+
+                        },
+
+                        {
+                            label:
+                                "Cancel",
+
+                            value:
+                                "cancel"
+
+                        }
+
+                    ],
+
+                    confirmLabel:
+                        "Continue",
+
+                    cancelLabel:
+                        "Cancel",
+
+                    onConfirm:
+                        async (choice) => {
+
+                            setDialogState(
+                                current => ({
+                                    ...current,
+                                    open: false
+                                })
+                            )
+
+
+                            if (
+                                choice !==
+                                "upload"
+                            ) {
+
+                                return
+
+                            }
+
+
+                            try {
+
+                                await saveWorkspaces(
+                                    workspaces
+                                )
+
+
+                                savedWorkspaceSnapshotRef.current =
+                                    JSON.stringify(
+                                        workspaces
+                                    )
+
+
+                                console.log(
+                                    "[GOOGLE DRIVE] Local workspace uploaded."
+                                )
+
+                            }
+                            catch (error) {
+
+                                console.error(
+                                    "[GOOGLE DRIVE] Initial upload failed:",
+                                    error
+                                )
+
+                            }
+
+                        }
+
+                })
+
+
+                return
+
+            }
+
+
+            /*
+             * -----------------------------------------
+             * DRIVE HAS DATA
+             * -----------------------------------------
+             */
+
+            setDialogState({
+
+                open: true,
+
+                type: "choice",
+
+                title:
+                    "Google Drive Workspace",
+
+                message:
+                    "Google Drive contains workspace data. Which data do you want to use?",
+
+                initialValue:
+                    "drive",
+
+                options: [
+
+                    {
+                        label:
+                            "Use Google Drive Data",
+
+                        value:
+                            "drive"
+
+                    },
+
+                    {
+                        label:
+                            "Keep Local Data and Upload to Google Drive",
+
+                        value:
+                            "local"
+
+                    }
+
+                ],
+
+                confirmLabel:
+                    "Continue",
+
+                cancelLabel:
+                    "Cancel",
+
+                onConfirm:
+                    async (choice) => {
+
+                        setDialogState(
+                            current => ({
+                                ...current,
+                                open: false
+                            })
+                        )
+
+
+                        /*
+                         * =================================
+                         * USE GOOGLE DRIVE
+                         * =================================
+                         */
+
+if (
+    choice ===
+    "drive"
+) {
+
+    const remoteWorkspaces =
+        Array.isArray(
+            remoteState.workspaces
+        )
+            ? remoteState.workspaces
+            : []
+
+
+    const activeId =
+        remoteState.activeWorkspaceId ??
+        remoteWorkspaces[0]?.id ??
+        null
+
+
+    /*
+     * First save Drive data into the common
+     * local workspace server.
+     *
+     * This does NOT upload back to Drive.
+     */
+
+    await applyGoogleDriveWorkspaceLocally(
+        remoteWorkspaces,
+        activeId
+    )
+
+
+    /*
+     * Then update the React UI.
+     */
+
+    setWorkspaces(
+        remoteWorkspaces
+    )
+
+
+    setActiveWorkspaceId(
+        activeId
+    )
+
+
+    /*
+     * Drive data is now the current saved state.
+     */
+
+    savedWorkspaceSnapshotRef.current =
+        JSON.stringify(
+            remoteWorkspaces
+        )
+
+
+    console.log(
+        "[GOOGLE DRIVE] Drive workspace selected and saved locally."
+    )
+
+
+    return
+
+}
+
+                        /*
+                         * =================================
+                         * KEEP LOCAL
+                         * =================================
+                         */
+
+                        if (
+                            choice ===
+                            "local"
+                        ) {
+
+                            try {
+
+                                await saveWorkspaces(
+                                    workspaces
+                                )
+
+
+                                savedWorkspaceSnapshotRef.current =
+                                    JSON.stringify(
+                                        workspaces
+                                    )
+
+
+                                console.log(
+                                    "[GOOGLE DRIVE] Local workspace uploaded."
+                                )
+
+                            }
+                            catch (error) {
+
+                                console.error(
+                                    "[GOOGLE DRIVE] Failed uploading local workspace:",
+                                    error
+                                )
+
+                            }
+
+                        }
+
+                    }
+
+            })
+
+        }
+        catch (error) {
+
+            console.error(
+                "[GOOGLE DRIVE] Connection/sync failed:",
+                error
+            )
+
+        }
+        finally {
+
+            /*
+             * Remove the OAuth query parameter.
+             */
+
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            )
+
+        }
+
+    }
+
+
+    handleGoogleDriveConnected()
+
+}, [
+    isWorkspacesLoaded
+])
 
 
 
@@ -132,27 +813,7 @@ useEffect(() => {
 }, [workspaces])
 
 
-    const [activeWorkspaceId, setActiveWorkspaceId] =
-        useState(() => {
 
-            const loadedWorkspaces =
-                loadWorkspaces()
-
-            const savedWorkspaceId =
-                loadActiveWorkspaceId()
-
-            const savedWorkspaceExists =
-                loadedWorkspaces.some(
-                    workspace =>
-                        workspace.id === savedWorkspaceId
-                )
-
-            if (savedWorkspaceExists) {
-                return savedWorkspaceId
-            }
-
-            return loadedWorkspaces[0]?.id ?? null
-        })
 
 
     const activeWorkspace =
@@ -223,192 +884,309 @@ useEffect(() => {
     }
 
 
-    function handleWorkspaceChange(workspace){
+async function handleWorkspaceChange(
+    workspace
+) {
 
-        setActiveWorkspaceId(
-            workspace.id
-        )
-            saveActiveWorkspaceId(
+    if (!workspace) {
+        return
+    }
+
+
+    setActiveWorkspaceId(
+        workspace.id
+    )
+
+
+    try {
+
+        await saveActiveWorkspaceId(
             workspace.id
         )
 
     }
+    catch (error) {
+
+        console.error(
+            "[WORKSPACE] Failed to save active workspace:",
+            error
+        )
+
+    }
+
+}
 
 
 
 
-    function handleCreateWorkspace() {
+function handleCreateWorkspace() {
 
-        setDialogState({
-            open: true,
-            type: "input",
-            title: "New Workspace",
-            message: "Enter a name for the new workspace.",
-            initialValue: "",
-            options: [],
-            confirmLabel: "Create",
-            cancelLabel: "Cancel",
+    setDialogState({
 
-            onConfirm: (workspaceName) => {
+        open: true,
+
+        type: "input",
+
+        title: "New Workspace",
+
+        message:
+            "Enter a name for the new workspace.",
+
+        initialValue: "",
+
+        options: [],
+
+        confirmLabel: "Create",
+
+        cancelLabel: "Cancel",
+
+
+        onConfirm:
+            async (workspaceName) => {
 
                 const name =
-                    String(workspaceName || "").trim()
+                    String(
+                        workspaceName || ""
+                    ).trim()
+
 
                 if (!name) {
                     return
                 }
 
-    const newWorkspace = {
-        id: crypto.randomUUID(),
-        name,
-        collections: [],
-        environments: [],
-        selectedRequestId: null
-    }
+
+                const newWorkspace = {
+
+                    id:
+                        crypto.randomUUID(),
+
+                    name,
+
+                    collections: [],
+
+                    environments: [],
+
+                    selectedRequestId:
+                        null
+
+                }
+
+
                 const updated = [
+
                     ...workspaces,
-                    newWorkspace,
+
+                    newWorkspace
+
                 ]
 
-                setWorkspaces(updated)
 
-                saveWorkspaces(updated)
+                /*
+                 * Update UI immediately.
+                 *
+                 * The debounced save effect will
+                 * persist the workspace.
+                 */
+
+                setWorkspaces(
+                    updated
+                )
+
+
+                /*
+                 * Make the new workspace active.
+                 */
 
                 setActiveWorkspaceId(
                     newWorkspace.id
                 )
 
-                saveActiveWorkspaceId(
-                    newWorkspace.id
+
+                /*
+                 * Persist active workspace ID
+                 * through the common backend.
+                 */
+
+                try {
+
+                    await saveActiveWorkspaceId(
+                        newWorkspace.id
+                    )
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "[WORKSPACE] Failed to save new active workspace:",
+                        error
+                    )
+
+                }
+
+
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
                 )
 
-                setDialogState((current) => ({
-                    ...current,
-                    open: false,
-                }))
             },
 
-            onCancel: () =>
-                setDialogState((current) => ({
-                    ...current,
-                    open: false,
-                })),
-        })
+
+        onCancel:
+            () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                )
+
+    })
+
+}
+
+
+function handleRenameWorkspace() {
+
+    const currentWorkspace =
+        activeWorkspace
+
+
+    if (!currentWorkspace) {
+        return
     }
 
 
+    setDialogState({
 
-    function handleRenameWorkspace() {
+        open: true,
 
-        const currentWorkspace =
-            activeWorkspace
+        type: "input",
 
-        if (!currentWorkspace) {
-            return
-        }
+        title: "Rename Workspace",
 
-        setDialogState({
-            open: true,
-            type: "input",
-            title: "Rename Workspace",
-            message: "Enter a new name for the workspace.",
-            initialValue: currentWorkspace.name,
-            options: [],
-            confirmLabel: "Rename",
-            cancelLabel: "Cancel",
+        message:
+            "Enter a new name for the workspace.",
 
-            onConfirm: (newName) => {
+        initialValue:
+            currentWorkspace.name,
+
+        options: [],
+
+        confirmLabel: "Rename",
+
+        cancelLabel: "Cancel",
+
+
+        onConfirm:
+            (newName) => {
 
                 const name =
-                    String(newName || "").trim()
+                    String(
+                        newName || ""
+                    ).trim()
+
 
                 if (!name) {
                     return
                 }
 
+
                 const updated =
                     workspaces.map(
-                        (workspace) =>
+                        workspace =>
 
                             workspace.id ===
                             currentWorkspace.id
 
                                 ? {
                                     ...workspace,
-                                    name,
+                                    name
                                 }
 
                                 : workspace
                     )
 
-                setWorkspaces(updated)
 
-                saveWorkspaces(updated)
+                /*
+                 * Only update React state.
+                 *
+                 * Debounced save effect persists it.
+                 */
 
-                setDialogState((current) => ({
-                    ...current,
-                    open: false,
-                }))
+                setWorkspaces(
+                    updated
+                )
+
+
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                )
+
             },
 
-            onCancel: () =>
-                setDialogState((current) => ({
-                    ...current,
-                    open: false,
-                })),
-        })
+
+        onCancel:
+            () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                )
+
+    })
+
+}
+
+
+function handleDeleteWorkspace() {
+
+    const currentWorkspace =
+        activeWorkspace
+
+
+    if (!currentWorkspace) {
+        return
     }
 
 
-
-    function handleDeleteWorkspace() {
-
-        const currentWorkspace =
-            activeWorkspace
-
-        if (!currentWorkspace) {
-            return
-        }
-
-        /*
-        Do not allow the last workspace
-        to be deleted.
-        */
-
-        if (workspaces.length <= 1) {
-            return
-        }
+    if (workspaces.length <= 1) {
+        return
+    }
 
 
-        setDialogState({
+    setDialogState({
 
-            open: true,
+        open: true,
 
-            type: "input",
+        type: "input",
 
-            title: "Delete Workspace",
+        title: "Delete Workspace",
 
-            message:
-                `Delete workspace "${currentWorkspace.name}"? Type DELETE to confirm.`,
+        message:
+            `Delete workspace "${currentWorkspace.name}"? Type DELETE to confirm.`,
 
-            initialValue: "",
+        initialValue: "",
 
-            options: [],
+        options: [],
 
-            confirmLabel: "Save",
+        confirmLabel: "Delete",
 
-            cancelLabel: "Cancel",
+        cancelLabel: "Cancel",
 
 
-            onConfirm: (value) => {
-
-                /*
-                User must type exactly:
-                DELETE
-                */
+        onConfirm:
+            async (value) => {
 
                 if (
-                    String(value || "").trim() !==
+                    String(value || "")
+                        .trim() !==
                     "DELETE"
                 ) {
 
@@ -419,14 +1197,18 @@ useEffect(() => {
 
                 const updated =
                     workspaces.filter(
-                        (workspace) =>
+                        workspace =>
                             workspace.id !==
                             currentWorkspace.id
                     )
 
 
-                if (updated.length === 0) {
+                if (
+                    updated.length === 0
+                ) {
+
                     return
+
                 }
 
 
@@ -434,41 +1216,68 @@ useEffect(() => {
                     updated[0]
 
 
-                setWorkspaces(updated)
+                /*
+                 * Update UI.
+                 */
 
-                saveWorkspaces(updated)
+                setWorkspaces(
+                    updated
+                )
 
+
+                /*
+                 * Switch active workspace.
+                 */
 
                 setActiveWorkspaceId(
                     nextWorkspace.id
                 )
 
 
-                saveActiveWorkspaceId(
-                    nextWorkspace.id
+                /*
+                 * Persist active workspace
+                 * through common backend.
+                 */
+
+                try {
+
+                    await saveActiveWorkspaceId(
+                        nextWorkspace.id
+                    )
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "[WORKSPACE] Failed to save active workspace after delete:",
+                        error
+                    )
+
+                }
+
+
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
                 )
 
-
-                setDialogState((current) => ({
-                    ...current,
-                    open: false,
-                }))
-
             },
 
 
-            onCancel: () => {
+        onCancel:
+            () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                )
 
-                setDialogState((current) => ({
-                    ...current,
-                    open: false,
-                }))
+    })
 
-            },
-
-        })
-    }
-
+}
     function handleImportWorkspace(){
 
         alert(
@@ -735,77 +1544,78 @@ useEffect(() => {
 }
 
 
-    function handleWorkspaceCollectionsChange(collections) {
+function handleWorkspaceCollectionsChange(
+    collections
+) {
 
-        setWorkspaces((currentWorkspaces) => {
+    setWorkspaces(
+        currentWorkspaces => {
 
-            const updatedWorkspaces =
-                currentWorkspaces.map((workspace) => {
+            return currentWorkspaces.map(
+                workspace => {
 
                     if (
                         workspace.id !==
                         activeWorkspaceId
                     ) {
+
                         return workspace
+
                     }
+
 
                     return {
+
                         ...workspace,
-                        collections,
-                    }
-                })
 
-
-            saveWorkspaces(
-                updatedWorkspaces
-            )
-
-
-            return updatedWorkspaces
-
-        })
-
-    }
-
-
-    function handleSelectedRequestChange(
-        requestId
-    ) {
-
-        setWorkspaces((currentWorkspaces) => {
-
-            const updatedWorkspaces =
-                currentWorkspaces.map(
-                    (workspace) => {
-
-                        if (
-                            workspace.id !==
-                            activeWorkspaceId
-                        ) {
-                            return workspace
-                        }
-
-                        return {
-                            ...workspace,
-
-                            selectedRequestId:
-                                requestId,
-                        }
+                        collections
 
                     }
-                )
 
-
-            saveWorkspaces(
-                updatedWorkspaces
+                }
             )
 
+        }
+    )
 
-            return updatedWorkspaces
+}
 
-        })
+function handleSelectedRequestChange(
+    requestId
+) {
 
-    }
+    setWorkspaces(
+        currentWorkspaces => {
+
+            return currentWorkspaces.map(
+                workspace => {
+
+                    if (
+                        workspace.id !==
+                        activeWorkspaceId
+                    ) {
+
+                        return workspace
+
+                    }
+
+
+                    return {
+
+                        ...workspace,
+
+                        selectedRequestId:
+                            requestId
+
+                    }
+
+                }
+            )
+
+        }
+    )
+
+}
 
     const activeEnvironment = environments.find((environment) => environment.active) ?? null
 
@@ -877,66 +1687,92 @@ const {
     collectionState.selectedRequestId
 )
 
-    function handleEnvironmentChange(environmentId){
+function handleEnvironmentChange(
+    environmentId
+) {
 
     const updated =
-        environments.map(env => ({
-            ...env,
-            active:
-                env.id === environmentId
-        }))
+        environments.map(
+            environment => ({
+
+                ...environment,
+
+                active:
+                    environment.id ===
+                    environmentId
+
+            })
+        )
 
 
     const next =
-    workspaces.map(ws=>{
+        workspaces.map(
+            workspace => {
 
-        if(ws.id!==activeWorkspaceId)
-            return ws
+                if (
+                    workspace.id !==
+                    activeWorkspaceId
+                ) {
 
-
-        return {
-            ...ws,
-            environments:updated
-        }
-
-    })
-
-
-    setWorkspaces(next)
-
-    saveWorkspaces(next)
-
-    }
-
-    function handleEnvironmentsChange(updatedEnvironments) {
-
-
-        const updatedWorkspaces =
-            workspaces.map(workspace => {
-
-
-                if(workspace.id !== activeWorkspaceId){
                     return workspace
+
                 }
 
 
                 return {
+
+                    ...workspace,
+
+                    environments:
+                        updated
+
+                }
+
+            }
+        )
+
+
+    setWorkspaces(
+        next
+    )
+
+}
+function handleEnvironmentsChange(
+    updatedEnvironments
+) {
+
+    const updatedWorkspaces =
+        workspaces.map(
+            workspace => {
+
+                if (
+                    workspace.id !==
+                    activeWorkspaceId
+                ) {
+
+                    return workspace
+
+                }
+
+
+                return {
+
                     ...workspace,
 
                     environments:
                         updatedEnvironments
+
                 }
 
+            }
+        )
 
-            })
 
+    setWorkspaces(
+        updatedWorkspaces
+    )
 
-        setWorkspaces(updatedWorkspaces)
-
-        saveWorkspaces(updatedWorkspaces)
-
-    }
-
+}
     function handleDuplicateEnvironment(){
 
         if(!activeEnvironment) return
@@ -1198,6 +2034,315 @@ const {
 
     }
     }
+
+
+async function handleConnectGoogleDrive() {
+
+    try {
+
+        window.location.href =
+            "http://localhost:3001/api/google/auth/start"
+
+    }
+    catch (error) {
+
+        console.error(
+            "[GOOGLE DRIVE] Failed to start authentication:",
+            error
+        )
+
+        setDialogState({
+            open: true,
+            type: "confirm",
+            title: "Google Drive connection failed",
+            message:
+                error?.message ||
+                "Unable to start Google Drive authentication.",
+            initialValue: "",
+            options: [],
+            confirmLabel: "OK",
+            cancelLabel: "",
+            onConfirm: () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                ),
+            onCancel: () =>
+                setDialogState(
+                    current => ({
+                        ...current,
+                        open: false
+                    })
+                )
+        })
+
+    }
+
+}
+
+
+
+async function handleSyncGoogleDrive() {
+
+    if (
+        !googleDriveStatus?.authenticated
+    ) {
+
+        return
+
+    }
+
+
+    if (
+        googleDriveSyncing
+    ) {
+
+        return
+
+    }
+
+
+    setGoogleDriveSyncing(
+        true
+    )
+
+
+    try {
+
+        console.log(
+            "[GOOGLE DRIVE] Starting manual sync..."
+        )
+
+
+        const result =
+            await syncWorkspaceFromGoogleDrive()
+
+
+        if (
+            result?.empty
+        ) {
+
+            setDialogState({
+
+                open: true,
+
+                type:
+                    "confirm",
+
+                title:
+                    "Google Drive is empty",
+
+                message:
+                    "There is no workspace data in Google Drive.",
+
+                initialValue:
+                    "",
+
+                options:
+                    [],
+
+                confirmLabel:
+                    "OK",
+
+                cancelLabel:
+                    "",
+
+                onConfirm:
+                    () =>
+                        setDialogState(
+                            current => ({
+                                ...current,
+                                open: false
+                            })
+                        ),
+
+                onCancel:
+                    () =>
+                        setDialogState(
+                            current => ({
+                                ...current,
+                                open: false
+                            })
+                        )
+
+            })
+
+
+            return
+
+        }
+
+
+        setWorkspaces(
+            result.workspaces
+        )
+
+
+        setActiveWorkspaceId(
+            result.activeWorkspaceId
+        )
+
+
+        savedWorkspaceSnapshotRef.current =
+            JSON.stringify(
+                result.workspaces
+            )
+
+
+        console.log(
+            "[GOOGLE DRIVE] Manual sync completed."
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "[GOOGLE DRIVE] Manual sync failed:",
+            error
+        )
+
+
+        setDialogState({
+
+            open: true,
+
+            type:
+                "confirm",
+
+            title:
+                "Google Drive Sync Failed",
+
+            message:
+                error?.message ||
+                "Unable to sync from Google Drive.",
+
+            initialValue:
+                "",
+
+            options:
+                [],
+
+            confirmLabel:
+                "OK",
+
+            cancelLabel:
+                "",
+
+            onConfirm:
+                () =>
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    ),
+
+            onCancel:
+                () =>
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    )
+
+        })
+
+    }
+    finally {
+
+        setGoogleDriveSyncing(
+            false
+        )
+
+    }
+
+}
+
+async function handleDisconnectGoogleDrive() {
+
+    try {
+
+        await disconnectGoogleDrive()
+
+
+        setGoogleDriveStatus({
+
+            authenticated:
+                false,
+
+            user:
+                null
+
+        })
+
+
+        console.log(
+            "[GOOGLE DRIVE] Disconnected."
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "[GOOGLE DRIVE] Disconnect failed:",
+            error
+        )
+
+
+        setDialogState({
+
+            open: true,
+
+            type:
+                "confirm",
+
+            title:
+                "Disconnect Google Drive",
+
+            message:
+                error?.message ||
+                "Unable to disconnect Google Drive.",
+
+            initialValue:
+                "",
+
+            options:
+                [],
+
+            confirmLabel:
+                "OK",
+
+            cancelLabel:
+                "",
+
+            onConfirm:
+                () =>
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    ),
+
+            onCancel:
+                () =>
+                    setDialogState(
+                        current => ({
+                            ...current,
+                            open: false
+                        })
+                    )
+
+        })
+
+    }
+
+}
+
+
     async function handleExportEnvironment() {
         if (!activeEnvironment) return
 
@@ -1277,6 +2422,24 @@ const {
         onExportAllEnvironments={
             handleExportAllEnvironments
         }
+
+        onConnectGoogleDrive={handleConnectGoogleDrive}
+
+        googleDriveStatus={
+    googleDriveStatus
+}
+
+googleDriveSyncing={
+    googleDriveSyncing
+}
+
+onSyncGoogleDrive={
+    handleSyncGoogleDrive
+}
+
+onDisconnectGoogleDrive={
+    handleDisconnectGoogleDrive
+}
 
 
 
@@ -1490,29 +2653,27 @@ const {
 
 onConfirm={async () => {
 
-    try {
+    const saved =
+        await saveCurrentWorkspaceChanges()
 
-        await Promise.resolve(
-            saveWorkspaces(workspaces)
-        )
 
-        savedWorkspaceSnapshotRef.current =
-            JSON.stringify(workspaces)
-
-        setCloseRequested(false)
-
-        forceCloseRuntimeWindow()
-
-    } catch (error) {
+    if (!saved) {
 
         console.error(
-            '[CLOSE] Save All failed:',
-            error
+            "[CLOSE] Save All failed."
         )
+
+        return
 
     }
 
+
+    setCloseRequested(false)
+
+    forceCloseRuntimeWindow()
+
 }}
+
 
     onCancel={async (action) => {
 
@@ -1527,22 +2688,18 @@ onConfirm={async () => {
                 const savedSnapshot =
                     savedWorkspaceSnapshotRef.current
 
-                if (savedSnapshot) {
+if (savedSnapshot) {
 
-                    const restoredWorkspaces =
-                        JSON.parse(savedSnapshot)
+    const restoredWorkspaces =
+        JSON.parse(savedSnapshot)
 
-                    setWorkspaces(
-                        restoredWorkspaces
-                    )
+    setWorkspaces(
+        restoredWorkspaces
+    )
 
-                    await Promise.resolve(
-                        saveWorkspaces(
-                            restoredWorkspaces
-                        )
-                    )
-                }
-
+    savedWorkspaceSnapshotRef.current =
+        savedSnapshot
+}
                 setCloseRequested(false)
 
                 forceCloseRuntimeWindow()

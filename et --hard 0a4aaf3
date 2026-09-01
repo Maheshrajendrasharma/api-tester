@@ -1,0 +1,57 @@
+[33m34cafd0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcleanup-unused-css[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{0}: reset: moving to origin/master
+[33m0a4aaf3[m HEAD@{1}: commit: phase_1_codex_2026-08-29 23:34:36
+[33m52b618b[m HEAD@{2}: commit: runner column_working_2026-08-29 22:02:02
+[33m383c206[m HEAD@{3}: commit: runner_2 column_working_2026-08-29 12:29:07
+[33mf11bddd[m HEAD@{4}: commit: runner_paues_resume_working_2026-08-29 10:40:16
+[33mda1b6d3[m HEAD@{5}: commit: request cancel button working close-dont save not working working_2026-08-29 05:30:58
+[33m6d67cd1[m HEAD@{6}: commit: sidebar_all_fixed working_2026-08-27 21:30:57
+[33mc92da8d[m HEAD@{7}: commit: sidebar_all_fixed working_2026-08-27 05:13:50
+[33mf131d80[m HEAD@{8}: commit: sidebar_all_css_fixed working_2026-08-23 23:45:54
+[33mb05061d[m HEAD@{9}: commit: sidebar_all_dragging working_2026-08-23 19:31:27
+[33m479f9e5[m HEAD@{10}: commit: Backup Runner working_2_2026-08-23 13:18:15
+[33mfb6b1c4[m HEAD@{11}: commit: Backup Runner working_1_2026-08-23 12:15:56
+[33m502b07b[m HEAD@{12}: reset: moving to 502b07b
+[33m502b07b[m HEAD@{13}: commit: Backup Runner working 2026-08-22 21:29:20
+[33mcee2c23[m HEAD@{14}: commit: Backup Runner collection specific 2026-08-22 14:56:54
+[33m86d1119[m HEAD@{15}: commit: Backup runner visible without css 2026-08-22 11:34:23
+[33md6c6194[m HEAD@{16}: commit: Backup bef_runner 2026-08-22 03:36:16
+[33m66e2026[m HEAD@{17}: reset: moving to 66e2026fab80f93faa77010c9b1e96050871281b
+[33m66e2026[m HEAD@{18}: commit: Backup CODE editor for response req scritp 2026-08-18 22:50:02
+[33m8b17f80[m HEAD@{19}: commit: Backup environment panel from sidebar 2026-08-16 23:56:54
+[33m0202486[m HEAD@{20}: commit: Backup bef-and after restart same state 2026-08-16 18:54:44
+[33m6135f3d[m HEAD@{21}: commit: Backup workspace adding the colln and env
+[33m5bc8276[m HEAD@{22}: commit: Backup
+[33m91b40e5[m HEAD@{23}: commit: Backup
+[33mc35ed04[m HEAD@{24}: commit: Backup
+[33m18ebcd2[m HEAD@{25}: commit: Backup
+[33m10036ac[m HEAD@{26}: commit: Backup project
+[33m608507a[m HEAD@{27}: commit: Fix params and headers scrollable tables
+[33m09c26de[m HEAD@{28}: commit: Backup 2026-08-09 13:00:43
+[33m804ff99[m HEAD@{29}: commit: Complete sidebar drag drop and UI improvements
+[33m820995d[m HEAD@{30}: commit: Fix nested folder and request creation
+[33ma8cc80c[m HEAD@{31}: commit: 08-082026 PARENT AND TREE ALL OPTION WORKING
+[33m34cafd0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcleanup-unused-css[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{32}: reset: moving to 34cafd0
+[33me58f0e9[m HEAD@{33}: reset: moving to e58f0e9
+[33me58f0e9[m HEAD@{34}: reset: moving to e58f0e9
+[33me58f0e9[m HEAD@{35}: reset: moving to e58f0e9
+[33m34cafd0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcleanup-unused-css[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{36}: reset: moving to origin/master
+[33m34cafd0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcleanup-unused-css[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{37}: checkout: moving from master to cleanup-unused-css
+[33m34cafd0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcleanup-unused-css[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{38}: commit: Fix action menu dropdown styling
+[33me58f0e9[m HEAD@{39}: commit: Update API tester UI and collection management
+[33md06470a[m HEAD@{40}: commit: Refactor Postman importer structure
+[33m675f311[m HEAD@{41}: commit: Improve environment management and variable editor
+[33m4e4fdee[m HEAD@{42}: commit: Stable environment import/export and scripts foundation
+[33m4f206cf[m HEAD@{43}: commit: Add environment import/export and request scripts support
+[33m573f351[m[33m ([m[1;32mgrape-pond[m[33m, [m[1;32mcalm-adapter[m[33m)[m HEAD@{44}: reset: moving to origin/master
+[33m2357ede[m HEAD@{45}: reset: moving to 2357ede
+[33m573f351[m[33m ([m[1;32mgrape-pond[m[33m, [m[1;32mcalm-adapter[m[33m)[m HEAD@{46}: commit: Fix sidebar layout and environment panel rendering and request and response
+[33m2357ede[m HEAD@{47}: checkout: moving from master to master
+[33m2357ede[m HEAD@{48}: commit: Phase 5.4 - Variable resolution and environment improvements
+[33mabb7228[m HEAD@{49}: commit: Phase 5.3B - Resizable and collapsible environment panel
+[33mf60adae[m HEAD@{50}: commit: Phase 5.1A - Environment helper and storage foundation
+[33m04f4045[m HEAD@{51}: commit: Phase 4.3 - Architecture refactoring completed
+[33m98851cb[m HEAD@{52}: commit: Phase 3D.2 - Resizable request and response panels
+[33m991a6e1[m HEAD@{53}: commit: Phase 3B.2 - UI improvements and scrolling completed
+[33m0d1b651[m HEAD@{54}: commit: Phase 3A - Refactor request engine
+[33m4cf5d0c[m HEAD@{55}: commit: Phase 2 - Electron IPC request engine
+[33m656c4ce[m HEAD@{56}: commit (initial): Phase 1 - Initial Electron UI

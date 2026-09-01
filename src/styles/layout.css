@@ -4032,21 +4032,75 @@ button, input, select, textarea { transition: background 150ms ease, border-colo
 }
 
 .workspace-actions-menu {
-  position: absolute;
-  top: 42px;
-  right: 0;
-  width: 255px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 0px;
-  padding: 0px; 
-  z-index: 10000 !important;
-  box-shadow: 0px 10px 30px rgba(0,0,0,0.6);
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-  pointer-events: auto !important;
-  left: auto;
+    position: absolute;
+    top: 42px;
+    right: 0;
+
+    width: 255px;
+
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 0;
+
+    padding: 0;
+
+    z-index: 10000 !important;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    pointer-events: auto !important;
+
+    left: auto;
+
+    /*
+     * Prevent the browser from clipping the lower
+     * Google Drive menu items.
+     */
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    overflow-x: visible;
+}
+
+
+.google-drive-menu-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.google-drive-menu-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 12px;
+
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.google-drive-account {
+    padding: 2px 12px 8px;
+
+    font-size: 12px;
+    color: #8f9bab;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    box-sizing: border-box;
+}
+
+.google-drive-menu-section button {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
 }
 
 .workspace-modal-overlay{
@@ -5255,4 +5309,39 @@ color:white;
 .response-cancel-button:hover {
     background: #3a211e;
     color: #ff9184;
+}
+
+
+.google-drive-menu-section {
+    padding: 4px 0;
+}
+
+
+.google-drive-menu-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+
+.google-drive-status-dot {
+    color: #8b95a5;
+}
+
+
+.google-drive-status-dot.connected {
+    color: #55d6a3;
+}
+
+
+.google-drive-account {
+    padding: 2px 10px 8px;
+    font-size: 12px;
+    color: #8f9bab;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 260px;
 }
