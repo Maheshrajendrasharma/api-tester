@@ -790,21 +790,23 @@ async function findOrCreateWorkspaceFile(
      * =====================================================
      */
 
-    const initialData = {
+const initialData = {
 
-        version:
-            1,
+    version:
+        1,
 
-        workspaces: [],
+    revision:
+        0,
 
-        activeWorkspaceId:
-            null,
+    workspaces: [],
 
-        updatedAt:
-            new Date().toISOString()
+    activeWorkspaceId:
+        null,
 
-    };
+    updatedAt:
+        new Date().toISOString()
 
+};
 
     const content =
         JSON.stringify(
@@ -965,30 +967,39 @@ export async function uploadWorkspaceState(
 
 
     const content =
-        JSON.stringify(
-            {
+    JSON.stringify(
+        {
 
-                version:
-                    1,
+            version:
+                state?.version ??
+                1,
 
-                workspaces:
-                    Array.isArray(
-                        state?.workspaces
-                    )
-                        ? state.workspaces
-                        : [],
+            revision:
+                Number.isInteger(
+                    state?.revision
+                )
+                    ? state.revision
+                    : 0,
 
-                activeWorkspaceId:
-                    state?.activeWorkspaceId ??
-                    null,
+            workspaces:
+                Array.isArray(
+                    state?.workspaces
+                )
+                    ? state.workspaces
+                    : [],
 
-                updatedAt:
-                    new Date().toISOString()
+            activeWorkspaceId:
+                state?.activeWorkspaceId ??
+                null,
 
-            },
-            null,
-            2
-        );
+            updatedAt:
+                state?.updatedAt ??
+                new Date().toISOString()
+
+        },
+        null,
+        2
+    );
 
 
     /*

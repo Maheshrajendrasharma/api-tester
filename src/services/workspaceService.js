@@ -444,21 +444,155 @@ export async function loadWorkspaceFromGoogleDrive() {
         null
 
 
+return {
+
+    version:
+        driveState?.version ??
+        1,
+
+    revision:
+        Number.isInteger(
+            driveState?.revision
+        )
+            ? driveState.revision
+            : 0,
+
+    workspaces:
+        normalizedWorkspaces,
+
+    activeWorkspaceId,
+
+    updatedAt:
+        driveState?.updatedAt ??
+        null
+
+}
+
+}
+
+
+export async function compareWorkspaceWithGoogleDrive(
+    driveState = null
+) {
+
+    /*
+     * -----------------------------------------
+     * LOAD LOCAL STATE
+     * -----------------------------------------
+     */
+
+    const localState =
+        await fetchWorkspaceState()
+
+
+    /*
+     * -----------------------------------------
+     * USE PROVIDED DRIVE STATE
+     * OR DOWNLOAD IT
+     * -----------------------------------------
+     */
+
+    const remoteState =
+        driveState ??
+        await loadWorkspaceFromGoogleDrive()
+
+
+    /*
+     * -----------------------------------------
+     * NORMALIZE REVISIONS
+     * -----------------------------------------
+     */
+
+    const localRevision =
+        Number.isInteger(
+            localState?.revision
+        )
+            ? localState.revision
+            : 0
+
+
+    const driveRevision =
+        Number.isInteger(
+            remoteState?.revision
+        )
+            ? remoteState.revision
+            : 0
+
+
+    /*
+     * -----------------------------------------
+     * COMPARE
+     * -----------------------------------------
+     */
+
+    let status
+
+
+    if (
+        localRevision ===
+        driveRevision
+    ) {
+
+        status =
+            "SAME"
+
+    }
+    else if (
+        localRevision >
+        driveRevision
+    ) {
+
+        status =
+            "LOCAL_NEWER"
+
+    }
+    else {
+
+        status =
+            "DRIVE_NEWER"
+
+    }
+
+
+    /*
+     * -----------------------------------------
+     * RETURN
+     * -----------------------------------------
+     */
+
     return {
 
-        workspaces:
-            normalizedWorkspaces,
+        status,
 
-        activeWorkspaceId,
+        localRevision,
 
-        updatedAt:
-            driveState?.updatedAt ??
-            null
+        driveRevision,
+
+        localUpdatedAt:
+            localState?.updatedAt ??
+            null,
+
+        driveUpdatedAt:
+            remoteState?.updatedAt ??
+            null,
+
+        localWorkspaceCount:
+            Array.isArray(
+                localState?.workspaces
+            )
+                ? localState.workspaces.length
+                : 0,
+
+        driveWorkspaceCount:
+            Array.isArray(
+                remoteState?.workspaces
+            )
+                ? remoteState.workspaces.length
+                : 0
 
     }
 
 }
-
 
 
 export async function syncWorkspaceFromGoogleDrive() {
@@ -486,6 +620,17 @@ export async function syncWorkspaceFromGoogleDrive() {
 
             empty:
                 true,
+
+            version:
+                driveState?.version ??
+                1,
+
+            revision:
+                Number.isInteger(
+                    driveState?.revision
+                )
+                    ? driveState.revision
+                    : 0,
 
             workspaces:
                 [],
@@ -521,6 +666,17 @@ export async function syncWorkspaceFromGoogleDrive() {
 
         empty:
             false,
+
+        version:
+            driveState?.version ??
+            1,
+
+        revision:
+            Number.isInteger(
+                driveState?.revision
+            )
+                ? driveState.revision
+                : 0,
 
         workspaces,
 

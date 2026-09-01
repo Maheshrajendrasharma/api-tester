@@ -5345,3 +5345,30 @@ color:white;
     white-space: nowrap;
     max-width: 260px;
 }
+
+.workspace-save-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 14px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.workspace-save-status.saved {
+    color: #55d6a3;
+}
+
+.workspace-save-status.saved-local {
+    color: #9fb3c8;
+}
+
+.workspace-save-status.saving {
+    color: #d8b36a;
+}
+
+.workspace-save-status.error,
+.workspace-save-status.cloud-error {
+    color: #e46b6b;
+}
+

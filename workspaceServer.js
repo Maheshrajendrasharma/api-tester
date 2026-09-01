@@ -55,9 +55,17 @@ function createDefaultState() {
 
     return {
 
-        workspaces: [],
+        version:
+            1,
 
-        activeWorkspaceId: null,
+        revision:
+            0,
+
+        workspaces:
+            [],
+
+        activeWorkspaceId:
+            null,
 
         updatedAt:
             new Date().toISOString()
@@ -65,7 +73,6 @@ function createDefaultState() {
     }
 
 }
-
 
 /*
  * =========================================================
@@ -95,6 +102,17 @@ function normalizeState(state) {
 
     return {
 
+        version:
+            state?.version ??
+            1,
+
+        revision:
+            Number.isInteger(
+                state?.revision
+            )
+                ? state.revision
+                : 0,
+
         workspaces:
             Array.isArray(
                 state?.workspaces
@@ -113,7 +131,6 @@ function normalizeState(state) {
     }
 
 }
-
 
 /*
  * =========================================================
@@ -309,14 +326,41 @@ function saveWorkspaceState(
                 await ensureDataDirectory()
 
 
-                const nextState =
-                    normalizeState(
-                        state
+                const currentState =
+                    await readWorkspaceState()
+
+
+                const currentRevision =
+                    Number.isInteger(
+                        currentState.revision
                     )
+                        ? currentState.revision
+                        : 0
 
 
-                nextState.updatedAt =
-                    new Date().toISOString()
+                const nextState = {
+
+                    version:
+                        1,
+
+                    revision:
+                        currentRevision + 1,
+
+                    workspaces:
+                        Array.isArray(
+                            state?.workspaces
+                        )
+                            ? state.workspaces
+                            : [],
+
+                    activeWorkspaceId:
+                        state?.activeWorkspaceId ??
+                        null,
+
+                    updatedAt:
+                        new Date().toISOString()
+
+                }
 
 
                 const tempFile =
@@ -824,37 +868,7 @@ if (
  * =================================================
  */
 
-if (
-    request.url ===
-    "/api/google/drive/upload"
-    &&
-    request.method ===
-    "POST"
-) {
 
-    const body =
-        await readRequestBody(
-            request
-        );
-
-
-    const result =
-        await googleDriveService
-            .uploadWorkspaceState(
-                body
-            );
-
-
-    sendJson(
-        response,
-        200,
-        result
-    );
-
-
-    return;
-
-}
 
 
 

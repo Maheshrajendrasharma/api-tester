@@ -40,6 +40,8 @@ function Header({
 
     googleDriveStatus,
 
+    saveStatus,
+
 googleDriveSyncing,
 
 onSyncGoogleDrive,
@@ -553,22 +555,64 @@ onDisconnectGoogleDrive,
                 API TESTER BRAND
                ================================================= */}
 
-            <div className="app-header-brand">
+<div className="app-header-brand">
 
-                <span className="app-header-mark">
-
-                    A
-
-                </span>
+    <span className="app-header-mark">
+        A
+    </span>
 
 
-                <span className="app-header-title">
+    <span className="app-header-title">
+        API Tester
+    </span>
 
-                    API Tester
 
-                </span>
+    <div
+        className={
+            "workspace-save-status " +
+            (
+                saveStatus?.state === "error" ||
+                saveStatus?.state === "cloud-error"
+                    ? "error"
+                    : saveStatus?.state === "saving"
+                        ? "saving"
+                        : saveStatus?.state === "saved-local"
+                            ? "saved-local"
+                            : "saved"
+            )
+        }
+        title={
+            saveStatus?.message ||
+            "No changes to save"
+        }
+    >
 
-            </div>
+        <span>
+            {
+                saveStatus?.state === "saving"
+                    ? "⟳"
+                    : saveStatus?.state === "error" ||
+                      saveStatus?.state === "cloud-error"
+                        ? "⚠"
+                        : "✓"
+            }
+        </span>
+
+
+        <span>
+            {
+                saveStatus?.message ||
+                "Saved"
+            }
+        </span>
+
+    </div>
+
+</div>
+
+
+
+   
 
         </header>
 
