@@ -1,8 +1,23 @@
-const STORAGE_KEY = "api_tester_workspaces"
+const WORKSPACE_API_URL =
+    "http://localhost:3001/api/workspace-state"
 
 
-const ACTIVE_WORKSPACE_KEY =
-    "api_tester_active_workspace"
+
+    const GOOGLE_AUTH_STATUS_URL =
+    "http://localhost:3001/api/google/auth/status"
+
+
+const GOOGLE_DRIVE_UPLOAD_URL =
+    "http://localhost:3001/api/google/drive/upload"
+
+
+const GOOGLE_DRIVE_DOWNLOAD_URL =
+    "http://localhost:3001/api/google/drive/download"
+
+
+const GOOGLE_DRIVE_WORKSPACE_URL =
+    "http://localhost:3001/api/google/drive/workspace"
+
 
 const OLD_COLLECTION_KEY =
     "apiTester.collections"
@@ -12,24 +27,607 @@ const OLD_ENVIRONMENT_KEY =
     "apiTester.environments"
 
 
-function createDefaultWorkspace(){
+const LEGACY_WORKSPACE_KEY =
+    "api_tester_workspaces"
+
+
+const LEGACY_ACTIVE_WORKSPACE_KEY =
+    "api_tester_active_workspace"
+
+
+function createDefaultWorkspace() {
 
     return {
 
-        id: crypto.randomUUID(),
+        id:
+            crypto.randomUUID(),
 
-        name: "Default Workspace",
+        name:
+            "Default Workspace",
 
         collections: [],
 
-        environments: []
+        environments: [],
+
+        selectedRequestId: null
 
     }
 
 }
 
 
-function migrateOldData(){
+function normalizeWorkspace(workspace) {
+
+    return {
+
+        id:
+            workspace.id ??
+            crypto.randomUUID(),
+
+        name:
+            workspace.name ??
+            "Unnamed Workspace",
+
+        collections:
+            Array.isArray(
+                workspace.collections
+            )
+                ? workspace.collections
+                : [],
+
+        environments:
+            Array.isArray(
+                workspace.environments
+            )
+                ? workspace.environments
+                : [],
+
+        selectedRequestId:
+            workspace.selectedRequestId ??
+            null
+
+    }
+
+}
+
+
+/*
+ * =========================================================
+ * COMMON WORKSPACE API
+ * =========================================================
+ *
+ * Both Vite and Electron use the same API.
+ *
+ * Vite Browser
+ *      │
+ *      ├──────► localhost:3001
+ *      │
+ * Electron
+ *      │
+ *      └──────► localhost:3001
+ *
+ * The server owns the actual workspace data.
+ * =========================================================
+ */
+
+
+async function fetchWorkspaceState() {
+
+    const response =
+        await fetch(
+            WORKSPACE_API_URL
+        )
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Failed to load workspace data"
+        )
+
+    }
+
+
+    return response.json()
+
+}
+
+
+async function saveWorkspaceState(state) {
+
+    const response =
+        await fetch(
+            WORKSPACE_API_URL,
+            {
+
+                method:
+                    "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify(state)
+
+            }
+        )
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Failed to save workspace data"
+        )
+
+    }
+
+
+    return response.json()
+
+}
+
+
+async function getGoogleDriveAuthStatus() {
+
+    const response =
+        await fetch(
+            GOOGLE_AUTH_STATUS_URL
+        )
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Failed to check Google Drive authentication status"
+        )
+
+    }
+
+
+    return response.json()
+
+}
+
+
+export async function getGoogleDriveStatus() {
+
+    return getGoogleDriveAuthStatus()
+
+}
+
+
+export async function disconnectGoogleDrive() {
+
+    const response =
+        await fetch(
+            "http://localhost:3001/api/google/auth/logout",
+            {
+                method:
+                    "POST"
+            }
+        )
+
+
+    if (!response.ok) {
+
+        let message =
+            "Failed to disconnect Google Drive"
+
+
+        try {
+
+            const error =
+                await response.json()
+
+
+            if (error?.error) {
+
+                message =
+                    error.error
+
+            }
+
+        }
+        catch {
+        }
+
+
+        throw new Error(
+            message
+        )
+
+    }
+
+
+    return response.json()
+
+}
+
+
+async function uploadWorkspaceToGoogleDrive(
+    state
+) {
+
+    const authStatus =
+        await getGoogleDriveAuthStatus()
+
+
+    /*
+     * Google Drive is optional.
+     *
+     * If the user has not connected Google Drive,
+     * local saving should still work normally.
+     */
+
+    if (
+        !authStatus?.authenticated
+    ) {
+
+        return {
+
+            synced:
+                false,
+
+            skipped:
+                true,
+
+            reason:
+                "Google Drive is not connected."
+
+        }
+
+    }
+
+
+    const response =
+        await fetch(
+            GOOGLE_DRIVE_UPLOAD_URL,
+            {
+
+                method:
+                    "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify(
+                        state
+                    )
+
+            }
+        )
+
+
+    if (!response.ok) {
+
+        let message =
+            "Failed to upload workspace to Google Drive"
+
+
+        try {
+
+            const error =
+                await response.json()
+
+
+            if (
+                error?.error
+            ) {
+
+                message =
+                    error.error
+
+            }
+
+        }
+        catch {
+        }
+
+
+        throw new Error(
+            message
+        )
+
+    }
+
+
+    const result =
+        await response.json()
+
+
+    return {
+
+        synced:
+            true,
+
+        skipped:
+            false,
+
+        ...result
+
+    }
+
+}
+
+async function downloadWorkspaceFromGoogleDrive() {
+
+    const authStatus =
+        await getGoogleDriveAuthStatus()
+
+
+    if (
+        !authStatus?.authenticated
+    ) {
+
+        throw new Error(
+            "Google Drive is not connected."
+        )
+
+    }
+
+
+    const response =
+        await fetch(
+            GOOGLE_DRIVE_DOWNLOAD_URL
+        )
+
+
+    if (!response.ok) {
+
+        let message =
+            "Failed to download workspace from Google Drive"
+
+
+        try {
+
+            const error =
+                await response.json()
+
+
+            if (
+                error?.error
+            ) {
+
+                message =
+                    error.error
+
+            }
+
+        }
+        catch {
+        }
+
+
+        throw new Error(
+            message
+        )
+
+    }
+
+
+    const state =
+        await response.json()
+
+
+    return state
+
+}
+
+export async function loadWorkspaceFromGoogleDrive() {
+
+    const driveState =
+        await downloadWorkspaceFromGoogleDrive()
+
+
+    const normalizedWorkspaces =
+        Array.isArray(
+            driveState?.workspaces
+        )
+            ? driveState.workspaces.map(
+                normalizeWorkspace
+            )
+            : []
+
+
+    const activeWorkspaceId =
+        driveState?.activeWorkspaceId ??
+        normalizedWorkspaces[0]?.id ??
+        null
+
+
+    return {
+
+        workspaces:
+            normalizedWorkspaces,
+
+        activeWorkspaceId,
+
+        updatedAt:
+            driveState?.updatedAt ??
+            null
+
+    }
+
+}
+
+
+
+export async function syncWorkspaceFromGoogleDrive() {
+
+    const driveState =
+        await loadWorkspaceFromGoogleDrive()
+
+
+    const workspaces =
+        Array.isArray(
+            driveState?.workspaces
+        )
+            ? driveState.workspaces
+            : []
+
+
+    if (
+        workspaces.length === 0
+    ) {
+
+        return {
+
+            synced:
+                false,
+
+            empty:
+                true,
+
+            workspaces:
+                [],
+
+            activeWorkspaceId:
+                null,
+
+            updatedAt:
+                driveState?.updatedAt ??
+                null
+
+        }
+
+    }
+
+
+    const activeWorkspaceId =
+        driveState.activeWorkspaceId ??
+        workspaces[0]?.id ??
+        null
+
+
+    await applyGoogleDriveWorkspaceLocally(
+        workspaces,
+        activeWorkspaceId
+    )
+
+
+    return {
+
+        synced:
+            true,
+
+        empty:
+            false,
+
+        workspaces,
+
+        activeWorkspaceId,
+
+        updatedAt:
+            driveState?.updatedAt ??
+            null
+
+    }
+
+}
+
+export async function applyGoogleDriveWorkspaceLocally(
+    workspaces,
+    activeWorkspaceId
+) {
+
+    const normalizedWorkspaces =
+        Array.isArray(
+            workspaces
+        )
+            ? workspaces.map(
+                normalizeWorkspace
+            )
+            : []
+
+
+    const nextActiveWorkspaceId =
+        activeWorkspaceId ??
+        normalizedWorkspaces[0]?.id ??
+        null
+
+
+    return saveWorkspaceState({
+
+        workspaces:
+            normalizedWorkspaces,
+
+        activeWorkspaceId:
+            nextActiveWorkspaceId
+
+    })
+
+}
+/*
+ * =========================================================
+ * LEGACY DATA MIGRATION
+ * =========================================================
+ *
+ * Used only when the common workspace storage
+ * is empty.
+ *
+ * This allows old browser localStorage data
+ * to be moved into the new common storage.
+ * =========================================================
+ */
+
+
+function readLegacyWorkspaceData() {
+
+    const data =
+        localStorage.getItem(
+            LEGACY_WORKSPACE_KEY
+        )
+
+
+    if (!data) {
+
+        return null
+
+    }
+
+
+    try {
+
+        const parsed =
+            JSON.parse(data)
+
+
+        if (!Array.isArray(parsed)) {
+
+            return null
+
+        }
+
+
+        return parsed.map(
+            normalizeWorkspace
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed loading legacy workspaces:",
+            error
+        )
+
+        return null
+
+    }
+
+}
+
+
+function migrateOldData() {
 
     const oldCollections =
         localStorage.getItem(
@@ -48,9 +646,9 @@ function migrateOldData(){
     let environments = []
 
 
-    try{
+    try {
 
-        if(oldCollections){
+        if (oldCollections) {
 
             collections =
                 JSON.parse(
@@ -59,19 +657,17 @@ function migrateOldData(){
 
         }
 
+    }
+    catch {
+
+        collections = []
 
     }
-    catch{
-
-        collections=[]
-
-    }
 
 
+    try {
 
-    try{
-
-        if(oldEnvironments){
+        if (oldEnvironments) {
 
             environments =
                 JSON.parse(
@@ -80,14 +676,12 @@ function migrateOldData(){
 
         }
 
+    }
+    catch {
+
+        environments = []
 
     }
-    catch{
-
-        environments=[]
-
-    }
-
 
 
     return {
@@ -100,107 +694,267 @@ function migrateOldData(){
 
         collections,
 
-        environments
+        environments,
+
+        selectedRequestId: null
 
     }
 
 }
 
 
+/*
+ * =========================================================
+ * LOAD WORKSPACES
+ * =========================================================
+ */
 
 
-function normalizeWorkspace(workspace){
+export async function loadWorkspaces() {
 
-    return {
-        id: workspace.id ?? crypto.randomUUID(),
-
-        name: workspace.name ?? "Unnamed Workspace",
-
-        collections:
-            Array.isArray(workspace.collections)
-                ? workspace.collections
-                : [],
-
-        environments:
-            Array.isArray(workspace.environments)
-                ? workspace.environments
-                : [],
-                        selectedRequestId:
-            workspace.selectedRequestId ??
-            null,
+    performance.mark?.(
+        "api-tester:workspace-load-start"
+    )
 
 
+    const state =
+        await fetchWorkspaceState()
 
 
-    }
-}
+    /*
+     * If common storage already contains
+     * workspace data, use it.
+     */
+
+    if (
+        Array.isArray(
+            state.workspaces
+        )
+        &&
+        state.workspaces.length > 0
+    ) {
+
+        const workspaces =
+            state.workspaces.map(
+                normalizeWorkspace
+            )
 
 
-export function loadWorkspaces(){
-
-    performance.mark?.('api-tester:workspace-load-start')
-
-    const data =
-        localStorage.getItem(
-            STORAGE_KEY
+        performance.mark?.(
+            "api-tester:workspace-load-finished"
         )
 
 
-    if(!data){
+        return workspaces
+
+    }
+
+
+    /*
+     * Common storage is empty.
+     *
+     * Try migrating previous workspace data
+     * from localStorage.
+     */
+
+    const legacy =
+        readLegacyWorkspaceData()
+
+
+    if (
+        legacy &&
+        legacy.length > 0
+    ) {
+
+        const activeWorkspaceId =
+            localStorage.getItem(
+                LEGACY_ACTIVE_WORKSPACE_KEY
+            )
+
+
+        await saveWorkspaceState({
+
+            workspaces:
+                legacy,
+
+            activeWorkspaceId:
+                activeWorkspaceId ??
+                legacy[0]?.id ??
+                null
+
+        })
+
+
+        performance.mark?.(
+            "api-tester:workspace-load-finished"
+        )
+
+
+        return legacy
+
+    }
+
+
+    /*
+     * Try migrating even older
+     * collections/environment data.
+     */
 
     const migrated =
         migrateOldData()
 
 
-    saveWorkspaces(
+    const workspaces =
         [migrated]
+
+
+    await saveWorkspaceState({
+
+        workspaces,
+
+        activeWorkspaceId:
+            migrated.id
+
+    })
+
+
+    performance.mark?.(
+        "api-tester:workspace-load-finished"
     )
 
 
-    const workspaces = [
-        migrated
-    ]
-    performance.mark?.('api-tester:workspace-load-finished')
     return workspaces
 
 }
 
 
-    try{
-
-        const parsed =
-            JSON.parse(data)
-
-
-        if(!Array.isArray(parsed)){
-
-            return [
-                createDefaultWorkspace()
-            ]
-
-        }
+/*
+ * =========================================================
+ * SAVE WORKSPACES
+ * =========================================================
+ */
 
 
-        const workspaces = parsed.map(
-            normalizeWorkspace
-        )
-        performance.mark?.('api-tester:workspace-load-finished')
-        return workspaces
+export async function saveWorkspaces(
+    workspaces
+) {
 
+    performance.mark?.(
+        "api-tester:workspace-save-start"
+    )
+
+
+    const currentState =
+        await fetchWorkspaceState()
+
+
+    const normalizedWorkspaces =
+        Array.isArray(workspaces)
+            ? workspaces.map(
+                normalizeWorkspace
+            )
+            : []
+
+
+    const stateToSave = {
+
+        workspaces:
+            normalizedWorkspaces,
+
+        activeWorkspaceId:
+            currentState.activeWorkspaceId ??
+            null
 
     }
-    catch(error){
 
+
+    /*
+     * =========================================
+     * STEP 1 — SAVE LOCALLY
+     * =========================================
+     *
+     * This remains the primary save.
+     *
+     * Vite and Electron continue using the same
+     * common workspace-state.json.
+     */
+
+    const localState =
+        await saveWorkspaceState(
+            stateToSave
+        )
+
+
+    /*
+     * =========================================
+     * STEP 2 — GOOGLE DRIVE SYNC
+     * =========================================
+     *
+     * Google Drive is optional.
+     *
+     * If the user hasn't connected Drive,
+     * local saving succeeds and we return normally.
+     *
+     * If Drive is connected but upload fails,
+     * we THROW the error.
+     *
+     * This is important because Ctrl+S should
+     * only be considered completely successful
+     * when both local and cloud saves succeed.
+     */
+
+    let googleDriveSync = {
+
+        synced:
+            false,
+
+        skipped:
+            true,
+
+        reason:
+            "Google Drive is not connected."
+
+    }
+
+
+    try {
+
+        googleDriveSync =
+            await uploadWorkspaceToGoogleDrive(
+                localState
+            )
+
+    }
+    catch (error) {
 
         console.error(
-            "Failed loading workspaces",
+            "[GOOGLE DRIVE] Workspace upload failed:",
             error
         )
 
 
-        return [
-            createDefaultWorkspace()
-        ]
+        throw new Error(
+            `Local workspace was saved, but Google Drive sync failed: ${
+                error?.message ||
+                "Unknown error"
+            }`
+        )
+
+    }
+
+
+    performance.mark?.(
+        "api-tester:workspace-save-finished"
+    )
+
+
+    return {
+
+        localSaved:
+            true,
+
+        googleDrive:
+            googleDriveSync
 
     }
 
@@ -208,24 +962,17 @@ export function loadWorkspaces(){
 
 
 
-export function saveWorkspaces(
-    workspaces
-){
 
-    performance.mark?.('api-tester:workspace-save-start')
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(workspaces)
-    )
-    performance.mark?.('api-tester:workspace-save-finished')
-
-}
-
+/*
+ * =========================================================
+ * CREATE WORKSPACE
+ * =========================================================
+ */
 
 
 export function createWorkspace(
     name
-){
+) {
 
     return {
 
@@ -233,42 +980,60 @@ export function createWorkspace(
             crypto.randomUUID(),
 
         name:
-            name.trim()
-            ||
+            name.trim() ||
             "New Workspace",
 
-        collections:[],
+        collections: [],
 
-        environments:[]
+        environments: [],
+
+        selectedRequestId: null
 
     }
 
 }
 
 
+/*
+ * =========================================================
+ * ACTIVE WORKSPACE
+ * =========================================================
+ */
 
-export function saveActiveWorkspaceId(
+export async function saveActiveWorkspaceId(
     workspaceId
-){
+) {
 
-    if(!workspaceId){
-        localStorage.removeItem(
-            ACTIVE_WORKSPACE_KEY
-        )
+    const state =
+        await fetchWorkspaceState()
 
-        return
-    }
 
-    localStorage.setItem(
-        ACTIVE_WORKSPACE_KEY,
-        workspaceId
-    )
+    await saveWorkspaceState({
+
+        workspaces:
+            state.workspaces,
+
+        activeWorkspaceId:
+            workspaceId ??
+            null
+
+    })
+
 }
 
 
-export function loadActiveWorkspaceId(){
+export async function loadActiveWorkspaceId() {
 
-    return localStorage.getItem(
-        ACTIVE_WORKSPACE_KEY
+    const state =
+        await fetchWorkspaceState()
+
+
+    return (
+        state.activeWorkspaceId ??
+        null
     )
+
 }
+
+
+

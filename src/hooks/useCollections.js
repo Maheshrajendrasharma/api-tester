@@ -653,12 +653,21 @@ useEffect(() => {
 
       try {
         const importedCollection =
-          await importCollectionFromFile(file)
+    await importCollectionFromFile(file)
+
+console.log(
+    '[IMPORT COLLECTION] Parsed:',
+    importedCollection
+)
 
         const treeCollection =
           normalizeImportedCollection(
             importedCollection
           )
+          console.log(
+    '[IMPORT COLLECTION] Tree:',
+    treeCollection
+)
 
         const defaultName =
           treeCollection.name ||
@@ -691,6 +700,11 @@ useEffect(() => {
               name,
               expanded: true,
             }
+
+            console.log(
+    '[IMPORT COLLECTION] Adding collection:',
+    collection
+)
 
             updateCollections(
               (currentCollections) => [

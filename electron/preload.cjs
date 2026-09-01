@@ -54,6 +54,30 @@ contextBridge.exposeInMainWorld("apiTester", {
     writeFile: (filePath, content) =>
         ipcRenderer.invoke("api-tester:write-file", filePath, content),
 
+
+
+
+// ---------------------------------------
+// GOOGLE DRIVE
+// ---------------------------------------
+
+googleSignIn: () =>
+    ipcRenderer.invoke(
+        "api-tester:google-sign-in"
+    ),
+
+googleAuthStatus: () =>
+    ipcRenderer.invoke(
+        "api-tester:google-auth-status"
+    ),
+
+googleSignOut: () =>
+    ipcRenderer.invoke(
+        "api-tester:google-sign-out"
+    ),
+
+
+
 // ---------------------------------------
 // WINDOW CONTROLS
 // ---------------------------------------

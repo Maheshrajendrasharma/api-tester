@@ -36,6 +36,16 @@ function Header({
 
     onExportWorkspace,
 
+    onConnectGoogleDrive,
+
+    googleDriveStatus,
+
+googleDriveSyncing,
+
+onSyncGoogleDrive,
+
+onDisconnectGoogleDrive,
+
 
     sidebarOpen,
 
@@ -43,48 +53,59 @@ function Header({
 
 }) {
 
-const [showWorkspaceActions, setShowWorkspaceActions] =
-    useState(false);
+    const [showWorkspaceActions, setShowWorkspaceActions] =
+        useState(false);
 
     const [showWorkspaceMenu, setShowWorkspaceMenu] =
-    useState(false);
+        useState(false);
 
     const menuRef = useRef(null);
 
 
-    
-
     useEffect(() => {
+
         function handleClickOutside(event) {
+
             if (
                 menuRef.current &&
                 !menuRef.current.contains(event.target)
             ) {
+
                 setShowWorkspaceMenu(false);
-setShowWorkspaceActions(false);
+
+                setShowWorkspaceActions(false);
+
             }
+
         }
+
 
         document.addEventListener(
             "mousedown",
             handleClickOutside
         );
 
+
         return () => {
+
             document.removeEventListener(
                 "mousedown",
                 handleClickOutside
             );
+
         };
+
     }, []);
 
+
     return (
+
         <header
-    className="app-header"
-    style={{
-        WebkitAppRegion: "drag",
-    }}
->
+            className="app-header"
+            style={{
+                WebkitAppRegion: "drag",
+            }}
+        >
 
             {/* =================================================
                 LEFT SIDE
@@ -109,14 +130,22 @@ setShowWorkspaceActions(false);
                             : "Show sidebar"
                     }
                     onClick={() => {
-                        setSidebarOpen?.(!sidebarOpen);
+
+                        setSidebarOpen?.(
+                            !sidebarOpen
+                        );
+
                     }}
                 >
+
                     <span className="hamburger-icon">
+
                         <span></span>
                         <span></span>
                         <span></span>
+
                     </span>
+
                 </button>
 
 
@@ -130,20 +159,22 @@ setShowWorkspaceActions(false);
                     <button
                         type="button"
                         className="workspace-selector-button"
-onClick={() => {
+                        onClick={() => {
 
-    
+                            setShowWorkspaceMenu(
+                                previous =>
+                                    !previous
+                            );
 
-    setShowWorkspaceMenu(
-        previous => !previous
-    )
-
-}}
+                        }}
                         title="Select workspace"
                     >
 
                         <span className="workspace-selector-name">
-                            {selectedWorkspace || workspaceName}
+                            {
+                                selectedWorkspace ||
+                                workspaceName
+                            }
                         </span>
 
                         <span className="workspace-selector-arrow">
@@ -156,56 +187,71 @@ onClick={() => {
                     {/* WORKSPACE DROPDOWN */}
 
                     {showWorkspaceMenu && (
+
                         <div className="workspace-dropdown">
 
                             {workspaces.length > 0 ? (
 
-                                workspaces.map((workspace) => {
+                                workspaces.map(
+                                    (workspace) => {
 
-                                    const workspaceValue =
-                                        workspace.name || workspace;
+                                        const workspaceValue =
+                                            workspace.name ||
+                                            workspace;
 
-                                    return (
-                                        <button
-                                            key={
-                                                workspace.id ||
-                                                workspaceValue
-                                            }
-                                            type="button"
-                                            className={
-                                                "workspace-dropdown-item" +
-                                                (
-                                                    selectedWorkspace ===
+
+                                        return (
+
+                                            <button
+                                                key={
+                                                    workspace.id ||
                                                     workspaceValue
-                                                        ? " active"
-                                                        : ""
-                                                )
-                                            }
-                                            onClick={() => {
+                                                }
+                                                type="button"
+                                                className={
+                                                    "workspace-dropdown-item" +
+                                                    (
+                                                        selectedWorkspace ===
+                                                        workspaceValue
+                                                            ? " active"
+                                                            : ""
+                                                    )
+                                                }
+                                                onClick={() => {
 
-                                                onWorkspaceChange?.(
-                                                    workspace
-                                                );
+                                                    onWorkspaceChange?.(
+                                                        workspace
+                                                    );
 
-                                                setShowWorkspaceMenu(
-                                                    false
-                                                );
-                                            }}
-                                        >
-                                            {workspaceValue}
-                                        </button>
-                                    );
-                                })
+
+                                                    setShowWorkspaceMenu(
+                                                        false
+                                                    );
+
+                                                }}
+                                            >
+
+                                                {workspaceValue}
+
+                                            </button>
+
+                                        );
+
+                                    }
+                                )
 
                             ) : (
 
                                 <div className="workspace-dropdown-empty">
+
                                     No workspaces available
+
                                 </div>
 
                             )}
 
                         </div>
+
                     )}
 
                 </div>
@@ -213,154 +259,291 @@ onClick={() => {
 
                 {/* WORKSPACE OPTIONS */}
 
-<div className="workspace-actions-wrapper">
+                <div className="workspace-actions-wrapper">
 
-<button
-    type="button"
-    className="workspace-menu-button"
-    title="Workspace options"
-    aria-label="Workspace options"
+                    <button
+                        type="button"
+                        className="workspace-menu-button"
+                        title="Workspace options"
+                        aria-label="Workspace options"
 
-onClick={() => {
+                        onClick={() => {
 
-    
+                            setShowWorkspaceActions(
+                                previous =>
+                                    !previous
+                            );
 
-    setShowWorkspaceActions(
-        previous => !previous
-    )
+                        }}
+                    >
 
-}}
->
-    ⋮
-</button>
+                        ⋮
+
+                    </button>
 
 
-{
-showWorkspaceActions && (
+                    {showWorkspaceActions && (
+
+                        <div
+                            className="workspace-actions-menu"
+                            onMouseDown={(e) => {
+
+                                e.stopPropagation();
+
+                            }}
+                        >
+
+                            <button
+                                type="button"
+                                onMouseDown={(e) => {
+
+                                    e.stopPropagation();
+
+                                }}
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+
+                                    if (
+                                        onCreateWorkspace
+                                    ) {
+
+                                        onCreateWorkspace();
+
+                                    }
+
+
+                                    setShowWorkspaceActions(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                New Workspace
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                onMouseDown={(e) => {
+
+                                    e.stopPropagation();
+
+                                }}
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+
+                                    onRenameWorkspace?.();
+
+
+                                    setShowWorkspaceActions(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                Rename Workspace
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                onMouseDown={(e) => {
+
+                                    e.stopPropagation();
+
+                                }}
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+
+                                    onDeleteWorkspace?.();
+
+
+                                    setShowWorkspaceActions(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                Delete Workspace
+
+                            </button>
+
+
+                            <hr />
+
+
+                            <button
+                                type="button"
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+
+                                    onImportWorkspace?.();
+
+
+                                    setShowWorkspaceActions(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                Import Workspace
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+
+                                    onExportWorkspace?.();
+
+
+                                    setShowWorkspaceActions(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                Export Workspace
+
+                            </button>
+
+                            <hr />
 
 <div
-    className="workspace-actions-menu"
-    onMouseDown={(e)=>{
+    className="google-drive-menu-section"
+    onMouseDown={(e) => {
         e.stopPropagation()
     }}
 >
 
+    <div className="google-drive-menu-status">
 
-<button
-    type="button"
-    onMouseDown={(e)=>{
-        e.stopPropagation()
-    }}
-    onClick={(e)=>{
+        <span
+            className={
+                googleDriveStatus?.authenticated
+                    ? "google-drive-status-dot connected"
+                    : "google-drive-status-dot"
+            }
+        >
+            ●
+        </span>
 
-        e.stopPropagation()
+        <span>
+            Google Drive
+        </span>
 
-        
-
-        if(onCreateWorkspace){
-            onCreateWorkspace()
-        }
-
-        setShowWorkspaceActions(false)
-
-    }}
->
-    New Workspace
-</button>
+    </div>
 
 
+    {googleDriveStatus?.authenticated ? (
 
-<button
-    type="button"
-    onMouseDown={(e)=>{
-        e.stopPropagation()
-    }}
-    onClick={(e)=>{
+        <>
 
-        e.stopPropagation()
+            <div className="google-drive-account">
 
-        
+                {googleDriveStatus?.user?.emailAddress ||
+                 "Connected"}
 
-        onRenameWorkspace?.()
-
-        setShowWorkspaceActions(false)
-
-    }}
->
-    Rename Workspace
-</button>
+            </div>
 
 
+            <button
+                type="button"
+                disabled={
+                    googleDriveSyncing
+                }
+                onMouseDown={(e) => {
+                    e.stopPropagation()
+                }}
+                onClick={async (e) => {
 
-<button
-    type="button"
-    onMouseDown={(e)=>{
-        e.stopPropagation()
-    }}
-    onClick={(e)=>{
+                    e.stopPropagation()
 
-        e.stopPropagation()
+                    await onSyncGoogleDrive?.()
 
-        
-
-        onDeleteWorkspace?.()
-
-        setShowWorkspaceActions(false)
-
-    }}
->
-    Delete Workspace
-</button>
-
-
-
-<hr/>
+                }}
+            >
+                {googleDriveSyncing
+                    ? "Syncing..."
+                    : "Sync from Google Drive"}
+            </button>
 
 
-<button
-    type="button"
-    onClick={(e)=>{
+            <button
+                type="button"
+                onMouseDown={(e) => {
+                    e.stopPropagation()
+                }}
+                onClick={async (e) => {
 
-        e.stopPropagation()
+                    e.stopPropagation()
 
-        
+                    await onDisconnectGoogleDrive?.()
 
-        onImportWorkspace?.()
+                    setShowWorkspaceActions(
+                        false
+                    )
 
-        setShowWorkspaceActions(false)
+                }}
+            >
+                Disconnect Google Drive
+            </button>
 
-    }}
->
-    Import Workspace
-</button>
+        </>
 
+    ) : (
 
+        <button
+            type="button"
+            onMouseDown={(e) => {
+                e.stopPropagation()
+            }}
+            onClick={async (e) => {
 
-<button
-    type="button"
-    onClick={(e)=>{
+                e.stopPropagation()
 
-        e.stopPropagation()
+                await onConnectGoogleDrive?.()
 
-        
+                setShowWorkspaceActions(
+                    false
+                )
 
-        onExportWorkspace?.()
+            }}
+        >
+            Connect Google Drive
+        </button>
 
-        setShowWorkspaceActions(false)
-
-    }}
->
-    Export Workspace
-</button>
-
+    )}
 
 </div>
 
-)
-}
 
+                
 
-</div>
+                        </div>
+
+                    )}
+
+                </div>
 
             </div>
 
@@ -373,17 +556,24 @@ showWorkspaceActions && (
             <div className="app-header-brand">
 
                 <span className="app-header-mark">
+
                     A
+
                 </span>
 
+
                 <span className="app-header-title">
+
                     API Tester
+
                 </span>
 
             </div>
 
         </header>
+
     );
+
 }
 
 export default Header;
