@@ -4,6 +4,9 @@ import path from "node:path"
 import * as googleDriveService
     from "./googleDriveService.js"
 
+import * as authService
+    from "./authService.js"
+
 import { fileURLToPath } from "node:url"
 
 import {
@@ -394,7 +397,43 @@ function saveWorkspaceState(
 
 }
 
+async function writeWorkspaceStateDirectly(
+    state
+) {
 
+    await ensureDataDirectory()
+
+
+    const normalizedState =
+        normalizeState(
+            state
+        )
+
+
+    const tempFile =
+        `${DATA_FILE}.tmp`
+
+
+    await writeFile(
+        tempFile,
+        JSON.stringify(
+            normalizedState,
+            null,
+            2
+        ),
+        "utf8"
+    )
+
+
+    await rename(
+        tempFile,
+        DATA_FILE
+    )
+
+
+    return normalizedState
+
+}
 /*
  * =========================================================
  * SEND JSON
@@ -558,6 +597,658 @@ const server =
 
                 }
 
+
+
+                /*
+ * =================================================
+ * USER AUTH - REGISTER
+ * =================================================
+ */
+
+if (
+    request.url ===
+    "/api/auth/register"
+    &&
+    request.method ===
+    "POST"
+) {
+
+    try {
+
+        const body =
+            await readRequestBody(
+                request
+            )
+
+
+        const name =
+            String(
+                body?.name ??
+                ""
+            )
+                .trim()
+
+
+        const email =
+            String(
+                body?.email ??
+                ""
+            )
+                .trim()
+
+
+        const password =
+            String(
+                body?.password ??
+                ""
+            )
+
+
+        /*
+         * -----------------------------------------
+         * VALIDATION
+         * -----------------------------------------
+         */
+
+        if (
+            !name
+        ) {
+
+            sendJson(
+                response,
+                400,
+                {
+                    error:
+                        "Name is required."
+                }
+            )
+
+            return
+
+        }
+
+
+        if (
+            !email
+        ) {
+
+            sendJson(
+                response,
+                400,
+                {
+                    error:
+                        "Email is required."
+                }
+            )
+
+            return
+
+        }
+
+
+        if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                email
+            )
+        ) {
+
+            sendJson(
+                response,
+                400,
+                {
+                    error:
+                        "Please enter a valid email address."
+                }
+            )
+
+            return
+
+        }
+
+
+        if (
+            password.length <
+            8
+        ) {
+
+            sendJson(
+                response,
+                400,
+                {
+                    error:
+                        "Password must be at least 8 characters long."
+                }
+            )
+
+            return
+
+        }
+
+
+        /*
+         * -----------------------------------------
+         * CREATE USER
+         * -----------------------------------------
+         */
+
+        const user =
+            await authService.createUser({
+
+                name,
+
+                email,
+
+                password
+
+            })
+
+
+        /*
+         * -----------------------------------------
+         * SUCCESS
+         * -----------------------------------------
+         */
+
+        sendJson(
+            response,
+            201,
+            {
+                success:
+                    true,
+
+                user
+
+            }
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "[AUTH] Registration failed:",
+            error
+        )
+
+
+        const message =
+            error?.message ||
+            "Registration failed."
+
+
+        const statusCode =
+            message.includes(
+                "already exists"
+            )
+                ? 409
+                : 500
+
+
+        sendJson(
+            response,
+            statusCode,
+            {
+                error:
+                    message
+            }
+        )
+
+    }
+
+
+    return
+}
+
+
+/*
+ * =================================================
+ * USER AUTH - LOGIN
+ * =================================================
+ */
+
+if (
+    request.url ===
+    "/api/auth/login"
+    &&
+    request.method ===
+    "POST"
+) {
+
+    try {
+
+        const body =
+            await readRequestBody(
+                request
+            )
+
+
+        const email =
+            String(
+                body?.email ??
+                ""
+            )
+                .trim()
+                .toLowerCase()
+
+
+        const password =
+            String(
+                body?.password ??
+                ""
+            )
+
+
+        /*
+         * -----------------------------------------
+         * VALIDATION
+         * -----------------------------------------
+         */
+
+        if (
+            !email ||
+            !password
+        ) {
+
+            sendJson(
+                response,
+                400,
+                {
+                    error:
+                        "Email and password are required."
+                }
+            )
+
+            return
+
+        }
+
+
+        /*
+         * -----------------------------------------
+         * FIND USER
+         * -----------------------------------------
+         */
+
+        const user =
+            await authService.findUserByEmail(
+                email
+            )
+
+
+        /*
+         * Do not reveal whether the
+         * email exists.
+         */
+
+        if (
+            !user
+        ) {
+
+            sendJson(
+                response,
+                401,
+                {
+                    error:
+                        "Invalid email or password."
+                }
+            )
+
+            return
+
+        }
+
+
+        /*
+         * -----------------------------------------
+         * VERIFY PASSWORD
+         * -----------------------------------------
+         */
+
+        const passwordValid =
+            await authService.verifyPassword(
+
+                password,
+
+                user.passwordSalt,
+
+                user.passwordHash
+
+            )
+
+
+        if (
+            !passwordValid
+        ) {
+
+            sendJson(
+                response,
+                401,
+                {
+                    error:
+                        "Invalid email or password."
+                }
+            )
+
+            return
+
+        }
+
+
+        /*
+         * -----------------------------------------
+         * CREATE SESSION
+         * -----------------------------------------
+         */
+
+        const session =
+            await authService.createSession(
+                user.id
+            )
+
+
+        /*
+         * -----------------------------------------
+         * HTTP-ONLY SESSION COOKIE
+         * -----------------------------------------
+         */
+
+        response.setHeader(
+            "Set-Cookie",
+
+            `api_tester_session=${session.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${Math.floor(30 * 24 * 60 * 60)}`
+        )
+
+
+        /*
+         * -----------------------------------------
+         * SUCCESS
+         * -----------------------------------------
+         */
+
+        sendJson(
+            response,
+            200,
+            {
+
+                success:
+                    true,
+
+                user:
+                    authService.sanitizeUser(
+                        user
+                    )
+
+            }
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "[AUTH] Login failed:",
+            error
+        )
+
+
+        sendJson(
+            response,
+            500,
+            {
+                error:
+                    "Login failed."
+            }
+        )
+
+    }
+
+
+    return
+}
+
+
+
+/*
+ * =================================================
+ * USER AUTH - LOGOUT
+ * =================================================
+ */
+
+if (
+    request.url ===
+    "/api/auth/logout"
+    &&
+    request.method ===
+    "POST"
+) {
+
+    try {
+
+        const cookieHeader =
+            request.headers.cookie ??
+            ""
+
+
+        const sessionCookie =
+            cookieHeader
+                .split(";")
+                .map(
+                    cookie =>
+                        cookie.trim()
+                )
+                .find(
+                    cookie =>
+                        cookie.startsWith(
+                            "api_tester_session="
+                        )
+                )
+
+
+        const token =
+            sessionCookie
+                ? sessionCookie
+                    .slice(
+                        "api_tester_session=".length
+                    )
+                : null
+
+
+        if (
+            token
+        ) {
+
+            await authService.destroySession(
+                token
+            )
+
+        }
+
+
+        response.setHeader(
+            "Set-Cookie",
+            "api_tester_session=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0"
+        )
+
+
+        sendJson(
+            response,
+            200,
+            {
+                success:
+                    true
+            }
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "[AUTH] Logout failed:",
+            error
+        )
+
+
+        sendJson(
+            response,
+            500,
+            {
+                error:
+                    "Logout failed."
+            }
+        )
+
+    }
+
+
+    return
+}
+
+
+/*
+ * =================================================
+ * USER AUTH - CURRENT USER
+ * =================================================
+ */
+
+if (
+    request.url ===
+    "/api/auth/me"
+    &&
+    request.method ===
+    "GET"
+) {
+
+    try {
+
+        const cookieHeader =
+            request.headers.cookie ??
+            ""
+
+
+        const sessionCookie =
+            cookieHeader
+                .split(";")
+                .map(
+                    cookie =>
+                        cookie.trim()
+                )
+                .find(
+                    cookie =>
+                        cookie.startsWith(
+                            "api_tester_session="
+                        )
+                )
+
+
+        const token =
+            sessionCookie
+                ? sessionCookie.slice(
+                    "api_tester_session=".length
+                )
+                : null
+
+
+        /*
+         * -----------------------------------------
+         * NO SESSION
+         * -----------------------------------------
+         */
+
+        if (
+            !token
+        ) {
+
+            sendJson(
+                response,
+                401,
+                {
+                    authenticated:
+                        false,
+
+                    user:
+                        null
+                }
+            )
+
+            return
+
+        }
+
+
+        /*
+         * -----------------------------------------
+         * FIND SESSION
+         * -----------------------------------------
+         */
+
+        const session =
+            await authService.findSession(
+                token
+            )
+
+
+        if (
+            !session
+        ) {
+
+            sendJson(
+                response,
+                401,
+                {
+                    authenticated:
+                        false,
+
+                    user:
+                        null
+                }
+            )
+
+            return
+
+        }
+
+
+        /*
+         * -----------------------------------------
+         * AUTHENTICATED
+         * -----------------------------------------
+         */
+
+        sendJson(
+            response,
+            200,
+            {
+                authenticated:
+                    true,
+
+                user:
+                    authService.sanitizeUser(
+                        session.user
+                    )
+            }
+        )
+
+    }
+    catch (error) {
+
+        console.error(
+            "[AUTH] Current-user check failed:",
+            error
+        )
+
+
+        sendJson(
+            response,
+            500,
+            {
+                error:
+                    "Failed to check authentication status."
+            }
+        )
+
+    }
+
+
+    return
+}
 
                 /*
                  * =================================================
@@ -934,6 +1625,118 @@ if (
 
                 }
 
+
+
+
+
+
+
+                if (
+    request.url ===
+    "/api/workspace-state/apply-remote"
+    &&
+    request.method ===
+    "POST"
+) {
+
+    let body = ""
+
+    request.on(
+        "data",
+        chunk => {
+            body += chunk
+        }
+    )
+
+    request.on(
+        "end",
+        async () => {
+
+            try {
+
+                const remoteState =
+                    JSON.parse(body)
+
+
+                const workspaces =
+                    Array.isArray(
+                        remoteState?.workspaces
+                    )
+                        ? remoteState.workspaces
+                        : []
+
+
+                const activeWorkspaceId =
+                    remoteState?.activeWorkspaceId ??
+                    workspaces[0]?.id ??
+                    null
+
+
+                const remoteRevision =
+                    Number.isInteger(
+                        remoteState?.revision
+                    )
+                        ? remoteState.revision
+                        : 0
+
+
+                const nextState = {
+
+                    version:
+                        remoteState?.version ??
+                        1,
+
+                    revision:
+                        remoteRevision,
+
+                    workspaces,
+
+                    activeWorkspaceId,
+
+                    updatedAt:
+                        remoteState?.updatedAt ??
+                        new Date().toISOString()
+
+                }
+
+
+                await writeWorkspaceStateDirectly(
+                    nextState
+                )
+
+
+                sendJson(
+                    response,
+                    200,
+                    nextState
+                )
+
+            }
+            catch (error) {
+
+                console.error(
+                    "[WORKSPACE] Failed applying remote state:",
+                    error
+                )
+
+
+                sendJson(
+                    response,
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            "Failed to apply remote workspace state"
+                    }
+                )
+
+            }
+
+        }
+    )
+
+    return
+}
 
                 /*
                  * =================================================

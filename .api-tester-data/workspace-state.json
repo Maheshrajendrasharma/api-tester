@@ -1,7 +1,785 @@
 {
   "version": 1,
-  "revision": 14,
+  "revision": 7,
   "workspaces": [
+    {
+      "id": "5726a8a4-81e9-48c3-a47a-59d3ccbf4ea3",
+      "name": "mahesh",
+      "collections": [
+        {
+          "id": "30ed852a-201c-4de5-ab99-77668e353432",
+          "type": "collection",
+          "name": "PL 3 tier onboarding",
+          "expanded": true,
+          "children": [
+            {
+              "name": "Accounts",
+              "method": "POST",
+              "url": "{{base_url}}/customers/{{externalId}}/accounts",
+              "headers": [
+                {
+                  "id": "60eaa137-cd4e-4c3f-93c2-2d31f4aa9198",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "2f406a54-0367-442a-a892-f60ecbc40811",
+                  "enabled": true,
+                  "key": "X-API-Key",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                }
+              ],
+              "params": [],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\n    \"externalId\": \"{{externalId}}\",\n    \"accountType\": 2,\n    \"accountNumber\": \"{{$randomBankAccount}}\",\n    \"ifsc\": null,\n    \"accountProvider\": null,\n    \"accountName\": \"New Account\",\n    \"onboarding_date\": \"2025-12-10\",\n    \"expiry_date\": null,\n    \"default_mcc\": null,\n    \"merchant\": true,\n    \"verified\": null,\n    \"attribs\": {\n        \"CORPORATE\": true,\n        \"window_enabled\": null\n    },\n    \"record_status\": 0\n}",
+              "scripts": {
+                "preRequest": "",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "513342ca-1701-405d-8fd4-82b8039b70d8",
+              "type": "request"
+            },
+            {
+              "name": "Customers Copy",
+              "method": "GET",
+              "url": "{{base_url}}/customers/01JAWN89TJX0W67Z9D5FGC8XN",
+              "headers": [
+                {
+                  "id": "5dbe7704-7326-4a31-96dc-081b4a60c0bc",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "bc4c4da3-e573-4da7-8064-6aaac2f5a9c5",
+                  "enabled": true,
+                  "key": "X-API-Key",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                }
+              ],
+              "params": [],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\r\n    \"externalId\": \"5028230_PINE\",\r\n    \"attribs\": [\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/contact\",\r\n            \"value\": {}\r\n        },\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/contact/1020\",\r\n            \"value\": {\r\n                \"registered_mobile\": \"960XXXXX65\"\r\n                \"reg_address\": \"G-27,Phoenix CitadXXXXXh     452016,Indore,a0q0o00000QuCjVAAV,MP,PXXXXXX6\",\r\n                \"email\": null\r\n            }\r\n        }\r\n    ]\r\n}",
+              "scripts": {
+                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "cbb2cb10-7aae-4d5a-aac2-93ea38689291",
+              "type": "request"
+            },
+            {
+              "name": "Customers",
+              "method": "PATCH",
+              "url": "{{base_url}}/customers",
+              "headers": [
+                {
+                  "id": "2038d687-848b-4fbe-b60f-48685d0002a3",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "ec1ffd72-92d9-4e66-a805-19d053d10d3c",
+                  "enabled": true,
+                  "key": "X-API-Key",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                }
+              ],
+              "params": [],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\r\n    \"attribs\": [\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/bankAccount\",\r\n            \"value\": {\r\n                \"628404\": {\r\n                    \"bankname\": \"9\",\r\n                    \"ifsccode\": \"HDFC0001779\",\r\n                    \"accountType\": \"4\",\r\n                    \"accountNumber\": \"50200086365910\",\r\n                    \"settlement mode\": \"NEFT\"\r\n                }\r\n            }\r\n        }\r\n    ]\r\n}",
+              "scripts": {
+                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "ff51e48c-0858-44b8-9023-e5745237fedf",
+              "type": "request"
+            },
+            {
+              "name": "VPA",
+              "method": "POST",
+              "url": "{{base_url}}/accounts/{{AccountID}}/payment_addresses",
+              "headers": [
+                {
+                  "id": "52e48436-ef09-4481-ae33-00e06a6859c6",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "2c93b6de-3511-4ccb-8e27-368a436b55e2",
+                  "enabled": true,
+                  "key": "X-API-Key",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                }
+              ],
+              "params": [],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\r\n    \"externalId\": \"{{$guid}}\",\r\n    \"payment_address\": \"divya1256@jio\",\r\n    \"vpaName\": \"divya parmar\",\r\n    \"productId\": 1,\r\n    \"onboarding_date\": \"2020-08-01\",\r\n    \"expiry_date\": \"2022-07-31\",\r\n    \"merchant\": false,\r\n    \"verified\": false,\r\n    \"attribs\": {\r\n        \"accountaddress\": \"some address, some building\",\r\n        \"accountnumber\": \"98989812312\",\r\n        \"ifsccode\": \"FFRL000111\",\r\n        \"bankname\": \"HDFC\"\r\n    },\r\n    \"record_status\": 0\r\n}",
+              "scripts": {
+                "preRequest": "",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "fd7c500e-1491-4fbf-a969-882b0cf8e363",
+              "type": "request"
+            },
+            {
+              "name": "VPA Copy",
+              "method": "PATCH",
+              "url": "{{base_url}}/payment_addresses/50188760_PINE",
+              "headers": [
+                {
+                  "id": "87b9c4a1-c9d3-4fa5-b2e0-d15c7e1bccd8",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "fd100169-0a41-40bd-a968-90e4665eb978",
+                  "enabled": true,
+                  "key": "X-API-Key",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                }
+              ],
+              "params": [],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\r\n    \"payment_address\": \"Katarinaupi@changed\"\r\n}",
+              "scripts": {
+                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "202103cd-af54-41b1-80d8-93c28a2db14e",
+              "type": "request"
+            },
+            {
+              "name": "customers",
+              "method": "PUT",
+              "url": "{{base_url}}/customers",
+              "headers": [],
+              "params": [],
+              "authorization": {
+                "type": "None",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "",
+              "scripts": {
+                "preRequest": "",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "e979cabb-f5ee-43c8-bd62-ef7ed6c5ff23",
+              "type": "request"
+            },
+            {
+              "name": "Customer",
+              "method": "POST",
+              "url": "{{base_url}}/customers",
+              "headers": [
+                {
+                  "id": "b97af5b2-b4d2-4359-bec6-21169321c3ce",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "8ffb4095-8d71-4ea5-9dd1-f8aa7bb3e2aa",
+                  "enabled": true,
+                  "key": "X-API-Keya",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                },
+                {
+                  "id": "c34255df-e0a4-44ec-9968-ce09c3a91d26",
+                  "enabled": true,
+                  "key": "a",
+                  "value": ""
+                },
+                {
+                  "id": "fb0941d6-b7c2-412f-8e87-3e9b19b5a7eb",
+                  "enabled": true,
+                  "key": "a",
+                  "value": ""
+                },
+                {
+                  "id": "92e29a89-10ab-43ce-a848-1d1339ee24d9",
+                  "enabled": true,
+                  "key": "a",
+                  "value": ""
+                },
+                {
+                  "id": "c59943e8-6ab4-4bc7-b52b-d18d07700e99",
+                  "enabled": true,
+                  "key": "a",
+                  "value": ""
+                },
+                {
+                  "id": "916a454b-9bd8-4316-9998-7bda571e1bbc",
+                  "enabled": true,
+                  "key": "a",
+                  "value": ""
+                },
+                {
+                  "id": "f2cd69c3-76ab-49a8-83ea-46ae19222a4e",
+                  "enabled": true,
+                  "key": "aa",
+                  "value": ""
+                },
+                {
+                  "id": "8cdf91b1-179a-47b8-8eea-4effb722691a",
+                  "enabled": true,
+                  "key": "ss",
+                  "value": "a"
+                },
+                {
+                  "id": "a776429e-d4bb-4627-8968-f30ccc2d6fd7",
+                  "enabled": true,
+                  "key": "Ss",
+                  "value": ""
+                },
+                {
+                  "id": "3bf775b5-1a71-4bfe-8739-e94eade2225b",
+                  "enabled": true,
+                  "key": "{{{{base_url}}",
+                  "value": ""
+                },
+                {
+                  "id": "ce52a90f-f15e-4ad0-9517-602066340eb2",
+                  "enabled": true,
+                  "key": "",
+                  "value": ""
+                }
+              ],
+              "params": [
+                {
+                  "id": "cc83e61e-b71f-49b4-be9f-ac1c08ea2f5a",
+                  "enabled": true,
+                  "key": "a",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "6170f8e7-2670-4fc9-97d9-4c9e564e61bb",
+                  "enabled": true,
+                  "key": "s",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "d5b0d838-1763-4072-86a6-bc6a35c9da8e",
+                  "enabled": true,
+                  "key": "s",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "806eeac6-7212-434c-9e00-3f25f2ceb05d",
+                  "enabled": true,
+                  "key": "e",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "b918d997-ec3b-4f5b-9702-20db462f64e1",
+                  "enabled": true,
+                  "key": "e",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "f367c551-adaa-4537-abb3-52d56bcc2447",
+                  "enabled": true,
+                  "key": "w",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "1623ac6e-875d-42bf-8f52-15bd2388f9d0",
+                  "enabled": true,
+                  "key": "w",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "09b01257-eff2-4808-af8f-188702f67148",
+                  "enabled": true,
+                  "key": "w",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "dcf036cf-2ac5-446b-8466-161c00864495",
+                  "enabled": true,
+                  "key": "w",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": 1,
+                  "enabled": true,
+                  "key": "{{base_url}}",
+                  "value": "",
+                  "description": ""
+                },
+                {
+                  "id": "775bedf0-194c-48fc-8ed5-14e7b3a548ff",
+                  "enabled": true,
+                  "key": "",
+                  "value": "",
+                  "description": ""
+                }
+              ],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "{{base_url}}",
+                "apiValue": "{{apkey_value}}",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\n    \"externalId\": \"{{externalId}}\"\",\n    \"customerName\": \"{{customerName}}\",\n    \"verifiedName\": \"{{verifiedName}}\",\n    \"customerType\": \"Person\",\n    \"salutation\": \"NA\",\n    \"gender\": null,\n    \"doi_dob\": \"2012-04-01\",\n    \"onboarding_date\": \"{{$isoTimestamp}}\",\n    \"postal_code\": \"{{postalcode}}\",\n    \"email\": \"example@email.com\",\n    \"registered_mobile\": \"917981182185\",\n    //\"default_mcc\": null,\n    \"identity_type1\": \"ACCOUNT\",\n    \"identity_details1\": \"1234-1234-1234\",\n    \"identity_type2\": \"PAN\",\n    \"identity_details2\": \"AADPZ1234M\",\n    \"address_geolocation\": \"12.9667,77.5667\",\n    \"iso_country_code\": \"IN\",\n    \"attribs\": {\n        \"address\": \"some address, some building\",\n        \"city\": \"mum\",\n        \"state\": \"mah\",\n        \"turnover\": \"10cr\",\n        \"key_merchant\": \"\",\n        \"Ownershiptype\": \"LLP\",\n        \"odsEnabled\": null,\n        \"sdsEnabled\": true ,\n        \"accounttype\": \"SMB\",\n        \"acquirer_name\": \"PINE_AXIS\",\n        \"riskLimit\": \"ONLINE_MER_SPR_SAV_GST_SELF_SERVE_LEVEL_3\",\n        \"bankAccount\": {\n            \"628404\": {\n                \"bankname\": \"9\",\n                \"ifsccode\": \"HDFC0001779\",\n                \"accountType\": \"4\",\n                \"accountNumber\": \"50200086365910\",\n                \"settlement mode\": \"NEFT\"\n            }\n        }\n    }\n}",
+              "scripts": {
+                "preRequest": "let firstName = pm.variables.replaceIn(\"{{$randomFirstName}}\")\nlet lastName = pm.variables.replaceIn(\"{{$randomLastName}}\")\nlet externalId = pm.variables.replaceIn(\"{{$timestamp}}\")\nlet CustomerID = pm.variables.replaceIn(\"{{$timestamp}}\")\npm.environment.set(\"CustomerID\", `${CustomerID}`)\npm.environment.set(\"externalId\", `${externalId}`)\npm.environment.set(\"firstName\", `${firstName}`)\npm.environment.set(\"customerName\", `${firstName} ${lastName}`)\npm.environment.set(\"verifiedName\", `${firstName} ${lastName}`)\nlet userName = pm.variables.replaceIn(\"{{$randomUserName}}\")\npm.environment.set(\"email\", `${firstName}@gmail.com`)\n\n\n//pm.environment.set(\"name\", pm.globals.get(\"$randomFullName\"));",
+                "postResponse": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+              },
+              "description": "",
+              "id": "e512f56f-5160-452a-b173-de9051c09e95",
+              "type": "request"
+            },
+            {
+              "name": "accounts",
+              "method": "PATCH",
+              "url": "{{base_url}}/accounts/1759151328",
+              "headers": [
+                {
+                  "id": "e5bf9ba0-4295-4ae6-a76b-b31ba62ba23d",
+                  "enabled": true,
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "id": "0e440ae4-879f-4d95-90b9-63d573cdd367",
+                  "enabled": true,
+                  "key": "X-API-Key",
+                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                }
+              ],
+              "params": [],
+              "authorization": {
+                "type": "API Key",
+                "bearerToken": "",
+                "username": "",
+                "password": "",
+                "apiKey": "",
+                "apiValue": "",
+                "apiKeyLocation": "Header"
+              },
+              "body": "{\r\n    \"attribs\": [\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/window_enabled\",\r\n            \"value\": {\r\n                \"window 1\": false\r\n            }\r\n        }\r\n    ]\r\n}",
+              "scripts": {
+                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
+                "postResponse": ""
+              },
+              "description": "",
+              "id": "99bcec90-4865-4789-b5ac-2b27af40fc42",
+              "type": "request"
+            }
+          ]
+        }
+      ],
+      "environments": [
+        {
+          "id": "77a93219-3c20-458f-880c-585bf71721eb",
+          "name": "MSIT PL 10",
+          "active": true,
+          "variables": [
+            {
+              "id": "59e732c6-38ce-4b2d-8b0d-7674f681d85a",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "426d36ae-9ce5-455a-b7f3-e3f67bd40b44",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "cfcbeb11-f1bb-4874-b233-3670a35367fc",
+              "key": "apkey_value",
+              "value": "b5991db1-c9d6-4675-9705-3b2ff763e73b",
+              "enabled": true
+            },
+            {
+              "id": "794840f3-7f57-4276-b4a6-b8b152758f7d",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a5f4fc2c-b71d-4287-9afc-0de825a35214",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3a0c2d62-a352-4d62-b0ed-cf05d52469ae",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "229c827f-fe15-4ee7-9910-77096b05ede0",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2afa094f-41b7-4146-8afc-405a56ac5dc5",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "95715fee-7871-4874-93b9-1d2620ebd7c0",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0d223f27-fb37-4ae9-b8de-659631076e43",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b50be295-c173-4aaa-bd6d-477adc3c8be2",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f1706bff-de11-4ec3-a421-f6392db0be5d",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "45e8f4e9-2221-4492-87ec-cc6e9d8347fd",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "08c1a526-f316-46e6-9958-dee6a9362860",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a430dce9-2b23-43cb-8807-3344b559b4d9",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "741f5a5f-450d-40c7-bd16-405ed64ff01d",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a46fda1b-7073-4c94-95de-66fa0a652bfc",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b180a04d-65c2-4707-85fd-69628a21ddad",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3577c61d-1d67-40eb-8432-4f3ed2543caa",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "15552132-8586-4dac-9e35-c0cd72daf554",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "edf738bd-e765-4f7c-8e9c-845906f8e94a",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "9d15ab0f-c009-432b-87cd-b91ec49ac26d",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9969885c-968c-4866-bb3e-be05dc703c2d",
+              "key": "Custom",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0db9332e-70f9-4f04-bd89-a91eeddd480c",
+              "key": "current_timestamp + 1 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "592ee3ad-bedf-44f2-86ac-155c6268759f",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "6ccb312c-1528-418e-a87d-505e61caac99",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9e9405e1-e8fe-498f-b2f3-dee25ad77a88",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "selectedRequestId": "ff51e48c-0858-44b8-9023-e5745237fedf"
+    },
+    {
+      "id": "fdffa701-8a5c-4b24-b17f-4524aff8d846",
+      "name": "YES MONEY",
+      "collections": [],
+      "environments": [
+        {
+          "id": "7dd55bb7-9714-4d11-9f8c-5acb862909b7",
+          "name": "MSIT YES MONEY 19",
+          "active": true,
+          "variables": [
+            {
+              "id": "e48dedcd-e7a3-4e3b-a9e6-23547f796387",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "7e23c2c6-1ad2-45d3-bd33-20a5847b4075",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "c3cf7e4d-12ed-4f68-a738-37389af4e1f3",
+              "key": "apkey_value",
+              "value": "c609307c-5ce2-41d3-a2a8-0cc5e3c2e836",
+              "enabled": true
+            },
+            {
+              "id": "1ed7879c-acf0-4494-b125-40b22fc12417",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "af5157f2-37d4-4952-85d5-8109769d3dd4",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c0cbef22-0686-4b60-bb2b-dfc3f8e64c8d",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2e166bfb-21e1-400a-9eff-9ab8eddcb42a",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b87b287b-985a-4bed-84b6-98b5d759bc92",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "befffd26-64a2-4b2c-976f-a7a4f460eb52",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "165b49b7-27d5-4e3f-8964-37e00451f6ca",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a9a846a5-f5cb-4a7f-98a1-627654f9bd1f",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "91756ba8-81d2-4b1f-b569-61cd581d5630",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d5c526d0-9a19-4541-884d-653ab6a88253",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f121c5ba-fc4b-46a3-b765-08dbdc071e36",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3402f727-19ce-4fb2-9a4c-6a33485f952e",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d62fb9ef-8278-4f95-a9c2-081c0f33fdf6",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fb2dddaa-e02f-47f7-b739-4872a368ffa2",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "134ea499-4b1e-458c-af04-86d368ffc994",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7f78e34e-1cc3-4698-a61f-356f55d7514e",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "caf30b26-1905-42d1-b4f9-94692c09192d",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "faadd1e0-33c9-4b5f-8603-a913e47c4155",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "19c66de6-0463-464a-81a7-d6fc98055875",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "87af7279-b4b2-492f-9039-888317d8f06a",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b2f1d749-9492-4f74-a03d-9c94283ab3f6",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "22a8fae6-5ac4-4168-bfde-7eae8314727f",
+              "key": "DDHH",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "60f6905e-520f-485d-8b52-d9dce4957ab4",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        }
+      ],
+      "selectedRequestId": null
+    },
     {
       "id": "04e6d9a6-eb96-4eac-82bf-7f152aeaf7e4",
       "name": "MSIT All TENANTS",
@@ -40,7 +818,7 @@
                 "apiValue": "{{apkey_value}}",
                 "apiKeyLocation": "Header"
               },
-              "body": "{\n    \"reqid\": \"{{$randomCountryCode}}{{$timestamp}}\",s\n    \"org\": \"PL\",\n    \"ts\": \"{{$isoTimestamp}}\",\n    \"txn\": {\n        \"ts\": \"{{$isoTimestamp}}\",\n        \"id\": \"{{$timestamp}}~UPI_Offline\",\n        \"org_txn_id\": \"\",\n        \"note\": \"online purchase\",\n        \"type\": \"PAY\",\n        \"class\": \"UPI\",\n        \"attribs\": {\n            \"txn_type\": \"Online\",\n            \"is_domestic\": 1,\n            \"bin\": \"491866\",\n            \"payment_mode_id\": \"\",\n            \"acquirer_name\": \"HDFC\",\n            \"is_token_txn\": \"\",\n            \"moto_eci_indicator\": \"\",\n            \"3ds\": \"\",\n            \"isMiniTxn\" : true,\n            \"settlement_T0\": \"\",\n            \"is_emv_fallback\": \"0\",\n            \"card_entry_mode_name\": \"CARD_CHIP\",\n            \"host_terminal_id\": \"10012411\",\n            \"card_type_name\": \"VISA\",\n            \"hardware_type_id\": \"85\",\n            \"txn_type_str\": \"SALE\",\n            \"is_reversed\": \"0\",\n            \"is_dcc\": \"\",\n            \"tid\": \"{{$randomUUID}}\"\n        }\n    },\n    \"payer\": {\n        \"addr\": \"{{payerAddr}}\",\n        \"type\": \"PERSON\",\n        \"amount\": {{amount}},\n        \"currency\": \"365\"\n    },\n    \"payee\": {\n        \"addr\": \"{{payeeAddr}}\",\n        \"type\": \"ENTITY\",\n        \"amount\": {{amount}},\n        \"currency\": \"INR\"\n    }\n}",
+              "body": "{\n    \"reqid\": \"{{$randomCountryCode}}{{$timestamp}}\",\n    \"org\": \"PL\",\n    \"ts\": \"{{$isoTimestamp}}\",\n    \"txn\": {\n        \"ts\": \"{{$isoTimestamp}}\",\n        \"id\": \"{{$timestamp}}~UPI_Offline\",\n        \"org_txn_id\": \"\",\n        \"note\": \"online purchase\",\n        \"type\": \"PAY\",\n        \"class\": \"UPI\",\n        \"attribs\": {\n            \"txn_type\": \"Online\",\n            \"is_domestic\": 1,\n            \"bin\": \"491866\",\n            \"payment_mode_id\": \"\",\n            \"acquirer_name\": \"HDFC\",\n            \"is_token_txn\": \"\",\n            \"moto_eci_indicator\": \"\",\n            \"3ds\": \"\",\n            \"isMiniTxn\" : true,\n            \"settlement_T0\": \"\",\n            \"is_emv_fallback\": \"0\",\n            \"card_entry_mode_name\": \"CARD_CHIP\",\n            \"host_terminal_id\": \"10012411\",\n            \"card_type_name\": \"VISA\",\n            \"hardware_type_id\": \"85\",\n            \"txn_type_str\": \"SALE\",\n            \"is_reversed\": \"0\",\n            \"is_dcc\": \"\",\n            \"tid\": \"{{$randomUUID}}\"\n        }\n    },\n    \"payer\": {\n        \"addr\": \"{{payerAddr}}\",\n        \"type\": \"PERSON\",\n        \"amount\": {{amount}},\n        \"currency\": \"365\"\n    },\n    \"payee\": {\n        \"addr\": \"{{payeeAddr}}\",\n        \"type\": \"ENTITY\",\n        \"amount\": {{amount}},\n        \"currency\": \"INR\"\n    }\n}",
               "scripts": {
                 "preRequest": "",
                 "postResponse": ""
@@ -2209,434 +2987,93 @@
       "selectedRequestId": "5a26498b-3945-4ef5-97d1-6fae9c6fafc2"
     },
     {
-      "id": "5726a8a4-81e9-48c3-a47a-59d3ccbf4ea3",
-      "name": "mahesh",
+      "id": "04e6d9a6-eb96-4eac-82bf-7f152aeaf7e4",
+      "name": "MSIT All TENANTS",
       "collections": [
         {
-          "id": "30ed852a-201c-4de5-ab99-77668e353432",
+          "id": "8ed68d45-ad50-4b79-901e-ccebebcd8548",
           "type": "collection",
-          "name": "PL 3 tier onboarding",
+          "name": "PL Transactions",
           "expanded": true,
           "children": [
             {
-              "name": "Accounts",
+              "name": "Online MSIT",
               "method": "POST",
-              "url": "{{base_url}}/customers/{{externalId}}/accounts",
+              "url": "{{base_url}}/score",
               "headers": [
                 {
-                  "id": "60eaa137-cd4e-4c3f-93c2-2d31f4aa9198",
+                  "id": "bfa6cf96-5b42-47f8-bd32-6755abba28de",
                   "enabled": true,
                   "key": "Content-Type",
                   "value": "application/json"
                 },
                 {
-                  "id": "2f406a54-0367-442a-a892-f60ecbc40811",
-                  "enabled": true,
-                  "key": "X-API-Key",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
-                }
-              ],
-              "params": [],
-              "authorization": {
-                "type": "API Key",
-                "bearerToken": "",
-                "username": "",
-                "password": "",
-                "apiKey": "",
-                "apiValue": "",
-                "apiKeyLocation": "Header"
-              },
-              "body": "{\n    \"externalId\": \"{{externalId}}\",\n    \"accountType\": 2,\n    \"accountNumber\": \"{{$randomBankAccount}}\",\n    \"ifsc\": null,\n    \"accountProvider\": null,\n    \"accountName\": \"New Account\",\n    \"onboarding_date\": \"2025-12-10\",\n    \"expiry_date\": null,\n    \"default_mcc\": null,\n    \"merchant\": true,\n    \"verified\": null,\n    \"attribs\": {\n        \"CORPORATE\": true,\n        \"window_enabled\": null\n    },\n    \"record_status\": 0\n}",
-              "scripts": {
-                "preRequest": "",
-                "postResponse": ""
-              },
-              "description": "",
-              "id": "513342ca-1701-405d-8fd4-82b8039b70d8",
-              "type": "request"
-            },
-            {
-              "name": "Customers Copy",
-              "method": "GET",
-              "url": "{{base_url}}/customers/01JAWN89TJX0W67Z9D5FGC8XN",
-              "headers": [
-                {
-                  "id": "5dbe7704-7326-4a31-96dc-081b4a60c0bc",
-                  "enabled": true,
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "id": "bc4c4da3-e573-4da7-8064-6aaac2f5a9c5",
-                  "enabled": true,
-                  "key": "X-API-Key",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
-                }
-              ],
-              "params": [],
-              "authorization": {
-                "type": "API Key",
-                "bearerToken": "",
-                "username": "",
-                "password": "",
-                "apiKey": "",
-                "apiValue": "",
-                "apiKeyLocation": "Header"
-              },
-              "body": "{\r\n    \"externalId\": \"5028230_PINE\",\r\n    \"attribs\": [\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/contact\",\r\n            \"value\": {}\r\n        },\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/contact/1020\",\r\n            \"value\": {\r\n                \"registered_mobile\": \"960XXXXX65\"\r\n                \"reg_address\": \"G-27,Phoenix CitadXXXXXh     452016,Indore,a0q0o00000QuCjVAAV,MP,PXXXXXX6\",\r\n                \"email\": null\r\n            }\r\n        }\r\n    ]\r\n}",
-              "scripts": {
-                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
-                "postResponse": ""
-              },
-              "description": "",
-              "id": "cbb2cb10-7aae-4d5a-aac2-93ea38689291",
-              "type": "request"
-            },
-            {
-              "name": "Customers",
-              "method": "PATCH",
-              "url": "{{base_url}}/customers",
-              "headers": [
-                {
-                  "id": "2038d687-848b-4fbe-b60f-48685d0002a3",
-                  "enabled": true,
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "id": "ec1ffd72-92d9-4e66-a805-19d053d10d3c",
-                  "enabled": true,
-                  "key": "X-API-Key",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
-                }
-              ],
-              "params": [],
-              "authorization": {
-                "type": "API Key",
-                "bearerToken": "",
-                "username": "",
-                "password": "",
-                "apiKey": "",
-                "apiValue": "",
-                "apiKeyLocation": "Header"
-              },
-              "body": "{\r\n    \"attribs\": [\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/bankAccount\",\r\n            \"value\": {\r\n                \"628404\": {\r\n                    \"bankname\": \"9\",\r\n                    \"ifsccode\": \"HDFC0001779\",\r\n                    \"accountType\": \"4\",\r\n                    \"accountNumber\": \"50200086365910\",\r\n                    \"settlement mode\": \"NEFT\"\r\n                }\r\n            }\r\n        }\r\n    ]\r\n}",
-              "scripts": {
-                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
-                "postResponse": ""
-              },
-              "description": "",
-              "id": "ff51e48c-0858-44b8-9023-e5745237fedf",
-              "type": "request"
-            },
-            {
-              "name": "VPA",
-              "method": "POST",
-              "url": "{{base_url}}/accounts/{{AccountID}}/payment_addresses",
-              "headers": [
-                {
-                  "id": "52e48436-ef09-4481-ae33-00e06a6859c6",
-                  "enabled": true,
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "id": "2c93b6de-3511-4ccb-8e27-368a436b55e2",
-                  "enabled": true,
-                  "key": "X-API-Key",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
-                }
-              ],
-              "params": [],
-              "authorization": {
-                "type": "API Key",
-                "bearerToken": "",
-                "username": "",
-                "password": "",
-                "apiKey": "",
-                "apiValue": "",
-                "apiKeyLocation": "Header"
-              },
-              "body": "{\r\n    \"externalId\": \"{{$guid}}\",\r\n    \"payment_address\": \"divya1256@jio\",\r\n    \"vpaName\": \"divya parmar\",\r\n    \"productId\": 1,\r\n    \"onboarding_date\": \"2020-08-01\",\r\n    \"expiry_date\": \"2022-07-31\",\r\n    \"merchant\": false,\r\n    \"verified\": false,\r\n    \"attribs\": {\r\n        \"accountaddress\": \"some address, some building\",\r\n        \"accountnumber\": \"98989812312\",\r\n        \"ifsccode\": \"FFRL000111\",\r\n        \"bankname\": \"HDFC\"\r\n    },\r\n    \"record_status\": 0\r\n}",
-              "scripts": {
-                "preRequest": "",
-                "postResponse": ""
-              },
-              "description": "",
-              "id": "fd7c500e-1491-4fbf-a969-882b0cf8e363",
-              "type": "request"
-            },
-            {
-              "name": "VPA Copy",
-              "method": "PATCH",
-              "url": "{{base_url}}/payment_addresses/50188760_PINE",
-              "headers": [
-                {
-                  "id": "87b9c4a1-c9d3-4fa5-b2e0-d15c7e1bccd8",
-                  "enabled": true,
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "id": "fd100169-0a41-40bd-a968-90e4665eb978",
-                  "enabled": true,
-                  "key": "X-API-Key",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
-                }
-              ],
-              "params": [],
-              "authorization": {
-                "type": "API Key",
-                "bearerToken": "",
-                "username": "",
-                "password": "",
-                "apiKey": "",
-                "apiValue": "",
-                "apiKeyLocation": "Header"
-              },
-              "body": "{\r\n    \"payment_address\": \"Katarinaupi@changed\"\r\n}",
-              "scripts": {
-                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
-                "postResponse": ""
-              },
-              "description": "",
-              "id": "202103cd-af54-41b1-80d8-93c28a2db14e",
-              "type": "request"
-            },
-            {
-              "name": "customers",
-              "method": "PUT",
-              "url": "{{base_url}}/customers",
-              "headers": [],
-              "params": [],
-              "authorization": {
-                "type": "None",
-                "bearerToken": "",
-                "username": "",
-                "password": "",
-                "apiKey": "",
-                "apiValue": "",
-                "apiKeyLocation": "Header"
-              },
-              "body": "",
-              "scripts": {
-                "preRequest": "",
-                "postResponse": ""
-              },
-              "description": "",
-              "id": "e979cabb-f5ee-43c8-bd62-ef7ed6c5ff23",
-              "type": "request"
-            },
-            {
-              "name": "Customer",
-              "method": "POST",
-              "url": "{{base_url}}/customers",
-              "headers": [
-                {
-                  "id": "b97af5b2-b4d2-4359-bec6-21169321c3ce",
-                  "enabled": true,
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "id": "8ffb4095-8d71-4ea5-9dd1-f8aa7bb3e2aa",
-                  "enabled": true,
-                  "key": "X-API-Keya",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
-                },
-                {
-                  "id": "c34255df-e0a4-44ec-9968-ce09c3a91d26",
-                  "enabled": true,
-                  "key": "a",
-                  "value": ""
-                },
-                {
-                  "id": "fb0941d6-b7c2-412f-8e87-3e9b19b5a7eb",
-                  "enabled": true,
-                  "key": "a",
-                  "value": ""
-                },
-                {
-                  "id": "92e29a89-10ab-43ce-a848-1d1339ee24d9",
-                  "enabled": true,
-                  "key": "a",
-                  "value": ""
-                },
-                {
-                  "id": "c59943e8-6ab4-4bc7-b52b-d18d07700e99",
-                  "enabled": true,
-                  "key": "a",
-                  "value": ""
-                },
-                {
-                  "id": "916a454b-9bd8-4316-9998-7bda571e1bbc",
-                  "enabled": true,
-                  "key": "a",
-                  "value": ""
-                },
-                {
-                  "id": "f2cd69c3-76ab-49a8-83ea-46ae19222a4e",
-                  "enabled": true,
-                  "key": "aa",
-                  "value": ""
-                },
-                {
-                  "id": "8cdf91b1-179a-47b8-8eea-4effb722691a",
-                  "enabled": true,
-                  "key": "ss",
-                  "value": "a"
-                },
-                {
-                  "id": "a776429e-d4bb-4627-8968-f30ccc2d6fd7",
-                  "enabled": true,
-                  "key": "Ss",
-                  "value": ""
-                },
-                {
-                  "id": "3bf775b5-1a71-4bfe-8739-e94eade2225b",
-                  "enabled": true,
-                  "key": "{{{{base_url}}",
-                  "value": ""
-                },
-                {
-                  "id": "ce52a90f-f15e-4ad0-9517-602066340eb2",
+                  "id": "300c2bae-08c4-4fc8-a7e9-eaab6a16a7e5",
                   "enabled": true,
                   "key": "",
                   "value": ""
                 }
               ],
-              "params": [
-                {
-                  "id": "cc83e61e-b71f-49b4-be9f-ac1c08ea2f5a",
-                  "enabled": true,
-                  "key": "a",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "6170f8e7-2670-4fc9-97d9-4c9e564e61bb",
-                  "enabled": true,
-                  "key": "s",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "d5b0d838-1763-4072-86a6-bc6a35c9da8e",
-                  "enabled": true,
-                  "key": "s",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "806eeac6-7212-434c-9e00-3f25f2ceb05d",
-                  "enabled": true,
-                  "key": "e",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "b918d997-ec3b-4f5b-9702-20db462f64e1",
-                  "enabled": true,
-                  "key": "e",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "f367c551-adaa-4537-abb3-52d56bcc2447",
-                  "enabled": true,
-                  "key": "w",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "1623ac6e-875d-42bf-8f52-15bd2388f9d0",
-                  "enabled": true,
-                  "key": "w",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "09b01257-eff2-4808-af8f-188702f67148",
-                  "enabled": true,
-                  "key": "w",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "dcf036cf-2ac5-446b-8466-161c00864495",
-                  "enabled": true,
-                  "key": "w",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": 1,
-                  "enabled": true,
-                  "key": "{{base_url}}",
-                  "value": "",
-                  "description": ""
-                },
-                {
-                  "id": "775bedf0-194c-48fc-8ed5-14e7b3a548ff",
-                  "enabled": true,
-                  "key": "",
-                  "value": "",
-                  "description": ""
-                }
-              ],
+              "params": [],
               "authorization": {
                 "type": "API Key",
                 "bearerToken": "",
                 "username": "",
                 "password": "",
-                "apiKey": "{{base_url}}",
+                "apiKey": "{{apikey}}",
                 "apiValue": "{{apkey_value}}",
                 "apiKeyLocation": "Header"
               },
-              "body": "{\n    \"externalId\": \"{{externalId}}\"\",\n    \"customerName\": \"{{customerName}}\",\n    \"verifiedName\": \"{{verifiedName}}\",\n    \"customerType\": \"Person\",\n    \"salutation\": \"NA\",\n    \"gender\": null,\n    \"doi_dob\": \"2012-04-01\",\n    \"onboarding_date\": \"{{$isoTimestamp}}\",\n    \"postal_code\": \"{{postalcode}}\",\n    \"email\": \"example@email.com\",\n    \"registered_mobile\": \"917981182185\",\n    //\"default_mcc\": null,\n    \"identity_type1\": \"ACCOUNT\",\n    \"identity_details1\": \"1234-1234-1234\",\n    \"identity_type2\": \"PAN\",\n    \"identity_details2\": \"AADPZ1234M\",\n    \"address_geolocation\": \"12.9667,77.5667\",\n    \"iso_country_code\": \"IN\",\n    \"attribs\": {\n        \"address\": \"some address, some building\",\n        \"city\": \"mum\",\n        \"state\": \"mah\",\n        \"turnover\": \"10cr\",\n        \"key_merchant\": \"\",\n        \"Ownershiptype\": \"LLP\",\n        \"odsEnabled\": null,\n        \"sdsEnabled\": true ,\n        \"accounttype\": \"SMB\",\n        \"acquirer_name\": \"PINE_AXIS\",\n        \"riskLimit\": \"ONLINE_MER_SPR_SAV_GST_SELF_SERVE_LEVEL_3\",\n        \"bankAccount\": {\n            \"628404\": {\n                \"bankname\": \"9\",\n                \"ifsccode\": \"HDFC0001779\",\n                \"accountType\": \"4\",\n                \"accountNumber\": \"50200086365910\",\n                \"settlement mode\": \"NEFT\"\n            }\n        }\n    }\n}",
+              "body": "{\n    \"reqid\": \"{{$randomCountryCode}}{{$timestamp}}\",\n    \"org\": \"PL\",\n    \"ts\": \"{{$isoTimestamp}}\",\n    \"txn\": {\n        \"ts\": \"{{$isoTimestamp}}\",\n        \"id\": \"{{$timestamp}}~UPI_Offline\",\n        \"org_txn_id\": \"\",\n        \"note\": \"online purchase\",\n        \"type\": \"PAY\",\n        \"class\": \"UPI\",\n        \"attribs\": {\n            \"txn_type\": \"Online\",\n            \"is_domestic\": 1,\n            \"bin\": \"491866\",\n            \"payment_mode_id\": \"\",\n            \"acquirer_name\": \"HDFC\",\n            \"is_token_txn\": \"\",\n            \"moto_eci_indicator\": \"\",\n            \"3ds\": \"\",\n            \"isMiniTxn\" : true,\n            \"settlement_T0\": \"\",\n            \"is_emv_fallback\": \"0\",\n            \"card_entry_mode_name\": \"CARD_CHIP\",\n            \"host_terminal_id\": \"10012411\",\n            \"card_type_name\": \"VISA\",\n            \"hardware_type_id\": \"85\",\n            \"txn_type_str\": \"SALE\",\n            \"is_reversed\": \"0\",\n            \"is_dcc\": \"\",\n            \"tid\": \"{{$randomUUID}}\"\n        }\n    },\n    \"payer\": {\n        \"addr\": \"{{payerAddr}}\",\n        \"type\": \"PERSON\",\n        \"amount\": {{amount}},\n        \"currency\": \"365\"\n    },\n    \"payee\": {\n        \"addr\": \"{{payeeAddr}}\",\n        \"type\": \"ENTITY\",\n        \"amount\": {{amount}},\n        \"currency\": \"INR\"\n    }\n}",
               "scripts": {
-                "preRequest": "let firstName = pm.variables.replaceIn(\"{{$randomFirstName}}\")\nlet lastName = pm.variables.replaceIn(\"{{$randomLastName}}\")\nlet externalId = pm.variables.replaceIn(\"{{$timestamp}}\")\nlet CustomerID = pm.variables.replaceIn(\"{{$timestamp}}\")\npm.environment.set(\"CustomerID\", `${CustomerID}`)\npm.environment.set(\"externalId\", `${externalId}`)\npm.environment.set(\"firstName\", `${firstName}`)\npm.environment.set(\"customerName\", `${firstName} ${lastName}`)\npm.environment.set(\"verifiedName\", `${firstName} ${lastName}`)\nlet userName = pm.variables.replaceIn(\"{{$randomUserName}}\")\npm.environment.set(\"email\", `${firstName}@gmail.com`)\n\n\n//pm.environment.set(\"name\", pm.globals.get(\"$randomFullName\"));",
-                "postResponse": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+                "preRequest": "",
+                "postResponse": ""
               },
               "description": "",
-              "id": "e512f56f-5160-452a-b173-de9051c09e95",
-              "type": "request"
+              "id": "5a26498b-3945-4ef5-97d1-6fae9c6fafc2",
+              "type": "request",
+              "bodyMode": "raw"
             },
             {
-              "name": "accounts",
-              "method": "PATCH",
-              "url": "{{base_url}}/accounts/1759151328",
+              "id": "07267f20-078e-4d4b-ab07-934026e067b0",
+              "name": "Online MSIT_1",
+              "method": "POST",
+              "url": "{{base_url}}/score",
+              "params": [],
               "headers": [
                 {
-                  "id": "e5bf9ba0-4295-4ae6-a76b-b31ba62ba23d",
+                  "id": "f43f167e-b179-40a6-a084-f4d7998547e4",
                   "enabled": true,
-                  "key": "Content-Type",
+                  "key": "Content-Typdfe",
                   "value": "application/json"
                 },
                 {
-                  "id": "0e440ae4-879f-4d95-90b9-63d573cdd367",
-                  "enabled": true,
+                  "id": "d2071a3d-e00c-43ef-b933-03caffb7b93c",
+                  "enabled": false,
                   "key": "X-API-Key",
-                  "value": "f877a5b1-b6d6-4733-9d2e-0509538e536e"
+                  "value": "\\"
+                },
+                {
+                  "id": "ab6a20b1-794c-4de5-97d1-be6eae69c80f",
+                  "enabled": true,
+                  "key": "",
+                  "value": ""
                 }
               ],
-              "params": [],
               "authorization": {
                 "type": "API Key",
                 "bearerToken": "",
                 "username": "",
                 "password": "",
-                "apiKey": "",
-                "apiValue": "",
+                "apiKey": "{{apikey}}",
+                "apiValue": "{{apkey_value}}",
                 "apiKeyLocation": "Header"
               },
-              "body": "{\r\n    \"attribs\": [\r\n        {\r\n            \"op\": \"add\",\r\n            \"path\": \"/window_enabled\",\r\n            \"value\": {\r\n                \"window 1\": false\r\n            }\r\n        }\r\n    ]\r\n}",
+              "body": "{\n    \"reqid\": \"{{isoTimestamp}}\",\n    \"org_txn_id\": \"PL\",\n    \"note\": \"online purchase\",\n    \"type\": \"PAY\",\n    \"class\": \"UPI\",\n    \"attribs\": {\n        \"txn_type\": \"Online\",\n        \"is_domestic\": 1,\n        \"bin\": \"491866\",\n        \"payment_mode_id\": \"\",\n        \"acquirer_name\": \"HDFC\",\n        \"is_token_txn\": \"\",\n        \"moto_eci_indicator\": \"\",\n        \"3ds\": \"\",\n        \"isMiniTxn\": true,\n        \"settlement_T0\": \"\",\n        \"is_emv_fallback\": \"0\",\n        \"card_entry_mode_name\": \"CARD_CHIP\",\n        \"host_terminal_id\": \"10012411\",\n        \"card_type_name\": \"VISA\",\n        \"hardware_type_id\": \"85\",\n        \"txn_type_str\": \"SALE\",\n        \"is_reversed\": \"0\",\n        \"is_dcc\": \"\",\n        \"tid\": \"{{timestamp}}\"\n    }\n},\n\"payer\": {\n    \"addr\": \"Abc123562\",\n    \"type\": \"PERSON\",\n    \"amount\": 13866500,\n    \"currency\": \"365\"\n},\n\"payee\": {\n    \"addr\": \"divya123456@jio\",\n    \"type\": \"ENTITY\",\n    \"amount\": 13866500,\n    \"currency\": \"INR\"\n}\n",
               "scripts": {
-                "preRequest": "let UPI = pm.environment.get(\"firstName\")\r\npm.environment.set(\"UPI\", `${UPI}upi@jio`)\r\n//pm.environment.get(\"firstName\")",
+                "preRequest": "",
                 "postResponse": ""
               },
-              "description": "",
-              "id": "99bcec90-4865-4789-b5ac-2b27af40fc42",
               "type": "request"
             }
           ]
@@ -2644,339 +3081,2108 @@
       ],
       "environments": [
         {
-          "id": "77a93219-3c20-458f-880c-585bf71721eb",
-          "name": "MSIT PL 10",
-          "active": true,
+          "id": "5590592a-36e8-40ad-a8c0-9b310bfa7704",
+          "name": "MSIT 42C- CUB 6",
+          "active": false,
           "variables": [
             {
-              "id": "59e732c6-38ce-4b2d-8b0d-7674f681d85a",
+              "id": "1856f6ef-b497-41ee-aade-2b14a5c9b809",
               "key": "base_url",
               "value": "https://main.msit.dronapay.net/springapi",
               "enabled": true
             },
             {
-              "id": "426d36ae-9ce5-455a-b7f3-e3f67bd40b44",
+              "id": "5e5189bb-c5b9-4e1f-a17a-f30013ae828a",
               "key": "apikey",
               "value": "X-API-Key",
               "enabled": true
             },
             {
-              "id": "cfcbeb11-f1bb-4874-b233-3670a35367fc",
+              "id": "6d6ec70d-d10c-4311-8613-7ed6feed3ecd",
               "key": "apkey_value",
-              "value": "b5991db1-c9d6-4675-9705-3b2ff763e73b",
+              "value": "40292351-7fda-491a-926b-bbb8cb9721fc",
               "enabled": true
             },
             {
-              "id": "794840f3-7f57-4276-b4a6-b8b152758f7d",
+              "id": "ec53c2a4-11cb-4b34-9f84-48e90f5ace7d",
               "key": "customerFullName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "a5f4fc2c-b71d-4287-9afc-0de825a35214",
+              "id": "53cf45a4-c3ba-43fb-b458-b2c135a81830",
               "key": "id",
               "value": "",
               "enabled": true
             },
             {
-              "id": "3a0c2d62-a352-4d62-b0ed-cf05d52469ae",
+              "id": "090cc86f-c3ff-4b82-8000-b69f0587626b",
               "key": "win_id",
               "value": "",
               "enabled": true
             },
             {
-              "id": "229c827f-fe15-4ee7-9910-77096b05ede0",
+              "id": "c6b87af8-db87-4371-965f-7e2416784264",
               "key": "CustomerID",
               "value": "",
               "enabled": true
             },
             {
-              "id": "2afa094f-41b7-4146-8afc-405a56ac5dc5",
+              "id": "abd57254-d934-4b4d-a7be-56bffc620cd9",
               "key": "externalId",
               "value": "",
               "enabled": true
             },
             {
-              "id": "95715fee-7871-4874-93b9-1d2620ebd7c0",
+              "id": "ee87b440-bbc5-47d6-abe2-558e867ad199",
               "key": "firstName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "0d223f27-fb37-4ae9-b8de-659631076e43",
+              "id": "f8a0a53c-9be1-4570-b08c-fc7da515ce16",
               "key": "customerName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "b50be295-c173-4aaa-bd6d-477adc3c8be2",
+              "id": "01e5e63a-772d-4278-9b13-fa26aaead609",
               "key": "verifiedName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "f1706bff-de11-4ec3-a421-f6392db0be5d",
+              "id": "e10b8d5c-8bea-4e84-ae72-432f74f501f8",
               "key": "email",
               "value": "",
               "enabled": true
             },
             {
-              "id": "45e8f4e9-2221-4492-87ec-cc6e9d8347fd",
+              "id": "449de161-d75e-483d-87e0-ad2f04c75e3f",
               "key": "AccountID",
               "value": "",
               "enabled": true
             },
             {
-              "id": "08c1a526-f316-46e6-9958-dee6a9362860",
+              "id": "1da04dc6-7c92-49c8-89b0-952c1a5e2182",
               "key": "UPI",
               "value": "",
               "enabled": true
             },
             {
-              "id": "a430dce9-2b23-43cb-8807-3344b559b4d9",
+              "id": "4c9f7739-db6d-426d-b463-d8fb5fb33041",
               "key": "Black",
               "value": "",
               "enabled": true
             },
             {
-              "id": "741f5a5f-450d-40c7-bd16-405ed64ff01d",
+              "id": "e9799183-ff13-4a49-9855-5fa7dce6f759",
               "key": "Grey",
               "value": "",
               "enabled": true
             },
             {
-              "id": "a46fda1b-7073-4c94-95de-66fa0a652bfc",
+              "id": "d46ffbe7-df1d-4bd8-aa16-212b7d0ff609",
               "key": "White",
               "value": "",
               "enabled": true
             },
             {
-              "id": "b180a04d-65c2-4707-85fd-69628a21ddad",
+              "id": "f1134a06-3ff0-458d-b6f7-6437dbca2924",
               "key": "Risky",
               "value": "",
               "enabled": true
             },
             {
-              "id": "3577c61d-1d67-40eb-8432-4f3ed2543caa",
+              "id": "800b4ea7-39fd-411a-8d14-dd112dd735f7",
               "key": "current_timestamp",
               "value": "",
               "enabled": true
             },
             {
-              "id": "15552132-8586-4dac-9e35-c0cd72daf554",
+              "id": "c6e56331-a549-4601-8d19-25d0c904c87f",
               "key": "current_timestamp + 2 day",
               "value": "",
               "enabled": true
             },
             {
-              "id": "edf738bd-e765-4f7c-8e9c-845906f8e94a",
+              "id": "68aae535-a8ae-47ee-b916-2778d31a50d1",
               "key": "bin",
               "value": "356102000000000",
               "enabled": true
             },
             {
-              "id": "9d15ab0f-c009-432b-87cd-b91ec49ac26d",
+              "id": "033e9054-d53b-4123-b01e-1df592b92ea6",
               "key": "TransID",
               "value": "",
               "enabled": true
             },
             {
-              "id": "9969885c-968c-4866-bb3e-be05dc703c2d",
-              "key": "Custom",
-              "value": "",
-              "enabled": true
-            },
-            {
-              "id": "0db9332e-70f9-4f04-bd89-a91eeddd480c",
-              "key": "current_timestamp + 1 day",
-              "value": "",
-              "enabled": true
-            },
-            {
-              "id": "592ee3ad-bedf-44f2-86ac-155c6268759f",
+              "id": "758e1b51-114b-42c1-b846-5e4e469c0551",
               "key": "seller_id",
               "value": "",
               "enabled": true
             },
             {
-              "id": "6ccb312c-1528-418e-a87d-505e61caac99",
+              "id": "87fe4d78-b02c-4c7d-b350-0b0f1aa16869",
               "key": "sellerName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "9e9405e1-e8fe-498f-b2f3-dee25ad77a88",
+              "id": "5de251c9-0f77-470b-ab38-efe39724a2ce",
               "key": "",
               "value": "",
               "enabled": true
             }
           ]
-        }
-      ],
-      "selectedRequestId": "ff51e48c-0858-44b8-9023-e5745237fedf"
-    },
-    {
-      "id": "fdffa701-8a5c-4b24-b17f-4524aff8d846",
-      "name": "YES MONEY",
-      "collections": [],
-      "environments": [
+        },
         {
-          "id": "7dd55bb7-9714-4d11-9f8c-5acb862909b7",
-          "name": "MSIT YES MONEY 19",
-          "active": true,
+          "id": "ace93ede-87c3-41b6-ad21-c8db75400a5c",
+          "name": "MSIT SETU 27",
+          "active": false,
           "variables": [
             {
-              "id": "e48dedcd-e7a3-4e3b-a9e6-23547f796387",
+              "id": "4496860f-d6de-49f0-834c-bf9567f8f9ae",
               "key": "base_url",
               "value": "https://main.msit.dronapay.net/springapi",
               "enabled": true
             },
             {
-              "id": "7e23c2c6-1ad2-45d3-bd33-20a5847b4075",
+              "id": "c5213b61-3a40-4d5b-b32b-139a4c7043b6",
               "key": "apikey",
               "value": "X-API-Key",
               "enabled": true
             },
             {
-              "id": "c3cf7e4d-12ed-4f68-a738-37389af4e1f3",
+              "id": "49de43fd-e5f6-4435-8af1-076bb239aed4",
               "key": "apkey_value",
-              "value": "c609307c-5ce2-41d3-a2a8-0cc5e3c2e836",
+              "value": "6ba586fd-ec5e-47fd-8271-9612de46340b",
               "enabled": true
             },
             {
-              "id": "1ed7879c-acf0-4494-b125-40b22fc12417",
+              "id": "15db07a0-31e0-4e37-a92f-a971f9b88542",
               "key": "customerFullName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "af5157f2-37d4-4952-85d5-8109769d3dd4",
+              "id": "8383685d-ef79-4751-a939-67afcf036099",
               "key": "id",
               "value": "",
               "enabled": true
             },
             {
-              "id": "c0cbef22-0686-4b60-bb2b-dfc3f8e64c8d",
+              "id": "65ad4042-b062-445c-a0dc-332c7dfd3bd1",
               "key": "win_id",
               "value": "",
               "enabled": true
             },
             {
-              "id": "2e166bfb-21e1-400a-9eff-9ab8eddcb42a",
+              "id": "bc208cc4-1243-4a47-a5dd-ae28270d2273",
               "key": "CustomerID",
               "value": "",
               "enabled": true
             },
             {
-              "id": "b87b287b-985a-4bed-84b6-98b5d759bc92",
+              "id": "c37e58bc-ff90-4081-8876-bd7b9f885bd0",
               "key": "externalId",
               "value": "",
               "enabled": true
             },
             {
-              "id": "befffd26-64a2-4b2c-976f-a7a4f460eb52",
+              "id": "d67f0e76-fb6e-4ca9-b189-14890eac97ef",
               "key": "firstName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "165b49b7-27d5-4e3f-8964-37e00451f6ca",
+              "id": "d1151b33-4e92-4a85-8c31-ff5bf6966a12",
               "key": "customerName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "a9a846a5-f5cb-4a7f-98a1-627654f9bd1f",
+              "id": "218dcf61-629e-40a7-bafa-8bca05f283c0",
               "key": "verifiedName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "91756ba8-81d2-4b1f-b569-61cd581d5630",
+              "id": "a7a515b2-daee-4ace-9cb6-c74ecfcd946c",
               "key": "email",
               "value": "",
               "enabled": true
             },
             {
-              "id": "d5c526d0-9a19-4541-884d-653ab6a88253",
+              "id": "89c1dd87-66d7-4582-a75a-c4199eb7ae92",
               "key": "AccountID",
               "value": "",
               "enabled": true
             },
             {
-              "id": "f121c5ba-fc4b-46a3-b765-08dbdc071e36",
+              "id": "dc8efe5a-44f8-4221-ae7f-5e76784a512c",
               "key": "UPI",
               "value": "",
               "enabled": true
             },
             {
-              "id": "3402f727-19ce-4fb2-9a4c-6a33485f952e",
+              "id": "62cca092-19c8-4037-a70d-9b03f806b16f",
               "key": "Black",
               "value": "",
               "enabled": true
             },
             {
-              "id": "d62fb9ef-8278-4f95-a9c2-081c0f33fdf6",
+              "id": "3b7c9476-a664-42e2-ab81-be5f8d80d4da",
               "key": "Grey",
               "value": "",
               "enabled": true
             },
             {
-              "id": "fb2dddaa-e02f-47f7-b739-4872a368ffa2",
+              "id": "77505257-e1d1-44de-b6be-c10c8dd3108a",
               "key": "White",
               "value": "",
               "enabled": true
             },
             {
-              "id": "134ea499-4b1e-458c-af04-86d368ffc994",
+              "id": "8e4f4679-afd3-440e-933c-e027df596531",
               "key": "Risky",
               "value": "",
               "enabled": true
             },
             {
-              "id": "7f78e34e-1cc3-4698-a61f-356f55d7514e",
+              "id": "027bacd2-743f-4a44-ba88-7caa7429cde0",
               "key": "current_timestamp",
               "value": "",
               "enabled": true
             },
             {
-              "id": "caf30b26-1905-42d1-b4f9-94692c09192d",
+              "id": "130040fa-f401-4afc-ae0e-4159eca55d70",
               "key": "current_timestamp + 2 day",
               "value": "",
               "enabled": true
             },
             {
-              "id": "faadd1e0-33c9-4b5f-8603-a913e47c4155",
+              "id": "40d9dba0-2faf-4209-a7e2-c0aac7b786a7",
               "key": "bin",
               "value": "356102000000000",
               "enabled": true
             },
             {
-              "id": "19c66de6-0463-464a-81a7-d6fc98055875",
+              "id": "e9fb3595-4aaf-4860-bad9-32c38729441a",
               "key": "TransID",
               "value": "",
               "enabled": true
             },
             {
-              "id": "87af7279-b4b2-492f-9039-888317d8f06a",
+              "id": "b969a19e-82be-4545-8668-6a634fabed0d",
               "key": "seller_id",
               "value": "",
               "enabled": true
             },
             {
-              "id": "b2f1d749-9492-4f74-a03d-9c94283ab3f6",
+              "id": "b9a4010a-d53f-4b6a-a969-72070bd3b5c3",
               "key": "sellerName",
               "value": "",
               "enabled": true
             },
             {
-              "id": "22a8fae6-5ac4-4168-bfde-7eae8314727f",
+              "id": "02ba9580-8426-4bec-bbfc-e30c99f64076",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "d3f22cd0-e752-4464-a745-471f8c964b7a",
+          "name": "MSIT YBAML BAPA 08",
+          "active": false,
+          "variables": [
+            {
+              "id": "29c8febd-2279-4f48-8ff1-6a1dc235c1a3",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "63354d5f-ffd9-4578-95b7-5b5a60241c5b",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "c5195bdd-98a2-40dc-8e40-b3e7f401066a",
+              "key": "apkey_value",
+              "value": "c1bcf7a9-c7f3-4a83-995e-b663c369e07a",
+              "enabled": true
+            },
+            {
+              "id": "11dca1a5-2dbb-442c-95f7-1c651e10d748",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1299b176-bbcf-46b7-a75a-76110dcf2a67",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "534e4ce0-200b-4d42-b8a8-06dc9d0802b9",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e0ee4c54-4193-45fb-91ab-b63d472290e7",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c517d84d-54b3-42b7-87e2-015f2619226c",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1afe6685-4621-482d-ba3c-a7fb1ad14376",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b7faca54-bdda-4e28-afeb-ec08e54e34bf",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "dd9399e2-a91b-47b1-85b4-7426d533fec4",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e44fb176-9447-49ec-a147-38157590da43",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "59334c34-8b22-4fab-b217-ca5bba80dba7",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9ef9b635-293f-4a11-8e64-7a5215c94a1f",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3867141e-7725-4b35-a5ce-4dae8b730acf",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5b56a602-e815-47f1-8c26-ad933608aad1",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9701532f-33c6-47ab-aa4e-6cfefeceb800",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "4b76c26b-283f-4981-9ee3-abc4161ad8e4",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a82ac8a9-b144-4f98-b0f4-4a48c1526857",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "dbb98bef-8497-4400-839b-9e7dfad4d75b",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "4a77f331-972d-4ee2-9d27-546d84021386",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "b67e3c7e-e87f-4963-8323-d2e66979e4c4",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f394d687-9042-4983-8c95-5b6d2e716e3f",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "647a0d24-b426-4bf3-b317-976f13d9075a",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7280c366-aca8-4f48-b01d-411b8a2d0c8b",
+              "key": "t-date",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "aa8c330c-56cb-4b55-b196-3c6fde381bd7",
+              "key": "decision_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "994730b8-cfa1-4193-9162-c0df91c2b104",
               "key": "DDHH",
               "value": "",
               "enabled": true
             },
             {
-              "id": "60f6905e-520f-485d-8b52-d9dce4957ab4",
+              "id": "8efcf6c7-d05f-434b-b63f-2ffbc4d895cd",
+              "key": "amount",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "af7cd3d9-f51b-41c8-8a0d-cdfe84df03c9",
+              "key": "txnGuid",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "10e53982-8f5f-436b-9ed7-1c6288917251",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "1749e519-5609-465a-98a3-dc74065c3b92",
+          "name": "MSIT YBAML BAPA-Test 1008",
+          "active": false,
+          "variables": [
+            {
+              "id": "d7ccbe90-c5fd-4aa3-b532-669ca5d650d3",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "2ca1c436-c125-45ec-9863-8dcbc0c8c046",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "57540f9a-0b9b-4790-b1d2-2dca43aeb611",
+              "key": "apkey_value",
+              "value": "4d22d3bc-79d5-467a-8893-7a7485afa297",
+              "enabled": true
+            },
+            {
+              "id": "4fa9b877-eb4f-40e2-9b31-0a0cfab141cd",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8e1ca971-cfbb-4ef0-9b98-1cfb59157adc",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d7cdc34e-3f14-4737-87e5-b35fe1c475eb",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "ca311ad6-6946-4e50-a52d-af38923e9c11",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a1929c17-2151-4ee4-896a-47bd0f0c6128",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2459a7bb-3736-4cb5-a505-d98437b1a6bc",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "6a9ca13e-71cd-4eef-b13e-15aae6cdef37",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "11d49d47-f053-4259-8bcc-41c4b3acf996",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8e9e657a-e5b7-4017-8dcb-ddcb21886345",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "bb0ba350-30c7-4168-8c14-b08679b2919f",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "28744324-32e4-4966-8cdf-7f6460584680",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f61f123a-d739-4484-8627-626d90917a00",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7b6971d6-90aa-4242-8955-36c8b9931312",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9d08ff21-b3f4-4ccf-a16b-6dea01c0f22c",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "da517071-dd2e-469d-9927-63db6af65583",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c26be046-99bd-4282-a849-2e84883efc6e",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2893645a-84b0-4686-9a19-e56d16a4e136",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1bba9122-79a3-48da-b852-1f7de7260644",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "9058f5a4-4946-4595-becf-7c4282c43271",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "51be777e-d4ce-4842-8e79-f42d44d92bc4",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "aa5f1745-e8ad-421b-8e9e-bc823a5f806a",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cb42f524-d1b9-4553-8212-2a7342c8da62",
+              "key": "t-date",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "49628281-240b-484a-b3d8-be974ab81e60",
+              "key": "decision_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "83f3983b-0268-4d3a-b11a-01c1fd903428",
+              "key": "DDHH",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "bf3dca88-dc70-459f-91ea-bb14ba14fedd",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "a490e405-4520-488d-8811-475b02ad0743",
+          "name": "UAT YBFRM BAPA 09",
+          "active": false,
+          "variables": [
+            {
+              "id": "2deae89c-9245-4f4c-ac04-dad9d5103f0e",
+              "key": "base_url",
+              "value": "https://10.10.20.47:8080/springapi",
+              "enabled": true
+            },
+            {
+              "id": "5411d520-7033-4653-a8c6-30200e717c69",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "c9b28497-e146-43cb-8fbb-5fe2498dee37",
+              "key": "apkey_value",
+              "value": "ea626a33-7106-49bf-a426-ea0005a244f9",
+              "enabled": true
+            },
+            {
+              "id": "75912d77-5f5c-4659-96de-9a592a41c1d3",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "ce042b80-9106-4672-97c9-451ce380bd98",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "562dad23-7e40-44d4-bd40-b37a66d95066",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "743f37bf-286e-45ec-86a3-6bb3791dc400",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "75dfba2c-4777-4083-900a-e5654677f0db",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "29bd028f-3fc5-4a88-a2a5-a77f31e51ed6",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "ad3f5acf-a33e-4d18-b04a-77afc49e489c",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a65878ae-8874-433b-97a1-d713faf1fad4",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3304d23c-1092-49b3-93c5-d326d0a423b3",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "339a25f1-33d0-4210-b262-dc85a8542596",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f9e5176f-f93a-44fd-849a-921c185c31e7",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "4c09bdec-f2eb-48d9-8e9a-5be87c7f64d1",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e81edbf8-2240-4321-b6b0-1132fea43293",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "93695fbc-9078-4ffe-a967-713ee5b44329",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "222aaedf-adf4-4197-8fdb-a5e9d5b7003e",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "84245d6c-66c7-4596-a85c-345f70659c77",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "223e4f62-e8f9-4d37-9e7c-2151ac457172",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "19d6c94c-36b3-4619-8f14-9cf01003c029",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "e2729d6a-98b6-4d47-9c56-0cd124221031",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a2eec55d-9a81-4ce5-8e1d-848353429c6b",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "65ac8d60-fb0f-4965-b947-4d46c40fc065",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "6f21e6b5-fa50-4371-ab2b-0d6ab4da1638",
+              "key": "amount",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "267051be-ff28-458d-89c9-5ddae793d4fe",
+              "key": "txnGuid",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "bd6d1090-eda9-4370-b3dc-530d18aaeae5",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "e08f2f4b-dfca-4e75-9cdf-48dfecd5081d",
+          "name": "MSIT YBFRM BAPA 09",
+          "active": false,
+          "variables": [
+            {
+              "id": "4d34eaf9-a746-4fff-97c3-1c368f732ad6",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "e510ffaf-7a0e-4752-8b55-c1ec16657c7d",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "a4c4063b-9a36-4361-b274-3f6b6af522db",
+              "key": "apkey_value",
+              "value": "ea626a33-7106-49bf-a426-ea0005a244f9",
+              "enabled": true
+            },
+            {
+              "id": "b2268acc-da74-4357-b5a2-516c95324917",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "de19bc03-a473-4af0-a911-a1973af66cdc",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5fee1c82-4df2-4670-ab06-ce1fd46a62be",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "83821898-72d5-49c7-8d21-52a2b9dc275f",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "ed0d3121-47f1-462a-9e6d-2d41a37a3141",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fe35e310-1d8b-42d3-b3de-928bbb8343b5",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9ccac1ba-4b1a-498e-aeab-4754099433e6",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "efdc85a7-0b52-440d-ac76-18c27470b5f0",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "dcb11056-2336-4fb3-a99d-d3f2586d9b89",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "94e362db-9dbd-4a0d-b95a-058c8640e032",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8d96e18b-4de2-41c3-929e-95e940f87168",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "40d63ba0-0aba-47cd-9891-8cd5d4de8c40",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c001337b-fb18-41ec-a4e6-964a86c1392a",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cdd6c278-213f-4619-97b2-59d3dd83afc0",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "db3294ff-cd96-45a8-8dfe-ebc8424eafbc",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2863870a-3b19-43d9-8514-2e7c28e58036",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3a1b9a19-f595-4db4-801e-84850d6ee3f7",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5893e924-2104-4f7c-b6f1-0de05d6fb0a0",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "9f21d23c-3639-4bdd-b6af-d0475c34f39a",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f32f7080-d8a3-46b8-853d-71ab69422266",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "baadc461-b6ba-4422-975d-a6eeca3d3caa",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "288218cd-4f53-4893-8008-dff0d7d73f31",
+              "key": "DDHH",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8b3de5aa-d3ad-4860-8a0a-78cf5dc66276",
+              "key": "amount",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cf2c07a8-9394-47d1-972e-a1edc4c7a7d6",
+              "key": "txnGuid",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "21e3ec32-9d05-4aa0-aa2a-64dfade2d00b",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "5dc71029-4ab2-4e9c-9fd2-32f499bf0930",
+          "name": "MSIT JPSL 14",
+          "active": false,
+          "variables": [
+            {
+              "id": "9185b75c-5789-4bb2-9e79-b9e4254038aa",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "886988fd-b6d7-4fab-85c1-f261f55b76b2",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "2d41653e-ca1e-41d0-b37e-314e07553f62",
+              "key": "apkey_value",
+              "value": "e80a50e2-648d-4e62-90f6-3db8f2b2c5c7",
+              "enabled": true
+            },
+            {
+              "id": "f280ac5d-d9d8-4388-8aa5-fae2d7cfbd4a",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "6e02130b-3387-4fa0-b24a-23cc78a0b8c0",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "64a0890e-b4fd-433b-bdd0-b275856ade57",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "52ed054b-9d1e-4abd-9e97-dfd86df3da86",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "dc76a033-7bda-4bfa-9482-aa6e16c3c918",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "952b7cfa-e62d-41ed-b94b-11f0a4ec68c8",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5e206e20-382d-4db7-8509-73483a51ed30",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "068c50a0-3771-4c22-9c09-150f0acdc103",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "379777c6-34fb-4954-ae72-88f3f807ea64",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8e9698a9-ba4f-46cf-9cf1-043324a3cb3d",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f5cc75ac-ff60-44cf-87b2-529d4f9e5ffa",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8c240428-a6f2-4563-b9b2-bbb5c1e0d7f3",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "497dda84-b198-4c66-9c6a-2c90cf3c4ef2",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "64177ce8-16df-4a53-9979-fe37fb067084",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c80cd9db-16d0-404d-bcac-aeb2bd3ff471",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d09f5db6-d5d5-4b0e-9582-fc5d32cffff2",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8bb55331-ae79-4613-883a-afcfa0725c3e",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "90dc4f64-418f-4ac3-b622-45fc2b405943",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "45546681-8a6c-4f33-a461-48fadc3fb2a1",
+              "key": "DDHH",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "844d6e82-8e21-443c-b513-b4d124e555b4",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e93d43a2-2fad-466f-833e-58487cc64d55",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5af81243-c24f-4455-ad99-5f05559599a3",
+              "key": "t-date",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "06fff6e4-79ea-49de-b036-d8ad1018e479",
+              "key": "decision_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e7010462-ecc3-49f0-bb33-5c071438973f",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "7c5fc41e-c7da-4ad4-acbf-706b9ebd9553",
+          "name": "UAT JPSL 15",
+          "active": false,
+          "variables": [
+            {
+              "id": "7374c1eb-e862-4169-bb50-9a2f7738db94",
+              "key": "base_url",
+              "value": "https://main.e2e.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "4e87ee2e-2f57-4068-9ded-499f20817898",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "e497877d-79bf-45d8-8bfa-2aa26d3e7606",
+              "key": "apkey_value",
+              "value": "f504dad0-5086-4b10-b16f-ee38c15fd155",
+              "enabled": true
+            },
+            {
+              "id": "3c577d84-9d84-46de-a37d-ae6cab3246c7",
+              "key": "CustomerID",
+              "value": "08082022",
+              "enabled": true
+            },
+            {
+              "id": "0b1cf721-11bd-4026-bb6d-d03101bbe9fe",
+              "key": "name",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2211c44f-71ae-4974-9eff-0a60f7153d3e",
+              "key": "Adaptor",
+              "value": "https://msit.dronapay.com/adaptor-msit",
+              "enabled": true
+            },
+            {
+              "id": "f6818997-5092-4ff1-8651-8b966c4ddc78",
+              "key": "AccountID",
+              "value": "Acc080820221",
+              "enabled": true
+            },
+            {
+              "id": "66434626-70bd-438b-a306-0eba74fb2c2a",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "48856838-36fd-4451-a166-7e0745a5e884",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "64d0b6cd-d22c-43f9-a353-dcdeeaeb3db4",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8e7231e8-003b-497f-9d57-7b22638e654f",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b8a5c5bb-2fef-41c2-a24f-18731f042c7f",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "28be7b4c-02bf-4b99-bbf1-fcd2ec325760",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "da9ade04-2693-4c13-9ad9-969306ee4bbe",
+              "key": "EFT",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c5fb5609-6fe0-429e-9197-f5621c647406",
+              "key": "CARD",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7d9bb3b3-2f91-4674-9c5f-1d2e540f16ed",
+              "key": "amount",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "52f5ad52-4363-4571-ab1b-0bfaa421220f",
+              "key": "UPI2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "58d839fc-2133-47cc-8216-d174fe81f628",
+              "key": "EFT2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "4c486735-f180-4fd7-b444-2bb40c68b49a",
+              "key": "CARD2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7ac6bf67-912d-4db2-bc9a-1ab9f5cf145e",
+              "key": "UPI3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c46a4812-5f22-42f0-a18d-f64b9f868abd",
+              "key": "EFT3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "79d8a041-b32f-4ae2-b462-0944de57eb77",
+              "key": "CARD3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2ef1d2ff-904e-4ad6-abec-bc411a2a5401",
+              "key": "UPI4",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "554d6e15-73b2-4270-956d-c768753bbc42",
+              "key": "EFT4",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a7b55c08-e61a-4a52-9a9f-9dacdb764d1e",
+              "key": "CARD4",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "50a1b101-ed3e-4873-98a2-2557a35f5eac",
+              "key": "UPI5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "397a9d2e-64cd-41b0-b8c4-bad5b79e85bc",
+              "key": "EFT5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a9383d78-5354-4006-bd3d-5489cee44d5d",
+              "key": "CARD5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f47425d2-052e-4040-bcf4-eaf19565ea4a",
+              "key": "UPI6",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c0e9be7d-0799-4fa3-917a-a0f3242ec345",
+              "key": "EFT6",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "eac144e9-b2ab-4603-b3f7-d7ab383b92aa",
+              "key": "CARD6",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "71cc73d5-783b-4425-9c6e-1d62b0a6c8f9",
+              "key": "UPI7",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "95975352-5472-4a15-8f97-5ac41ddb5d6c",
+              "key": "EFT7",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f02caa0e-b593-4e60-a7df-3e503053b93f",
+              "key": "CARD7",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1c0f498c-a9fc-4a85-9742-5d04dad6198e",
+              "key": "UPI8",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "043cac5b-9870-4773-b370-8df8c4375891",
+              "key": "EFT8",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d875d71a-0b8a-4dee-a488-df516076fb99",
+              "key": "CARD8",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "69041701-1a6b-47f4-b44b-1511cb551e12",
+              "key": "UPI9",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b944ccfc-7061-4a22-9055-01c65ddff69a",
+              "key": "EFT9",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "29385019-fa2a-4ee4-a9a2-3863f38844e6",
+              "key": "CARD9",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7b8ec19e-a669-4ed6-9c8a-c5e2aa05c1b8",
+              "key": "UPI10",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cbeb84bb-08e6-40c8-a8af-97a82d3cadf9",
+              "key": "EFT10",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "da9ac56b-85ff-4d5d-87c5-7d84d1c41fdd",
+              "key": "CARD10",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "958e3cd5-cfa9-4b10-9779-a01dcbf985af",
+              "key": "payee",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f3f96436-675d-407d-ad6f-777fb8813bff",
+              "key": "payer",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f874526e-30c0-41a8-8f6a-00f6505475c0",
+              "key": "UPI1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "2eb19055-79a2-49fe-8811-104d896194ea",
+              "key": "EFT1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cc14de77-e09c-4703-9d88-74409d72fe02",
+              "key": "CARD1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fd4c6fc0-e8e3-40e9-86b0-00f41473f634",
+              "key": "bin1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f62e9c0d-8dc6-4549-95bb-7a78a9d6b237",
+              "key": "bin",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0b4d9142-622b-4a2e-b7a3-3a0856e0103e",
+              "key": "CARD15",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b1fbd441-e974-4cc4-8444-0c15614d1434",
+              "key": "CARD11",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9d7b5db9-ab52-45d5-a979-6c6564bdecc3",
+              "key": "CARD12",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8a974366-96f7-4d45-91bc-2bbdd4638ccf",
+              "key": "CARD13",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "89a2e789-fe53-4383-a8b5-7fc7ef39182a",
+              "key": "CARD16",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9cdccc37-57ec-4585-af7d-8667accba541",
+              "key": "bin2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3fe0e501-40fe-4874-9f28-d2abcd97156b",
+              "key": "",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a95d4678-e09e-4f56-ad4a-4eb6ac526c4d",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "439a7ffe-fa65-4048-a979-953ee415c24b",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "385da995-807f-4122-97b0-113c7ca662db",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "03262521-5266-4d6d-af24-871670009ec4",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1491aed0-535f-42ca-bf61-9e4f870a8211",
+              "key": "YESBANK1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a64c5cc5-29eb-496b-ac98-8b7d51ce7342",
+              "key": "YESBANK2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5924b3c7-103d-44ed-867c-146e9d835b72",
+              "key": "YESBANK3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "4036b75f-58a0-4b14-b35c-0c6f6b62193d",
+              "key": "YESBANK4",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0a7e86cf-cf73-4658-bbb5-f3d01f07bfe6",
+              "key": "YESBANK5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "79232dbe-9362-4cab-8c8c-cd4052129a3d",
+              "key": "YESBANK6",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7f586f68-e0bf-4ce3-9ea8-22419c9bc6b6",
+              "key": "YESBANK7",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "40b55a41-c2f1-4fbc-9161-01f4abbc9cdf",
+              "key": "YESBANK8",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "71f0ef0f-4feb-48e9-9489-d7c876d3c824",
+              "key": "YESBANK9",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fc44618e-7a0f-473b-af27-a71333069af4",
+              "key": "YESBANK10",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1b79ad25-d0dc-45f2-8572-de0a675955f7",
+              "key": "YESBANK11",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "652f519c-aba2-4f69-a901-90f69ee4a81d",
+              "key": "AccountID1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a88658bd-4810-465d-be7a-424b3789189f",
+              "key": "AccountID2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "764abe53-46fe-433c-92d3-3e2eaa517d37",
+              "key": "AccountID3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0911d867-0936-4dc0-93f3-337e6c101e01",
+              "key": "AccountID4",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d5880669-6e80-40db-affd-757445bccd19",
+              "key": "AccountID5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "9b665f19-c406-42cb-bc15-5b0c10ed1545",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0baebbab-abd7-415d-98f2-843f7f8e6f0e",
+              "key": "MINKYC1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a74b9cf3-64eb-4762-b6c7-134832ffe4fc",
+              "key": "MINKYC10",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0a823818-ce6e-4bb1-ab29-6e98dacad16e",
+              "key": "MINKYC2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "91433b6d-6746-4f9d-9d86-16f3d18e35f3",
+              "key": "MINKYC3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cb3c7bda-f9a8-4d0f-b6b1-2aaf63ed8233",
+              "key": "MINKYC7",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "65247ba7-d52b-466b-a376-e4f0190b2e26",
+              "key": "MINKYC9",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "67323f8e-05c8-4d9c-8767-bbaf271c1987",
+              "key": "MINKYC5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0c9125d3-8483-4604-a800-b81e82563891",
+              "key": "MINKYC4",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "4ffa49f1-f953-4fb2-a3b0-b4311bbcb5d8",
+              "key": "MINKYC6",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "678bb208-502f-4a99-b170-9539008a04cc",
+              "key": "AMLCARD1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "1b926cc5-3780-404d-8c61-154b1fcc610b",
+              "key": "AMLCARD2",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "cc4b2c5d-8a52-41af-872c-6c9d101d8528",
+              "key": "AMLCARD3",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e57e7cc2-4eba-4405-a495-97b5a25623bb",
+              "key": "AMLCARD5",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fb424b76-f640-4a26-af14-88d0fa6da828",
+              "key": "YESBANK",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5f3dc4d0-bb5f-4f2b-a538-18b45c9ffff6",
+              "key": "AMLCARD",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "721aa827-36d5-4ffb-81d0-6be2010580d9",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "3482470d-c5cd-4fce-b6a6-4fb182848c0f",
+              "key": "current_timestamp + 1 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "82140742-30a1-4713-a904-f0e707cba7ea",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "f82aeaf0-6c74-4144-8cc6-1bf2f1933ece",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "27ecb01a-75e5-4591-a9b9-cbc118b26bc6",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "b89bcaf7-c387-4210-ad90-a7be7c334f47",
+              "key": "rules_topic",
+              "value": "rules",
+              "enabled": true
+            },
+            {
+              "id": "cf5a24fd-6cf6-4e5d-af07-c7e7dbafcc2c",
+              "key": "transactionDate",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0f6dfbd4-87e3-4519-afca-ea8621664dc3",
+              "key": "txnDate",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8d7a3ce6-2053-413a-a3cf-bcaf2bf56f6a",
+              "key": "Dec_date",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "471743dc-c64e-4c3a-b972-06d6322c90da",
+              "key": "txncount",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8f6008f7-f519-4864-8e87-d93e7306250a",
+              "key": "batch_url",
+              "value": "http://10.61.0.20/batch",
+              "enabled": true
+            },
+            {
+              "id": "67a0ea58-9ddc-4052-a04f-c44518b71457",
+              "key": "t-date",
+              "value": "2023-07-01",
+              "enabled": true
+            },
+            {
+              "id": "bf4b6f9f-d325-4807-857e-9fed679a64ef",
+              "key": "decision_id",
+              "value": "40",
+              "enabled": true
+            },
+            {
+              "id": "61af801f-448a-4506-847e-a66791c1664f",
+              "key": "custom",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "90996168-b748-43b2-bbdc-0ef56475b371",
+              "key": "expiry_date",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "5d1c731e-9653-44df-bca7-1dffcd499cd3",
+              "key": "Custom",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "859dd1bf-ad62-4fd3-b0f9-cac4b9b19b2d",
+              "key": "Springapi_URL",
+              "value": "https://10.77.0.16/springapi",
+              "enabled": true
+            },
+            {
+              "id": "831b4019-f7d7-43c8-bc55-4a8be6709c43",
+              "key": "base_url_profiles",
+              "value": "http://10.61.0.20/profiles",
+              "enabled": true
+            },
+            {
+              "id": "24c1ad19-f0a6-4f82-8880-06dfaf13ba5c",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "91816311-8276-48ef-8239-deba203ef8fa",
+              "key": "Idecisionid",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8a086c3e-3c07-43e9-ac77-70a4b1d00287",
+              "key": "IDecisionid",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "62761405-03f1-4b6f-8b9f-f2f53624b99b",
+              "key": "Idecisionid1",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "0f789d39-5a23-4f35-9c8a-2246067942e9",
+              "key": "iterationCount",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a813d47a-db98-45dc-add6-d7c7a679a700",
+              "key": "maxIterations",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a510ab59-0511-44e2-9d16-57a50cab0c1d",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fe51a603-4fcc-4ecc-827f-c45a54805b34",
+              "key": "DDHH",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "6229d78e-853e-4a0a-961b-c643bcae8418",
+              "key": "currentIstTimestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c52997c3-d420-4a8c-b094-09cd0c643a83",
+              "key": "",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "id": "ccbb0990-91e6-4f8c-9021-21a62c72770a",
+          "name": "MSIT PL 10",
+          "active": true,
+          "variables": [
+            {
+              "id": "224d7c0f-dd60-4606-b25b-0656b48f5184",
+              "key": "base_url",
+              "value": "https://main.msit.dronapay.net/springapi",
+              "enabled": true
+            },
+            {
+              "id": "373ee614-ed6f-4621-a693-e448e0b0df52",
+              "key": "apikey",
+              "value": "X-API-Key",
+              "enabled": true
+            },
+            {
+              "id": "dfa4ab92-6884-4ae8-8de6-7674a121d056",
+              "key": "apkey_value",
+              "value": "a957cec6-47ce-4d26-996d-c27d186da431",
+              "enabled": true
+            },
+            {
+              "id": "d72850d7-b535-4e95-a21b-f813e9b2d5e9",
+              "key": "customerFullName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "826faae0-ae0e-4f43-b531-48256320d99f",
+              "key": "id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "972242d8-1a64-4cb1-873a-612c7b2515e8",
+              "key": "win_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "efdcf186-c6e2-405e-aba9-5cc0d8dce164",
+              "key": "CustomerID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e35f70ee-b68e-417b-bf7c-e74ef5583a21",
+              "key": "externalId",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "dbe9fa0a-633b-41ee-baf6-4a24035c6f02",
+              "key": "firstName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "a9008de2-291c-4ba8-ab00-1e823129d6ef",
+              "key": "customerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "fe7349aa-3158-4a14-b651-80a800032582",
+              "key": "verifiedName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e32fff8d-ffc2-4939-8b3f-d9954c5a690e",
+              "key": "email",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "8bb1e1a8-02d9-4d6b-9b94-ede38e4ebabe",
+              "key": "AccountID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "7f8e6d0e-dedc-4662-8f45-00ea205ebdd0",
+              "key": "UPI",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "97b0a0ce-0470-4d96-9dc1-7d6c1c3c35c4",
+              "key": "Black",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "76ed566e-4d47-4ccf-89c3-f0428d1f86da",
+              "key": "Grey",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "235ca5b6-b4d0-421a-9759-752d391753ac",
+              "key": "White",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c50c65ee-9dac-40f9-910e-a2bb603a51fc",
+              "key": "Risky",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "613d677d-94cd-43ff-a9cb-62aee6dc7739",
+              "key": "current_timestamp",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "c84d23b0-1c96-45fa-ae60-42e0e61d3dd1",
+              "key": "current_timestamp + 2 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "6217efd7-7829-477f-9ddf-dfe5038337b0",
+              "key": "bin",
+              "value": "356102000000000",
+              "enabled": true
+            },
+            {
+              "id": "dcb673b5-d552-412f-8efd-f4623a75d121",
+              "key": "TransID",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "e0be5044-cc19-461e-9245-1619538c76e5",
+              "key": "Custom",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "d018123e-d29d-487a-a2b9-144331d2d5a1",
+              "key": "current_timestamp + 1 day",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "dfa1b1e8-7662-4c38-acda-9cfaaebfd43a",
+              "key": "seller_id",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "aea89144-d10a-4b92-aef8-f6a7f4744385",
+              "key": "sellerName",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "id": "ff229ceb-1120-425f-917b-443951db4bae",
+              "key": "amount",
+              "value": "1",
+              "enabled": true
+            },
+            {
+              "id": "var-1786859260519-jhajhy",
+              "key": "payerAddr",
+              "value": "Abc123562",
+              "enabled": true
+            },
+            {
+              "id": "var-1786863055253-ir7ssm",
+              "key": "payeeAddr",
+              "value": "divya123456@jio",
+              "enabled": true
+            },
+            {
+              "id": "var-1786863122703-id3f5l",
               "key": "",
               "value": "",
               "enabled": true
@@ -2984,9 +5190,9 @@
           ]
         }
       ],
-      "selectedRequestId": null
+      "selectedRequestId": "5a26498b-3945-4ef5-97d1-6fae9c6fafc2"
     }
   ],
-  "activeWorkspaceId": "04e6d9a6-eb96-4eac-82bf-7f152aeaf7e4",
-  "updatedAt": "2026-09-01T12:53:48.586Z"
+  "activeWorkspaceId": "5726a8a4-81e9-48c3-a47a-59d3ccbf4ea3",
+  "updatedAt": "2026-09-01T14:39:00.365Z"
 }
