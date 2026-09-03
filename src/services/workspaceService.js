@@ -115,16 +115,31 @@ async function fetchWorkspaceState() {
 
     const response =
         await fetch(
-            WORKSPACE_API_URL
+            WORKSPACE_API_URL,
+            {
+                method:
+                    "GET",
+
+                credentials:
+                    "include"
+            }
         )
 
 
     if (!response.ok) {
 
+        if (
+            response.status ===
+            401
+        ) {
+            throw new Error(
+                "Authentication required."
+            )
+        }
+
         throw new Error(
             "Failed to load workspace data"
         )
-
     }
 
 
@@ -132,8 +147,9 @@ async function fetchWorkspaceState() {
 
 }
 
-
-async function saveWorkspaceState(state) {
+async function saveWorkspaceState(
+    state
+) {
 
     const response =
         await fetch(
@@ -142,6 +158,9 @@ async function saveWorkspaceState(state) {
 
                 method:
                     "POST",
+
+                credentials:
+                    "include",
 
                 headers: {
 
@@ -159,17 +178,24 @@ async function saveWorkspaceState(state) {
 
     if (!response.ok) {
 
+        if (
+            response.status ===
+            401
+        ) {
+            throw new Error(
+                "Authentication required."
+            )
+        }
+
         throw new Error(
             "Failed to save workspace data"
         )
-
     }
 
 
     return response.json()
 
 }
-
 
 async function getGoogleDriveAuthStatus() {
 
@@ -717,40 +743,43 @@ export async function applyGoogleDriveWorkspaceLocally(
         null
 
 
-    const response =
-        await fetch(
-            "http://localhost:3001/api/workspace-state/apply-remote",
-            {
+   const response =
+    await fetch(
+        "http://localhost:3001/api/workspace-state/apply-remote",
+        {
 
-                method:
-                    "POST",
+            method:
+                "POST",
 
-                headers: {
+            credentials:
+                "include",
 
-                    "Content-Type":
-                        "application/json"
+            headers: {
 
-                },
+                "Content-Type":
+                    "application/json"
 
-                body:
-                    JSON.stringify({
+            },
 
-                        version,
+            body:
+                JSON.stringify({
 
-                        revision,
+                    version,
 
-                        workspaces:
-                            normalizedWorkspaces,
+                    revision,
 
-                        activeWorkspaceId:
-                            nextActiveWorkspaceId,
+                    workspaces:
+                        normalizedWorkspaces,
 
-                        updatedAt
+                    activeWorkspaceId:
+                        nextActiveWorkspaceId,
 
-                    })
+                    updatedAt
 
-            }
-        )
+                })
+
+        }
+    )
 
 
     if (!response.ok) {
@@ -943,13 +972,14 @@ export async function loadWorkspaces() {
 
 
     /*
-     * If common storage already contains
-     * workspace data, use it.
+     * =================================================
+     * EXISTING USER WORKSPACE
+     * =================================================
      */
 
     if (
         Array.isArray(
-            state.workspaces
+            state?.workspaces
         )
         &&
         state.workspaces.length > 0
@@ -967,66 +997,28 @@ export async function loadWorkspaces() {
 
 
         return workspaces
-
     }
 
 
     /*
-     * Common storage is empty.
+     * =================================================
+     * NEW USER
+     * =================================================
      *
-     * Try migrating previous workspace data
-     * from localStorage.
+     * Do NOT load old localStorage data here.
+     *
+     * Every authenticated account gets
+     * its own fresh workspace.
      */
 
-    const legacy =
-        readLegacyWorkspaceData()
-
-
-    if (
-        legacy &&
-        legacy.length > 0
-    ) {
-
-        const activeWorkspaceId =
-            localStorage.getItem(
-                LEGACY_ACTIVE_WORKSPACE_KEY
-            )
-
-
-        await saveWorkspaceState({
-
-            workspaces:
-                legacy,
-
-            activeWorkspaceId:
-                activeWorkspaceId ??
-                legacy[0]?.id ??
-                null
-
-        })
-
-
-        performance.mark?.(
-            "api-tester:workspace-load-finished"
-        )
-
-
-        return legacy
-
-    }
-
-
-    /*
-     * Try migrating even older
-     * collections/environment data.
-     */
-
-    const migrated =
-        migrateOldData()
+    const freshWorkspace =
+        createDefaultWorkspace()
 
 
     const workspaces =
-        [migrated]
+        [
+            freshWorkspace
+        ]
 
 
     await saveWorkspaceState({
@@ -1034,7 +1026,7 @@ export async function loadWorkspaces() {
         workspaces,
 
         activeWorkspaceId:
-            migrated.id
+            freshWorkspace.id
 
     })
 
@@ -1047,7 +1039,6 @@ export async function loadWorkspaces() {
     return workspaces
 
 }
-
 
 /*
  * =========================================================

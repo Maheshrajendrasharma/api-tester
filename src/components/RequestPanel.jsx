@@ -13,6 +13,129 @@ import { api } from "../services/scriptApi"
 
 const tabs = ['Params', 'Headers', 'Authorization', 'Body','Scripts']
 
+function hasTabValue(tab, request) {
+
+    if (!request) {
+        return false
+    }
+
+
+    if (tab === 'Params') {
+
+        return (
+            Array.isArray(request.params) &&
+            request.params.some((param) =>
+                param?.enabled !== false &&
+                (
+                    String(param?.key ?? '').trim() !== '' ||
+                    String(param?.value ?? '').trim() !== ''
+                )
+            )
+        )
+
+    }
+
+
+    if (tab === 'Headers') {
+
+        return (
+            Array.isArray(request.headers) &&
+            request.headers.some((header) =>
+                header?.enabled !== false &&
+                (
+                    String(header?.key ?? '').trim() !== '' ||
+                    String(header?.value ?? '').trim() !== ''
+                )
+            )
+        )
+
+    }
+
+
+    if (tab === 'Authorization') {
+
+        const authorization =
+            request.authorization
+
+
+        if (!authorization) {
+            return false
+        }
+
+
+        if (
+            authorization.type === 'None' ||
+            !authorization.type
+        ) {
+            return false
+        }
+
+
+        return (
+            String(
+                authorization.bearerToken ?? ''
+            ).trim() !== '' ||
+
+            String(
+                authorization.username ?? ''
+            ).trim() !== '' ||
+
+            String(
+                authorization.password ?? ''
+            ).trim() !== '' ||
+
+            String(
+                authorization.apiKey ?? ''
+            ).trim() !== '' ||
+
+            String(
+                authorization.apiValue ?? ''
+            ).trim() !== ''
+        )
+
+    }
+
+
+    if (tab === 'Body') {
+
+        if (
+            request.bodyMode === 'none'
+        ) {
+            return false
+        }
+
+
+        return (
+            String(
+                request.body ?? ''
+            ).trim() !== ''
+        )
+
+    }
+
+
+    if (tab === 'Scripts') {
+
+        return (
+            String(
+                request.scripts?.preRequest ?? ''
+            ).trim() !== '' ||
+
+            String(
+                request.scripts?.postResponse ?? ''
+            ).trim() !== ''
+        )
+
+    }
+
+
+    return false
+
+}
+
+
+
+
 function RequestPanel({ environment, isSending, onSend,onCancel, request, onRequestChange }) {
   const [activeTab, setActiveTab] = useState('Body')
   const [activeScriptTab, setActiveScriptTab] = useState("Pre-request")
@@ -117,9 +240,44 @@ if (!request) {
 
       </div>
       <div className="tabs" role="tablist" aria-label="Request options">
-        {tabs.map((tab) => (
-          <button className={`tab-button${activeTab === tab ? ' active' : ''}`} key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)}>{tab}</button>
-        ))}
+{tabs.map((tab) => {
+
+    const hasValue =
+        hasTabValue(
+            tab,
+            request
+        )
+
+
+    return (
+        <button
+            className={`tab-button${activeTab === tab ? ' active' : ''}`}
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={
+                activeTab === tab
+            }
+            onClick={() =>
+                setActiveTab(tab)
+            }
+        >
+
+            <span className="tab-label">
+                {tab}
+            </span>
+
+            {hasValue && (
+                <span
+                    className="tab-value-indicator"
+                    aria-label={`${tab} has values`}
+                />
+            )}
+
+        </button>
+    )
+
+})}
       </div>
 
 <div className="request-tab-content">

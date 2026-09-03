@@ -20,6 +20,8 @@ import { useEffect, useRef, useState } from 'react'
     } from './services/environmentService'
     import RunnerScreen from "./components/RunnerScreen";
 
+import './styles/login.css'
+
 
 
 import {
@@ -45,10 +47,112 @@ import {
         saveTextFile,
     } from './services/runtimeService'
 
+import LoginScreen from './components/LoginScreen'
 
+import RegisterScreen from './components/RegisterScreen'
 
 
     function App() {
+
+
+    const [authenticatedUser, setAuthenticatedUser] =
+    useState(null)
+
+    const [showRegisterScreen, setShowRegisterScreen] =
+    useState(false)
+
+    const [isAuthChecking, setIsAuthChecking] =
+        useState(true)
+
+        useEffect(() => {
+
+        let cancelled = false
+
+
+        async function checkAuthentication() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3001/api/auth/me",
+                        {
+                            method:
+                                "GET",
+
+                            credentials:
+                                "include"
+                        }
+                    )
+
+
+                if (
+                    response.ok
+                ) {
+
+                    const result =
+                        await response.json()
+
+
+                    if (
+                        !cancelled &&
+                        result?.authenticated
+                    ) {
+
+                        setAuthenticatedUser(
+                            result.user
+                        )
+
+                    }
+
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "[AUTH] Failed checking session:",
+                    error
+                )
+
+            }
+            finally {
+
+                if (
+                    !cancelled
+                ) {
+
+                    setIsAuthChecking(
+                        false
+                    )
+
+                }
+
+            }
+
+        }
+
+
+        checkAuthentication()
+
+
+        return () => {
+
+            cancelled =
+                true
+
+        }
+
+    }, [])
+
+        function handleLogin(user) {
+
+        setAuthenticatedUser(
+            user
+        )
+
+    }
+
     const [sidebarOpen, setSidebarOpen] =useState(true)
 
     const [environmentPanelOpen, setEnvironmentPanelOpen] = useState(true)
@@ -342,25 +446,34 @@ useEffect(() => {
 
 useEffect(() => {
 
-    let cancelled = false
+    if (
+        !authenticatedUser?.id
+    ) {
+        return
+    }
 
+    let cancelled = false
 
     async function initializeWorkspaces() {
 
         try {
 
+            /*
+             * Load workspace only after
+             * the application user is authenticated.
+             */
+
             const loadedWorkspaces =
                 await loadWorkspaces()
-
 
             const savedWorkspaceId =
                 await loadActiveWorkspaceId()
 
-
-            if (cancelled) {
+            if (
+                cancelled
+            ) {
                 return
             }
-
 
             const normalizedWorkspaces =
                 Array.isArray(
@@ -369,14 +482,12 @@ useEffect(() => {
                     ? loadedWorkspaces
                     : []
 
-
             const savedWorkspaceExists =
                 normalizedWorkspaces.some(
                     workspace =>
                         workspace.id ===
                         savedWorkspaceId
                 )
-
 
             const initialActiveId =
                 savedWorkspaceExists
@@ -386,25 +497,26 @@ useEffect(() => {
                         null
                     )
 
-
             setWorkspaces(
                 normalizedWorkspaces
             )
 
-
             setActiveWorkspaceId(
                 initialActiveId
             )
-
 
             savedWorkspaceSnapshotRef.current =
                 JSON.stringify(
                     normalizedWorkspaces
                 )
 
-
             setIsWorkspacesLoaded(
                 true
+            )
+
+            console.log(
+                "[WORKSPACE] Loaded for user:",
+                authenticatedUser.id
             )
 
         }
@@ -415,24 +527,26 @@ useEffect(() => {
                 error
             )
 
-
-            if (!cancelled) {
+            if (
+                !cancelled
+            ) {
 
                 setWorkspaces([])
 
-                setActiveWorkspaceId(null)
+                setActiveWorkspaceId(
+                    null
+                )
 
-                setIsWorkspacesLoaded(true)
-
+                setIsWorkspacesLoaded(
+                    false
+                )
             }
 
         }
 
     }
 
-
     initializeWorkspaces()
-
 
     return () => {
 
@@ -440,8 +554,9 @@ useEffect(() => {
 
     }
 
-}, [])
-
+}, [
+    authenticatedUser?.id
+])
 
 useEffect(() => {
 
@@ -3374,6 +3489,63 @@ async function handleDisconnectGoogleDrive() {
 
         return off
     }, [collectionState, environments, activeEnvironment])
+
+        if (
+        isAuthChecking
+    ) {
+
+        return (
+            <div className="login-screen">
+
+                <div className="login-card">
+
+                    <div className="login-title">
+                        Loading...
+                    </div>
+
+                </div>
+
+            </div>
+        )
+
+    }
+
+
+if (
+    !authenticatedUser
+) {
+
+    if (showRegisterScreen) {
+
+        return (
+            <RegisterScreen
+                onRegistered={() => {
+                    setShowRegisterScreen(false)
+                }}
+
+                onBackToLogin={() => {
+                    setShowRegisterScreen(false)
+                }}
+            />
+        )
+
+    }
+
+
+    return (
+        <LoginScreen
+            onLogin={
+                handleLogin
+            }
+
+            onRegister={() => {
+                setShowRegisterScreen(true)
+            }}
+        />
+    )
+
+}
+
 
     return (
         <>

@@ -757,7 +757,21 @@ font-size:13px;
   cursor: pointer;
   font: inherit;
   font-size: 13px;
+  
 }
+
+
+.tab-value-indicator {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 7px;
+    border-radius: 50%;
+    background: #58e6b1;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
 
 .tab-button:hover { color: #cbd6e0; }
 .tab-button.active { color: #eaf0f6; }
