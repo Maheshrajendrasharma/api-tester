@@ -41,12 +41,11 @@ const DATA_DIRECTORY =
     )
 
 
-const DATA_FILE =
+const WORKSPACE_DIRECTORY =
     path.join(
         DATA_DIRECTORY,
-        "workspace-state.json"
+        "workspaces"
     )
-
 
 /*
  * =========================================================
@@ -90,6 +89,80 @@ async function ensureDataDirectory() {
         {
             recursive: true
         }
+    )
+
+    await mkdir(
+        WORKSPACE_DIRECTORY,
+        {
+            recursive: true
+        }
+    )
+
+}
+
+
+function getSessionToken(request) {
+
+    const cookieHeader =
+        request.headers?.cookie ||
+        ""
+
+    const cookies =
+        cookieHeader
+            .split(";")
+            .map(
+                cookie =>
+                    cookie.trim()
+            )
+            .filter(Boolean)
+
+    const sessionCookie =
+        cookies.find(
+            cookie =>
+                cookie.startsWith(
+                    "api_tester_session="
+                )
+        )
+
+    if (!sessionCookie) {
+        return null
+    }
+
+    return decodeURIComponent(
+        sessionCookie.substring(
+            "api_tester_session=".length
+        )
+    )
+}
+
+
+async function getAuthenticatedUser(request) {
+
+    const token =
+        getSessionToken(request)
+
+    if (!token) {
+        return null
+    }
+
+    const result =
+        await authService.findSession(
+            token
+        )
+
+    if (!result?.session) {
+        return null
+    }
+
+    return result.session.userId
+}
+
+
+function getUserWorkspaceFile(userId) {
+
+    return path.join(
+        WORKSPACE_DIRECTORY,
+        `${userId}.json`
     )
 
 }
@@ -186,7 +259,14 @@ function escapeHtml(value) {
  * =========================================================
  */
 
-async function readWorkspaceState() {
+async function readWorkspaceState(
+    userId
+) {
+
+        const dataFile =
+        getUserWorkspaceFile(
+            userId
+        )
 
     await ensureDataDirectory()
 
@@ -195,7 +275,7 @@ async function readWorkspaceState() {
 
         const content =
             await readFile(
-                DATA_FILE,
+                dataFile,
                 "utf8"
             )
 
@@ -217,7 +297,7 @@ async function readWorkspaceState() {
 
             const backupFile =
                 path.join(
-                    DATA_DIRECTORY,
+                    WORKSPACE_DIRECTORY,
                     `workspace-state-corrupt-${Date.now()}.json`
                 )
 
@@ -225,7 +305,7 @@ async function readWorkspaceState() {
             try {
 
                 await copyFile(
-                    DATA_FILE,
+                    dataFile,
                     backupFile
                 )
 
@@ -255,7 +335,7 @@ async function readWorkspaceState() {
 
 
             await writeFile(
-                DATA_FILE,
+                dataFile,
                 JSON.stringify(
                     freshState,
                     null,
@@ -286,7 +366,7 @@ async function readWorkspaceState() {
 
 
             await writeFile(
-                DATA_FILE,
+                dataFile,
                 JSON.stringify(
                     freshState,
                     null,
@@ -319,8 +399,14 @@ let writeQueue =
 
 
 function saveWorkspaceState(
+    userId,
     state
 ) {
+
+    const dataFile =
+        getUserWorkspaceFile(
+            userId
+        )
 
     writeQueue =
         writeQueue.then(
@@ -328,10 +414,10 @@ function saveWorkspaceState(
 
                 await ensureDataDirectory()
 
-
                 const currentState =
-                    await readWorkspaceState()
-
+                    await readWorkspaceState(
+                        userId
+                    )
 
                 const currentRevision =
                     Number.isInteger(
@@ -339,7 +425,6 @@ function saveWorkspaceState(
                     )
                         ? currentState.revision
                         : 0
-
 
                 const nextState = {
 
@@ -365,10 +450,8 @@ function saveWorkspaceState(
 
                 }
 
-
                 const tempFile =
-                    `${DATA_FILE}.tmp`
-
+                    `${dataFile}.tmp`
 
                 await writeFile(
                     tempFile,
@@ -380,26 +463,28 @@ function saveWorkspaceState(
                     "utf8"
                 )
 
-
                 await rename(
                     tempFile,
-                    DATA_FILE
+                    dataFile
                 )
-
 
                 return nextState
 
             }
         )
 
-
     return writeQueue
-
 }
 
 async function writeWorkspaceStateDirectly(
+    userId,
     state
 ) {
+
+    const dataFile =
+    getUserWorkspaceFile(
+        userId
+    )
 
     await ensureDataDirectory()
 
@@ -411,7 +496,7 @@ async function writeWorkspaceStateDirectly(
 
 
     const tempFile =
-        `${DATA_FILE}.tmp`
+        `${dataFile}.tmp`
 
 
     await writeFile(
@@ -427,7 +512,7 @@ async function writeWorkspaceStateDirectly(
 
     await rename(
         tempFile,
-        DATA_FILE
+        dataFile
     )
 
 
@@ -450,17 +535,17 @@ function sendJson(
         statusCode,
         {
 
-            "Content-Type":
-                "application/json; charset=utf-8",
+"Access-Control-Allow-Origin":
+    "http://localhost:5173",
 
-            "Access-Control-Allow-Origin":
-                "*",
+"Access-Control-Allow-Methods":
+    "GET, POST, OPTIONS",
 
-            "Access-Control-Allow-Methods":
-                "GET, POST, OPTIONS",
+"Access-Control-Allow-Headers":
+    "Content-Type",
 
-            "Access-Control-Allow-Headers":
-                "Content-Type"
+"Access-Control-Allow-Credentials":
+    "true"
 
         }
     )
@@ -543,34 +628,33 @@ const server =
                  * CORS PREFLIGHT
                  * -----------------------------------------
                  */
+if (
+    request.method ===
+    "OPTIONS"
+) {
 
-                if (
-                    request.method ===
-                    "OPTIONS"
-                ) {
+    response.writeHead(
+        204,
+        {
+            "Access-Control-Allow-Origin":
+                "http://localhost:5173",
 
-                    response.writeHead(
-                        204,
-                        {
+            "Access-Control-Allow-Methods":
+                "GET, POST, OPTIONS",
 
-                            "Access-Control-Allow-Origin":
-                                "*",
+            "Access-Control-Allow-Headers":
+                "Content-Type, Accept",
 
-                            "Access-Control-Allow-Methods":
-                                "GET, POST, OPTIONS",
-
-                            "Access-Control-Allow-Headers":
-                                "Content-Type"
-
-                        }
-                    )
+            "Access-Control-Allow-Credentials":
+                "true"
+        }
+    )
 
 
-                    response.end()
+    response.end()
 
-                    return
-
-                }
+    return
+}
 
 
                 /*
@@ -1602,28 +1686,46 @@ if (
                  * =================================================
                  */
 
-                if (
-                    request.url ===
-                    "/api/workspace-state"
-                    &&
-                    request.method ===
-                    "GET"
-                ) {
+if (
+    request.url ===
+    "/api/workspace-state"
+    &&
+    request.method ===
+    "GET"
+) {
 
-                    const state =
-                        await readWorkspaceState()
+    const userId =
+        await getAuthenticatedUser(
+            request
+        )
 
+    if (!userId) {
 
-                    sendJson(
-                        response,
-                        200,
-                        state
-                    )
+        sendJson(
+            response,
+            401,
+            {
+                error:
+                    "Authentication required."
+            }
+        )
 
+        return
+    }
 
-                    return
+    const state =
+        await readWorkspaceState(
+            userId
+        )
 
-                }
+    sendJson(
+        response,
+        200,
+        state
+    )
+
+    return
+}
 
 
 
@@ -1638,6 +1740,25 @@ if (
     request.method ===
     "POST"
 ) {
+
+        const userId =
+        await getAuthenticatedUser(
+            request
+        )
+
+    if (!userId) {
+
+        sendJson(
+            response,
+            401,
+            {
+                error:
+                    "Authentication required."
+            }
+        )
+
+        return
+    }
 
     let body = ""
 
@@ -1700,9 +1821,10 @@ if (
                 }
 
 
-                await writeWorkspaceStateDirectly(
-                    nextState
-                )
+await writeWorkspaceStateDirectly(
+    userId,
+    nextState
+)
 
 
                 sendJson(
@@ -1744,36 +1866,52 @@ if (
                  * =================================================
                  */
 
-                if (
-                    request.url ===
-                    "/api/workspace-state"
-                    &&
-                    request.method ===
-                    "POST"
-                ) {
+if (
+    request.url ===
+    "/api/workspace-state"
+    &&
+    request.method ===
+    "POST"
+) {
 
-                    const body =
-                        await readRequestBody(
-                            request
-                        )
+    const userId =
+        await getAuthenticatedUser(
+            request
+        )
 
+    if (!userId) {
 
-                    const savedState =
-                        await saveWorkspaceState(
-                            body
-                        )
+        sendJson(
+            response,
+            401,
+            {
+                error:
+                    "Authentication required."
+            }
+        )
 
+        return
+    }
 
-                    sendJson(
-                        response,
-                        200,
-                        savedState
-                    )
+    const body =
+        await readRequestBody(
+            request
+        )
 
+    const savedState =
+        await saveWorkspaceState(
+            userId,
+            body
+        )
 
-                    return
+    sendJson(
+        response,
+        200,
+        savedState
+    )
 
-                }
+    return
+}
 
 
                 /*
@@ -1831,9 +1969,9 @@ server.listen(
             `Workspace server running on http://localhost:${PORT}`
         )
 
-        console.log(
-            `Workspace data: ${DATA_FILE}`
-        )
+console.log(
+    `Workspace data directory: ${WORKSPACE_DIRECTORY}`
+)
 
     }
-)
+)   
