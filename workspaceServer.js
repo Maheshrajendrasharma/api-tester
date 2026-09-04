@@ -7,6 +7,11 @@ import * as googleDriveService
 import * as authService
     from "./authService.js"
 
+import * as requestService
+    from "./electron/services/requestService.js"
+
+
+
 import { fileURLToPath } from "node:url"
 
 import {
@@ -1860,6 +1865,169 @@ await writeWorkspaceStateDirectly(
     return
 }
 
+
+/*
+ * =================================================
+ * LOCAL REQUEST AGENT
+ * =================================================
+ */
+
+if (
+    request.url ===
+    "/api/proxy/request"
+    &&
+    request.method ===
+    "POST"
+) {
+    const origin =
+        request.headers?.origin
+
+    if (
+        origin !==
+        "http://localhost:5173"
+    ) {
+        sendJson(
+            response,
+            403,
+            {
+                error:
+                    "Forbidden origin."
+            }
+        )
+
+        return
+    }
+
+    const userId =
+        await getAuthenticatedUser(
+            request
+        )
+
+    if (!userId) {
+        sendJson(
+            response,
+            401,
+            {
+                error:
+                    "Authentication required."
+            }
+        )
+
+        return
+    }
+
+    const body =
+        await readRequestBody(
+            request
+        )
+
+    const method =
+        String(
+            body?.method ??
+            "GET"
+        ).toUpperCase()
+
+    const url =
+        String(
+            body?.url ??
+            ""
+        ).trim()
+
+    if (!url) {
+        sendJson(
+            response,
+            400,
+            {
+                error:
+                    "Request URL is required."
+            }
+        )
+
+        return
+    }
+
+    let parsedUrl
+
+    try {
+        parsedUrl =
+            new URL(
+                url
+            )
+    } catch {
+        sendJson(
+            response,
+            400,
+            {
+                error:
+                    `Invalid request URL: ${url}`
+            }
+        )
+
+        return
+    }
+
+    if (
+        ![
+            "http:",
+            "https:"
+        ].includes(
+            parsedUrl.protocol
+        )
+    ) {
+        sendJson(
+            response,
+            400,
+            {
+                error:
+                    "Only HTTP and HTTPS URLs are supported."
+            }
+        )
+
+        return
+    }
+
+    if (
+        ![
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+        ].includes(
+            method
+        )
+    ) {
+        sendJson(
+            response,
+            400,
+            {
+                error:
+                    `Unsupported HTTP method: ${method}`
+            }
+        )
+
+        return
+    }
+
+    const result =
+        await requestService.execute(
+            {
+                ...body,
+                method,
+                url
+            }
+        )
+
+    sendJson(
+        response,
+        200,
+        result
+    )
+
+    return
+}
+
+
                 /*
                  * =================================================
                  * WORKSPACE STATE - POST
@@ -1940,6 +2108,9 @@ if (
                 )
 
 
+
+
+
                 sendJson(
                     response,
                     500,
@@ -1953,6 +2124,8 @@ if (
 
         }
     )
+
+
 
 
 /*
