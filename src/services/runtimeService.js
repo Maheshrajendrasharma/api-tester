@@ -90,8 +90,66 @@ async function executeBrowserRequest(request = {}) {
 }
 
 export async function executeRuntimeRequest(request) {
-  if (isElectronRuntime()) return window.apiTester.sendRequest(request)
-  return executeBrowserRequest(request)
+  // Electron: keep using the existing native request engine.
+  if (isElectronRuntime()) {
+    return window.apiTester.sendRequest(request)
+  }
+
+  // Vite/browser: use the local Node.js request agent.
+  const requestId = request?.__requestId
+  const controller = new AbortController()
+
+  if (requestId) {
+    browserRequestControllers.set(requestId, controller)
+  }
+
+  try {
+    const response = await fetch(
+      'http://localhost:3001/api/proxy/request',
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(request ?? {}),
+        signal: controller.signal,
+      }
+    )
+
+    let result
+
+    try {
+      result = await response.json()
+    } catch {
+      throw new Error(
+        `Local request agent returned an invalid response (${response.status}).`
+      )
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error ||
+        `Local request agent failed with HTTP ${response.status}.`
+      )
+    }
+
+    return result
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw error
+    }
+
+    throw new Error(
+      error?.message ||
+      'Failed to communicate with the local API Tester request agent.'
+    )
+  } finally {
+    if (requestId) {
+      browserRequestControllers.delete(requestId)
+    }
+  }
 }
 
 export async function cancelRuntimeRequest(requestId) {
