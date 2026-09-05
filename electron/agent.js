@@ -108,6 +108,17 @@ async function startAgent() {
         );
 
 
+
+        if (app.isPackaged) {
+
+    process.env.API_TESTER_DATA_DIRECTORY =
+        path.join(
+            app.getPath("userData"),
+            ".api-tester-data"
+        );
+
+        }
+
         await import(
             "../workspaceServer.js"
         );
