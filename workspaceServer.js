@@ -589,32 +589,15 @@ function sendJson(
     statusCode,
     data
 ) {
-
     response.writeHead(
-        statusCode,
-        {
-
-"Access-Control-Allow-Origin":
-    "http://localhost:5173",
-
-"Access-Control-Allow-Methods":
-    "GET, POST, OPTIONS",
-
-"Access-Control-Allow-Headers": "Content-Type, Authorization",
-
-"Access-Control-Allow-Credentials":
-    "true"
-
-        }
+        statusCode
     )
-
 
     response.end(
         JSON.stringify(
             data
         )
     )
-
 }
 
 
@@ -681,6 +664,38 @@ const server =
 
             try {
 
+                                const allowedOrigins = [
+                    "http://localhost:5173",
+                    "https://api-tester-jade.vercel.app"
+                ]
+
+                const origin =
+                    request.headers?.origin
+
+                if (
+                    allowedOrigins.includes(origin)
+                ) {
+                    response.setHeader(
+                        "Access-Control-Allow-Origin",
+                        origin
+                    )
+                }
+
+                response.setHeader(
+                    "Access-Control-Allow-Methods",
+                    "GET, POST, OPTIONS"
+                )
+
+                response.setHeader(
+                    "Access-Control-Allow-Headers",
+                    "Content-Type, Accept, Authorization"
+                )
+
+                response.setHeader(
+                    "Access-Control-Allow-Credentials",
+                    "true"
+                )
+
                 /*
                  * -----------------------------------------
                  * CORS PREFLIGHT
@@ -692,21 +707,8 @@ if (
 ) {
 
     response.writeHead(
-        204,
-        {
-            "Access-Control-Allow-Origin":
-                "http://localhost:5173",
-
-            "Access-Control-Allow-Methods":
-                "GET, POST, OPTIONS",
-
-"Access-Control-Allow-Headers": "Content-Type, Accept, Authorization",
-
-            "Access-Control-Allow-Credentials":
-                "true"
-        }
+        204
     )
-
 
     response.end()
 
