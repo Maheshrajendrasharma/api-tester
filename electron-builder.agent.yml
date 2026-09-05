@@ -25,7 +25,7 @@ nsis:
   allowToChangeInstallationDirectory: false
   createDesktopShortcut: false
   createStartMenuShortcut: false
-  runAfterFinish: false
+  runAfterFinish: true
 
 extraMetadata:
   main: electron/agent.js
