@@ -27,3 +27,5 @@ google-token.json
 *.sw?
 
 google-web-credentials.json
+
+credentials.json.json
