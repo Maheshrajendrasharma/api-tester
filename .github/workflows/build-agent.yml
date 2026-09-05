@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Build Agent
-        run: npm run dist:agent
+        run: npm run dist:agent -- --publish never
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
