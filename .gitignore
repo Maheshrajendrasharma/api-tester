@@ -25,3 +25,5 @@ google-token.json
 *.njsproj
 *.sln
 *.sw?
+
+google-web-credentials.json
