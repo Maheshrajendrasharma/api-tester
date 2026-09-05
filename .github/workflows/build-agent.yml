@@ -6,6 +6,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   build-agent:
     runs-on: windows-latest
@@ -33,5 +36,4 @@ jobs:
           name: API Tester Agent v${{ github.run_number }}
           files: release-agent/API-Tester-Agent-Setup.exe
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
