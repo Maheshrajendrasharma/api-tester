@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import '../styles/home.css'
 
-const AGENT_DOWNLOAD_URL = '#'
-const DESKTOP_DOWNLOAD_URL = '#'
+const AGENT_DOWNLOAD_URL ='https://github.com/Maheshrajendrasharma/api-tester/releases/latest/download/API-Tester-Agent-Setup.exe'
+
+const DESKTOP_DOWNLOAD_URL ='https://github.com/Maheshrajendrasharma/api-tester/releases/latest/download/API-Tester-Desktop-Setup.exe'
 
 export default function HomePage({
     onContinueOnline,
