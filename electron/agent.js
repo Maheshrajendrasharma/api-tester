@@ -1,4 +1,7 @@
 import path from "node:path";
+import fs from "node:fs";
+
+
 import { app } from "electron";
 import { fileURLToPath } from "node:url";
 
@@ -17,21 +20,86 @@ async function startAgent() {
 
     try {
 
+        /*
+         * =====================================================
+         * LOAD ENVIRONMENT
+         * =====================================================
+         *
+         * Development:
+         *   C:\API Tester\.env.local
+         *
+         * Packaged Agent:
+         *   %APPDATA%\API Tester Agent\.env.local
+         *
+         * Never look for .env.local inside app.asar.
+         */
+
         if (
             typeof process.loadEnvFile ===
             "function"
         ) {
 
-            const envPath =
-                path.join(
-                    __dirname,
-                    "..",
-                    ".env.local"
+            let envPath;
+
+            if (app.isPackaged) {
+
+                const userDataDirectory =
+                    app.getPath(
+                        "userData"
+                    );
+
+                fs.mkdirSync(
+                    userDataDirectory,
+                    {
+                        recursive: true
+                    }
                 );
 
-            process.loadEnvFile(
+                envPath =
+                    path.join(
+                        userDataDirectory,
+                        ".env.local"
+                    );
+
+            }
+            else {
+
+                envPath =
+                    path.join(
+                        __dirname,
+                        "..",
+                        ".env.local"
+                    );
+
+            }
+
+
+            console.log(
+                "API TESTER AGENT ENV:",
                 envPath
             );
+
+
+            if (
+                fs.existsSync(
+                    envPath
+                )
+            ) {
+
+                process.loadEnvFile(
+                    envPath
+                );
+
+            }
+            else {
+
+                console.warn(
+                    "API TESTER AGENT: .env.local not found:",
+                    envPath
+                );
+
+            }
+
         }
 
 
@@ -63,18 +131,27 @@ async function startAgent() {
 
 }
 
-
 // =====================================================
 // READY
 // =====================================================
 
 app.whenReady().then(
-    async () => {
+  async () => {
 
-        await startAgent();
+    await startAgent();
 
+    if (process.platform === "win32" && app.isPackaged) {
+      app.setLoginItemSettings({
+        openAtLogin: true,
+        path: process.execPath,
+        args: []
+      });
     }
+
+  }
 );
+
+
 
 
 // =====================================================
@@ -87,3 +164,7 @@ app.on(
         // Agent has no window.
     }
 );
+
+
+
+
