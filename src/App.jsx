@@ -22,6 +22,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import './styles/login.css'
 
+import { supabase } from './lib/supabase'
+
 
 
 import {
@@ -69,70 +71,70 @@ import RegisterScreen from './components/RegisterScreen'
         let cancelled = false
 
 
-        async function checkAuthentication() {
+async function checkAuthentication() {
 
-            try {
+    try {
 
-                const response =
-                    await fetch(
-                        "http://localhost:3001/api/auth/me",
-                        {
-                            method:
-                                "GET",
+const { data, error } =
+    await supabase.auth.getSession()
 
-                            credentials:
-                                "include"
-                        }
-                    )
+if (error) {
+    throw error
+}
 
+if (cancelled) {
+    return
+}
 
-                if (
-                    response.ok
-                ) {
+const user =
+    data?.session?.user
 
-                    const result =
-                        await response.json()
+if (!user) {
+    setAuthenticatedUser(null)
+    return
+}
 
+const appUser = {
+    id: user.id,
+    email: user.email,
+    name:
+        user.user_metadata?.name ||
+        user.email
+}
 
-                    if (
-                        !cancelled &&
-                        result?.authenticated
-                    ) {
+console.log(
+    "[AUTH] Supabase session found:",
+    appUser
+)
 
-                        setAuthenticatedUser(
-                            result.user
-                        )
+setAuthenticatedUser(
+    appUser
+)
 
-                    }
+    }
+    catch (error) {
 
-                }
+        console.error(
+            "[AUTH] Failed checking session:",
+            error
+        )
 
-            }
-            catch (error) {
+    }
+    finally {
 
-                console.error(
-                    "[AUTH] Failed checking session:",
-                    error
-                )
+        if (
+            !cancelled
+        ) {
 
-            }
-            finally {
-
-                if (
-                    !cancelled
-                ) {
-
-                    setIsAuthChecking(
-                        false
-                    )
-
-                }
-
-            }
+            setIsAuthChecking(
+                false
+            )
 
         }
 
+    }
 
+}
         checkAuthentication()
 
 
@@ -145,13 +147,82 @@ import RegisterScreen from './components/RegisterScreen'
 
     }, [])
 
-        function handleLogin(user) {
 
-        setAuthenticatedUser(
-            user
+
+
+useEffect(() => {
+
+    const {
+        data: {
+            subscription
+        }
+    } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+
+            const user =
+                session?.user
+
+            if (!user) {
+                setAuthenticatedUser(null)
+                return
+            }
+
+            const appUser = {
+                id: user.id,
+                email: user.email,
+                name:
+                    user.user_metadata?.name ||
+                    user.email
+            }
+
+            setAuthenticatedUser(
+                appUser
+            )
+        }
+    )
+
+    return () => {
+        subscription.unsubscribe()
+    }
+
+}, [])
+
+
+
+function handleLogin(user) {
+
+    setAuthenticatedUser(
+        user
+    )
+
+}
+
+
+async function handleLogout() {
+
+    try {
+
+        const {
+            error
+        } = await supabase.auth.signOut()
+
+        if (error) {
+            throw error
+        }
+
+        setAuthenticatedUser(null)
+
+    }
+    catch (error) {
+
+        console.error(
+            "[AUTH] Sign out failed:",
+            error
         )
 
     }
+
+}
 
     const [sidebarOpen, setSidebarOpen] =useState(true)
 
@@ -3590,6 +3661,14 @@ if (
 
         saveStatus={
     saveStatus
+}
+
+authenticatedUser={
+    authenticatedUser
+}
+
+onLogout={
+    handleLogout
 }
 
         googleDriveStatus={

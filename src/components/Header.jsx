@@ -1,56 +1,37 @@
 import { useState, useEffect, useRef } from "react";
 
 function Header({
-
     environments,
-
     onEnvironmentChange,
-
     onImportEnvironment,
-
     onExportEnvironment,
-
     onDuplicateEnvironment,
-
     onDeleteEnvironment,
-
     onExportAllEnvironments,
 
-
     workspaceName = "Workspace",
-
     workspaces = [],
-
     selectedWorkspace,
-
     onWorkspaceChange,
 
-
     onCreateWorkspace,
-
     onRenameWorkspace,
-
     onDeleteWorkspace,
-
     onImportWorkspace,
-
     onExportWorkspace,
 
     onConnectGoogleDrive,
-
     googleDriveStatus,
 
     saveStatus,
+    googleDriveSyncing,
+    onSyncGoogleDrive,
+    onDisconnectGoogleDrive,
 
-googleDriveSyncing,
-
-onSyncGoogleDrive,
-
-onDisconnectGoogleDrive,
-
+    authenticatedUser,
+    onLogout,
 
     sidebarOpen,
-
     setSidebarOpen,
 
 }) {
@@ -61,7 +42,11 @@ onDisconnectGoogleDrive,
     const [showWorkspaceMenu, setShowWorkspaceMenu] =
         useState(false);
 
+    const [showProfileMenu, setShowProfileMenu] =
+        useState(false);
+
     const menuRef = useRef(null);
+    const profileMenuRef = useRef(null);
 
 
     useEffect(() => {
@@ -72,11 +57,15 @@ onDisconnectGoogleDrive,
                 menuRef.current &&
                 !menuRef.current.contains(event.target)
             ) {
-
                 setShowWorkspaceMenu(false);
-
                 setShowWorkspaceActions(false);
+            }
 
+            if (
+                profileMenuRef.current &&
+                !profileMenuRef.current.contains(event.target)
+            ) {
+                setShowProfileMenu(false);
             }
 
         }
@@ -611,8 +600,242 @@ onDisconnectGoogleDrive,
 </div>
 
 
+{/* =================================================
+    RIGHT SIDE
+    USER PROFILE
+   ================================================= */}
 
-   
+<div
+    className="app-header-profile"
+    ref={profileMenuRef}
+    style={{
+        WebkitAppRegion: "no-drag",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        marginLeft: "auto",
+        marginRight: "145px",
+    }}
+>
+
+    <button
+        type="button"
+        title={
+            authenticatedUser?.name ||
+            authenticatedUser?.email ||
+            "Profile"
+        }
+        aria-label="Open profile menu"
+        onClick={() => {
+            setShowProfileMenu(
+                previous => !previous
+            );
+        }}
+        style={{
+            WebkitAppRegion: "no-drag",
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.18)",
+            background: "linear-gradient(135deg, #55e6c1, #20bf6b)",
+            color: "#101010",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "15px",
+            fontWeight: "700",
+            cursor: "pointer",
+            padding: 0,
+        }}
+    >
+        {(
+            authenticatedUser?.name ||
+            authenticatedUser?.email ||
+            "U"
+        )
+            .trim()
+            .charAt(0)
+            .toUpperCase()}
+    </button>
+
+
+    {showProfileMenu && (
+
+        <div
+            className="profile-dropdown"
+            style={{
+                position: "absolute",
+                top: "48px",
+                right: "12px",
+                width: "300px",
+                background: "#202020",
+                border: "1px solid #383838",
+                borderRadius: "8px",
+                boxShadow: "0 12px 35px rgba(0,0,0,0.45)",
+                padding: "14px",
+                zIndex: 10000,
+                color: "#f1f1f1",
+            }}
+            onMouseDown={(event) => {
+                event.stopPropagation();
+            }}
+        >
+
+            {/* USER INFORMATION */}
+
+            <div
+                style={{
+                    textAlign: "center",
+                    padding: "8px 4px 14px",
+                }}
+            >
+
+                <div
+                    style={{
+                        width: "64px",
+                        height: "64px",
+                        borderRadius: "50%",
+                        margin: "0 auto 10px",
+                        background:
+                            "linear-gradient(135deg, #55e6c1, #20bf6b)",
+                        color: "#101010",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "25px",
+                        fontWeight: "700",
+                    }}
+                >
+                    {(
+                        authenticatedUser?.name ||
+                        authenticatedUser?.email ||
+                        "U"
+                    )
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase()}
+                </div>
+
+
+                <div
+                    style={{
+                        fontSize: "17px",
+                        fontWeight: "600",
+                        marginBottom: "5px",
+                    }}
+                >
+                    {authenticatedUser?.name || "User"}
+                </div>
+
+
+                <div
+                    style={{
+                        fontSize: "13px",
+                        color: "#999",
+                        wordBreak: "break-word",
+                    }}
+                >
+                    {authenticatedUser?.email || ""}
+                </div>
+
+            </div>
+
+
+            {/* VIEW PROFILE */}
+
+            <button
+                type="button"
+                onClick={() => {
+                    setShowProfileMenu(false);
+                }}
+                style={{
+                    width: "100%",
+                    height: "42px",
+                    borderRadius: "6px",
+                    border: "1px solid #555",
+                    background: "transparent",
+                    color: "#f1f1f1",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    marginBottom: "10px",
+                }}
+            >
+                View Profile
+            </button>
+
+
+            <div
+                style={{
+                    height: "1px",
+                    background: "#333",
+                    margin: "4px 0 8px",
+                }}
+            />
+
+
+            {/* SETTINGS */}
+
+            <button
+                type="button"
+                onClick={() => {
+                    setShowProfileMenu(false);
+                }}
+                style={{
+                    width: "100%",
+                    border: "0",
+                    background: "transparent",
+                    color: "#f1f1f1",
+                    textAlign: "left",
+                    padding: "11px 8px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    borderRadius: "5px",
+                }}
+            >
+                Settings
+            </button>
+
+
+            {/* SIGN OUT */}
+
+            <button
+                type="button"
+                onClick={async () => {
+
+                    setShowProfileMenu(false);
+
+                    try {
+                        await onLogout?.();
+                    }
+                    catch (error) {
+                        console.error(
+                            "[AUTH] Sign out failed:",
+                            error
+                        );
+                    }
+
+                }}
+                style={{
+                    width: "100%",
+                    border: "0",
+                    background: "transparent",
+                    color: "#ff6b6b",
+                    textAlign: "left",
+                    padding: "11px 8px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    borderRadius: "5px",
+                }}
+            >
+                Sign Out
+            </button>
+
+        </div>
+
+    )}
+
+</div>
+
 
         </header>
 

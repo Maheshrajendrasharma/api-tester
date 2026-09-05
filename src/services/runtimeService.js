@@ -1,4 +1,7 @@
+import { supabase } from '../lib/supabase'
+
 const browserRequestControllers = new Map()
+
 
 export function isElectronRuntime() {
   return Boolean(window.apiTester?.sendRequest)
@@ -103,16 +106,28 @@ export async function executeRuntimeRequest(request) {
     browserRequestControllers.set(requestId, controller)
   }
 
+
+  const {
+  data: {
+    session,
+  },
+} = await supabase.auth.getSession()
+
+if (!session?.access_token) {
+  throw new Error('Authentication required. Please log in again.')
+}
+
   try {
     const response = await fetch(
       'http://localhost:3001/api/proxy/request',
       {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
+headers: {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+  Authorization: `Bearer ${session.access_token}`,
+},
         body: JSON.stringify(request ?? {}),
         signal: controller.signal,
       }

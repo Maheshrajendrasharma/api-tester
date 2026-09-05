@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 function RegisterScreen({
+
     onRegistered,
+
     onBackToLogin
+
 }) {
 
     const [name, setName] =
@@ -27,12 +31,15 @@ function RegisterScreen({
         useState(false)
 
 
+
     async function handleRegister(event) {
 
         event.preventDefault()
 
         setError("")
+
         setSuccess("")
+
 
 
         const normalizedName =
@@ -42,113 +49,177 @@ function RegisterScreen({
             email.trim().toLowerCase()
 
 
+
         if (!normalizedName) {
-            setError("Name is required.")
+
+            setError(
+                "Name is required."
+            )
+
             return
         }
+
 
 
         if (!normalizedEmail) {
-            setError("Email is required.")
+
+            setError(
+                "Email is required."
+            )
+
             return
         }
 
 
-        if (
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-                normalizedEmail
-            )
-        ) {
+
+if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        normalizedEmail
+    )
+) {
+
             setError(
                 "Please enter a valid email address."
             )
+
             return
         }
+
 
 
         if (password.length < 8) {
+
             setError(
                 "Password must be at least 8 characters long."
             )
+
             return
         }
+
 
 
         if (password !== confirmPassword) {
+
             setError(
                 "Passwords do not match."
             )
+
             return
         }
+
 
 
         setLoading(true)
 
 
+
         try {
 
-            const response =
-                await fetch(
-                    "http://localhost:3001/api/auth/register",
-                    {
-                        method: "POST",
+            const {
+                data,
+                error
+            } = await supabase.auth.signUp({
 
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                            "Accept":
-                                "application/json"
-                        },
+                email:
+                    normalizedEmail,
 
-                        credentials:
-                            "include",
+                password,
 
-                        body:
-                            JSON.stringify({
-                                name:
-                                    normalizedName,
+                options: {
 
-                                email:
-                                    normalizedEmail,
+                    data: {
 
-                                password
-                            })
+                        name:
+                            normalizedName
+
                     }
-                )
+
+                }
+
+            })
 
 
-            const result =
-                await response.json()
 
-
-            if (!response.ok) {
+            if (error) {
 
                 throw new Error(
-                    result?.error ||
+                    error.message ||
                     "Registration failed."
                 )
 
             }
 
 
-            setSuccess(
-                "Account created successfully. You can now log in."
+
+            if (!data?.user) {
+
+                throw new Error(
+                    "Registration failed."
+                )
+
+            }
+
+
+
+            console.log(
+                "[AUTH] Supabase registration successful:",
+                data.user
             )
 
 
+
             setName("")
+
             setEmail("")
+
             setPassword("")
+
             setConfirmPassword("")
 
 
-            if (onRegistered) {
-                onRegistered(
-                    result?.user
+
+/*
+ * Supabase may require email confirmation.
+ * In that case session will be null.
+ */
+
+            if (!data.session) {
+
+                setSuccess(
+                    "Account created successfully. Please check your email to confirm your account."
                 )
+
+            }
+            else {
+
+                setSuccess(
+                    "Account created successfully."
+                )
+
+            }
+
+
+
+            if (onRegistered) {
+
+                onRegistered({
+
+                    id:
+                        data.user.id,
+
+                    email:
+                        data.user.email,
+
+                    name:
+                        data.user.user_metadata?.name ||
+                        normalizedName
+
+                })
+
             }
 
         }
+
         catch (error) {
 
             console.error(
@@ -162,6 +233,7 @@ function RegisterScreen({
             )
 
         }
+
         finally {
 
             setLoading(false)
@@ -171,6 +243,7 @@ function RegisterScreen({
     }
 
 
+
     return (
 
         <div className="login-screen">
@@ -178,152 +251,227 @@ function RegisterScreen({
             <div className="login-card">
 
                 <div className="login-title">
+
                     Create Account
+
                 </div>
 
+
                 <div className="login-subtitle">
+
                     Create your API Tester account
+
                 </div>
+
 
 
                 <form
+
                     onSubmit={handleRegister}
+
                     className="login-form"
+
                 >
 
                     <div className="login-field">
 
                         <label>
+
                             Name
+
                         </label>
 
+
                         <input
+
                             type="text"
+
                             value={name}
+
                             onChange={(event) =>
                                 setName(
                                     event.target.value
                                 )
                             }
+
                             placeholder="Enter your name"
+
                             autoComplete="name"
+
                             disabled={loading}
+
                         />
 
                     </div>
 
 
+
                     <div className="login-field">
 
                         <label>
+
                             Email
+
                         </label>
 
+
                         <input
+
                             type="email"
+
                             value={email}
+
                             onChange={(event) =>
                                 setEmail(
                                     event.target.value
                                 )
                             }
+
                             placeholder="Enter your email"
+
                             autoComplete="email"
+
                             disabled={loading}
+
                         />
 
                     </div>
 
 
+
                     <div className="login-field">
 
                         <label>
+
                             Password
+
                         </label>
 
+
                         <input
+
                             type="password"
+
                             value={password}
+
                             onChange={(event) =>
                                 setPassword(
                                     event.target.value
                                 )
                             }
+
                             placeholder="Minimum 8 characters"
+
                             autoComplete="new-password"
+
                             disabled={loading}
+
                         />
 
                     </div>
+
 
 
                     <div className="login-field">
 
                         <label>
+
                             Confirm Password
+
                         </label>
 
+
                         <input
+
                             type="password"
+
                             value={confirmPassword}
+
                             onChange={(event) =>
                                 setConfirmPassword(
                                     event.target.value
                                 )
                             }
+
                             placeholder="Re-enter password"
+
                             autoComplete="new-password"
+
                             disabled={loading}
+
                         />
 
                     </div>
 
 
+
                     {error && (
 
                         <div className="login-error">
+
                             {error}
+
                         </div>
 
                     )}
+
 
 
                     {success && (
 
                         <div className="login-success">
+
                             {success}
+
                         </div>
 
                     )}
 
 
+
                     <button
+
                         type="submit"
+
                         className="login-button"
+
                         disabled={loading}
+
                     >
 
                         {loading
+
                             ? "Creating account..."
+
                             : "Create Account"}
 
                     </button>
 
 
+
                 </form>
+
 
 
                 <div className="login-footer">
 
                     Already have an account?
 
+
                     <button
+
                         type="button"
+
                         className="login-link-button"
+
                         onClick={onBackToLogin}
+
                         disabled={loading}
+
                     >
+
                         Sign in
+
                     </button>
 
                 </div>
@@ -335,6 +483,7 @@ function RegisterScreen({
     )
 
 }
+
 
 
 export default RegisterScreen
