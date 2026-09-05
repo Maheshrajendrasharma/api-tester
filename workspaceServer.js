@@ -11,6 +11,9 @@ import * as requestService
     from "./electron/services/requestService.js"
 
 
+import { createClient } from "@supabase/supabase-js"
+
+
 
 import { fileURLToPath } from "node:url"
 
@@ -37,6 +40,26 @@ const __dirname =
 
 
 const PORT = 3001
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL
+const supabasePublishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+
+if (!supabaseUrl || !supabasePublishableKey) {
+  throw new Error(
+    "Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY."
+  )
+}
+
+const supabaseServer = createClient(
+  supabaseUrl,
+  supabasePublishableKey,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+)
 
 
 const DATA_DIRECTORY =
@@ -162,6 +185,37 @@ async function getAuthenticatedUser(request) {
     return result.session.userId
 }
 
+
+async function getSupabaseAuthenticatedUser(request) {
+  const authorization = request.headers?.authorization
+
+  if (!authorization) {
+    return null
+  }
+
+  const match = authorization.match(/^Bearer\s+(.+)$/i)
+
+  if (!match) {
+    return null
+  }
+
+  const accessToken = match[1].trim()
+
+  if (!accessToken) {
+    return null
+  }
+
+  const {
+    data: { user },
+    error,
+  } = await supabaseServer.auth.getUser(accessToken)
+
+  if (error || !user) {
+    return null
+  }
+
+  return user.id
+}
 
 function getUserWorkspaceFile(userId) {
 
@@ -546,8 +600,7 @@ function sendJson(
 "Access-Control-Allow-Methods":
     "GET, POST, OPTIONS",
 
-"Access-Control-Allow-Headers":
-    "Content-Type",
+"Access-Control-Allow-Headers": "Content-Type, Authorization",
 
 "Access-Control-Allow-Credentials":
     "true"
@@ -647,8 +700,7 @@ if (
             "Access-Control-Allow-Methods":
                 "GET, POST, OPTIONS",
 
-            "Access-Control-Allow-Headers":
-                "Content-Type, Accept",
+"Access-Control-Allow-Headers": "Content-Type, Accept, Authorization",
 
             "Access-Control-Allow-Credentials":
                 "true"
@@ -1699,10 +1751,7 @@ if (
     "GET"
 ) {
 
-    const userId =
-        await getAuthenticatedUser(
-            request
-        )
+const userId = await getSupabaseAuthenticatedUser(request)
 
     if (!userId) {
 
@@ -2009,14 +2058,11 @@ if (
         return
     }
 
-    const result =
-        await requestService.execute(
-            {
-                ...body,
-                method,
-                url
-            }
-        )
+    const result = await requestService.execute({
+    ...body,
+    method,
+    url,
+})
 
     sendJson(
         response,
@@ -2042,10 +2088,10 @@ if (
     "POST"
 ) {
 
-    const userId =
-        await getAuthenticatedUser(
-            request
-        )
+const userId =
+    await getSupabaseAuthenticatedUser(
+        request
+    )
 
     if (!userId) {
 
@@ -2134,9 +2180,7 @@ if (
  * =========================================================
  */
 
-server.listen(
-    PORT,
-    () => {
+server.listen(PORT, "localhost", () => {
 
         console.log(
             `Workspace server running on http://localhost:${PORT}`

@@ -1,5 +1,6 @@
-const WORKSPACE_API_URL =
-    "http://localhost:3001/api/workspace-state"
+import { supabase } from "../lib/supabase"
+
+
 
 
 
@@ -11,28 +12,12 @@ const GOOGLE_DRIVE_UPLOAD_URL =
     "http://localhost:3001/api/google/drive/upload"
 
 
-const GOOGLE_DRIVE_DOWNLOAD_URL =
-    "http://localhost:3001/api/google/drive/download"
 
 
-const GOOGLE_DRIVE_WORKSPACE_URL =
-    "http://localhost:3001/api/google/drive/workspace"
 
 
-const OLD_COLLECTION_KEY =
-    "apiTester.collections"
 
 
-const OLD_ENVIRONMENT_KEY =
-    "apiTester.environments"
-
-
-const LEGACY_WORKSPACE_KEY =
-    "api_tester_workspaces"
-
-
-const LEGACY_ACTIVE_WORKSPACE_KEY =
-    "api_tester_active_workspace"
 
 
 function createDefaultWorkspace() {
@@ -112,89 +97,223 @@ function normalizeWorkspace(workspace) {
 
 
 async function fetchWorkspaceState() {
+    const {
+        data: {
+            user
+        },
+        error: userError
+    } = await supabase.auth.getUser()
 
-    const response =
-        await fetch(
-            WORKSPACE_API_URL,
-            {
-                method:
-                    "GET",
-
-                credentials:
-                    "include"
-            }
+    if (userError) {
+        console.error(
+            "[SUPABASE] Failed to get authenticated user:",
+            userError
         )
 
+        throw userError
+    }
 
-    if (!response.ok) {
-
-        if (
-            response.status ===
-            401
-        ) {
-            throw new Error(
-                "Authentication required."
-            )
-        }
-
+    if (!user) {
         throw new Error(
-            "Failed to load workspace data"
+            "Authentication required."
         )
     }
 
+    const {
+        data,
+        error
+    } = await supabase
+        .from("workspace_states")
+        .select(
+            "version, revision, active_workspace_id, workspaces, updated_at"
+        )
+        .eq(
+            "user_id",
+            user.id
+        )
+        .maybeSingle()
 
-    return response.json()
+    if (error) {
+        console.error(
+            "[SUPABASE] Failed to load workspace:",
+            error
+        )
 
+        throw error
+    }
+
+    if (!data) {
+        return {
+            version: 1,
+            revision: 0,
+            workspaces: [],
+            activeWorkspaceId: null,
+            updatedAt: null
+        }
+    }
+
+    return {
+        version:
+            Number.isInteger(data.version)
+                ? data.version
+                : 1,
+
+        revision:
+            Number.isInteger(data.revision)
+                ? data.revision
+                : 0,
+
+        workspaces:
+            Array.isArray(data.workspaces)
+                ? data.workspaces
+                : [],
+
+        activeWorkspaceId:
+            data.active_workspace_id ??
+            null,
+
+        updatedAt:
+            data.updated_at ??
+            null
+    }
 }
 
-async function saveWorkspaceState(
-    state
-) {
 
-    const response =
-        await fetch(
-            WORKSPACE_API_URL,
-            {
+async function saveWorkspaceState(state) {
+    const {
+        data: {
+            user
+        },
+        error: userError
+    } = await supabase.auth.getUser()
 
-                method:
-                    "POST",
-
-                credentials:
-                    "include",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json"
-
-                },
-
-                body:
-                    JSON.stringify(state)
-
-            }
+    if (userError) {
+        console.error(
+            "[SUPABASE] Failed to get authenticated user:",
+            userError
         )
 
+        throw userError
+    }
 
-    if (!response.ok) {
-
-        if (
-            response.status ===
-            401
-        ) {
-            throw new Error(
-                "Authentication required."
-            )
-        }
-
+    if (!user) {
         throw new Error(
-            "Failed to save workspace data"
+            "Authentication required."
         )
     }
 
+    const {
+        data: existingState,
+        error: existingStateError
+    } = await supabase
+        .from("workspace_states")
+        .select(
+            "version, revision"
+        )
+        .eq(
+            "user_id",
+            user.id
+        )
+        .maybeSingle()
 
-    return response.json()
+    if (existingStateError) {
+        console.error(
+            "[SUPABASE] Failed to read workspace revision:",
+            existingStateError
+        )
 
+        throw existingStateError
+    }
+
+    const currentRevision =
+        Number.isInteger(
+            existingState?.revision
+        )
+            ? existingState.revision
+            : 0
+
+    const normalizedWorkspaces =
+        Array.isArray(
+            state?.workspaces
+        )
+            ? state.workspaces.map(
+                normalizeWorkspace
+            )
+            : []
+
+    const nextState = {
+        user_id:
+            user.id,
+
+        version:
+            Number.isInteger(
+                state?.version
+            )
+                ? state.version
+                : 1,
+
+        revision:
+            currentRevision + 1,
+
+        active_workspace_id:
+            state?.activeWorkspaceId ??
+            null,
+
+        workspaces:
+            normalizedWorkspaces,
+
+        updated_at:
+            new Date().toISOString()
+    }
+
+    const {
+        data,
+        error
+    } = await supabase
+        .from("workspace_states")
+        .upsert(
+            nextState,
+            {
+                onConflict:
+                    "user_id"
+            }
+        )
+        .select(
+            "version, revision, active_workspace_id, workspaces, updated_at"
+        )
+        .single()
+
+    if (error) {
+        console.error(
+            "[SUPABASE] Failed to save workspace:",
+            error
+        )
+
+        throw error
+    }
+
+    return {
+        version:
+            data.version,
+
+        revision:
+            data.revision,
+
+        workspaces:
+            Array.isArray(
+                data.workspaces
+            )
+                ? data.workspaces
+                : [],
+
+        activeWorkspaceId:
+            data.active_workspace_id ??
+            null,
+
+        updatedAt:
+            data.updated_at ??
+            null
+    }
 }
 
 async function getGoogleDriveAuthStatus() {
@@ -830,127 +949,8 @@ export async function applyGoogleDriveWorkspaceLocally(
  */
 
 
-function readLegacyWorkspaceData() {
-
-    const data =
-        localStorage.getItem(
-            LEGACY_WORKSPACE_KEY
-        )
 
 
-    if (!data) {
-
-        return null
-
-    }
-
-
-    try {
-
-        const parsed =
-            JSON.parse(data)
-
-
-        if (!Array.isArray(parsed)) {
-
-            return null
-
-        }
-
-
-        return parsed.map(
-            normalizeWorkspace
-        )
-
-    }
-    catch (error) {
-
-        console.error(
-            "Failed loading legacy workspaces:",
-            error
-        )
-
-        return null
-
-    }
-
-}
-
-
-function migrateOldData() {
-
-    const oldCollections =
-        localStorage.getItem(
-            OLD_COLLECTION_KEY
-        )
-
-
-    const oldEnvironments =
-        localStorage.getItem(
-            OLD_ENVIRONMENT_KEY
-        )
-
-
-    let collections = []
-
-    let environments = []
-
-
-    try {
-
-        if (oldCollections) {
-
-            collections =
-                JSON.parse(
-                    oldCollections
-                )
-
-        }
-
-    }
-    catch {
-
-        collections = []
-
-    }
-
-
-    try {
-
-        if (oldEnvironments) {
-
-            environments =
-                JSON.parse(
-                    oldEnvironments
-                )
-
-        }
-
-    }
-    catch {
-
-        environments = []
-
-    }
-
-
-    return {
-
-        id:
-            crypto.randomUUID(),
-
-        name:
-            "Default Workspace",
-
-        collections,
-
-        environments,
-
-        selectedRequestId: null
-
-    }
-
-}
 
 
 /*
@@ -1080,16 +1080,6 @@ export async function saveWorkspaces(
     }
 
 
-    /*
-     * =========================================
-     * STEP 1 — SAVE LOCALLY
-     * =========================================
-     *
-     * This remains the primary save.
-     *
-     * Vite and Electron continue using the same
-     * common workspace-state.json.
-     */
 
     const localState =
         await saveWorkspaceState(

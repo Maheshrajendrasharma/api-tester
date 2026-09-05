@@ -10,13 +10,15 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "electron": "electron .",
-    "workspace-server": "node workspaceServer.js"
+    "workspace-server": "node --env-file=.env.local workspaceServer.js"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@monaco-editor/react": "^4.7.0",
+    "@supabase/ssr": "^0.12.6",
+    "@supabase/supabase-js": "^2.115.0",
     "@uiw/codemirror-themes": "^4.25.11",
     "codemirror": "^6.0.2",
     "googleapis": "^176.0.0",

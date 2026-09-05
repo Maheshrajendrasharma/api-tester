@@ -1,26 +1,26 @@
-import { useState } from "react"
+    import { useState } from "react"
+    import { supabase } from "../lib/supabase"
 
 
-const AUTH_LOGIN_URL =
-    "http://localhost:3001/api/auth/login"
 
 
-function LoginScreen({
-    onLogin,
-    onRegister
-}) {
 
-    const [email, setEmail] =
-        useState("")
+    function LoginScreen({
+        onLogin,
+        onRegister
+    }) {
 
-    const [password, setPassword] =
-        useState("")
+        const [email, setEmail] =
+            useState("")
 
-    const [error, setError] =
-        useState("")
+        const [password, setPassword] =
+            useState("")
 
-    const [isSubmitting, setIsSubmitting] =
-        useState(false)
+        const [error, setError] =
+            useState("")
+
+        const [isSubmitting, setIsSubmitting] =
+            useState(false)
 
 
     async function handleSubmit(
@@ -29,13 +29,10 @@ function LoginScreen({
 
         event.preventDefault()
 
-
         setError("")
-
 
         const normalizedEmail =
             email.trim()
-
 
         if (!normalizedEmail) {
 
@@ -46,7 +43,6 @@ function LoginScreen({
             return
         }
 
-
         if (!password) {
 
             setError(
@@ -56,56 +52,30 @@ function LoginScreen({
             return
         }
 
-
         setIsSubmitting(
             true
         )
 
-
         try {
 
-            const response =
-                await fetch(
-                    AUTH_LOGIN_URL,
-                    {
+            const {
+                data,
+                error
+            } =
+                await supabase.auth.signInWithPassword({
 
-                        method:
-                            "POST",
+                    email:
+                        normalizedEmail,
 
-                        credentials:
-                            "include",
+                    password
 
-                        headers: {
-
-                            "Content-Type":
-                                "application/json"
-
-                        },
-
-                        body:
-                            JSON.stringify({
-
-                                email:
-                                    normalizedEmail,
-
-                                password
-
-                            })
-
-                    }
-                )
+                })
 
 
-            const result =
-                await response.json()
-
-
-            if (
-                !response.ok
-            ) {
+            if (error) {
 
                 throw new Error(
-                    result?.error ||
+                    error.message ||
                     "Login failed."
                 )
 
@@ -113,8 +83,7 @@ function LoginScreen({
 
 
             if (
-                !result?.success ||
-                !result?.user
+                !data?.user
             ) {
 
                 throw new Error(
@@ -122,14 +91,30 @@ function LoginScreen({
                 )
 
             }
+
+
+            console.log(
+                "[AUTH] Supabase login successful:",
+                data.user
+            )
 
 
             setPassword("")
 
 
-            onLogin(
-                result.user
-            )
+            onLogin({
+
+                id:
+                    data.user.id,
+
+                email:
+                    data.user.email,
+
+                name:
+                    data.user.user_metadata?.name ||
+                    data.user.email
+
+            })
 
         }
         catch (error) {
@@ -157,142 +142,142 @@ function LoginScreen({
     }
 
 
-    return (
+        return (
 
-        <div className="login-screen">
+            <div className="login-screen">
 
-            <div className="login-card">
+                <div className="login-card">
 
-                <div className="login-header">
+                    <div className="login-header">
 
-                    <div className="login-logo">
-                        API Tester
+                        <div className="login-logo">
+                            API Tester
+                        </div>
+
+                        <div className="login-title">
+                            Sign in
+                        </div>
+
+                        <div className="login-subtitle">
+                            Sign in to continue to API Tester
+                        </div>
+
                     </div>
 
-                    <div className="login-title">
-                        Sign in
-                    </div>
 
-                    <div className="login-subtitle">
-                        Sign in to continue to API Tester
-                    </div>
+                    <form
+                        className="login-form"
+                        onSubmit={
+                            handleSubmit
+                        }
+                    >
+
+                        <label
+                            className="login-field"
+                        >
+
+                            <span>
+                                Email
+                            </span>
+
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={
+                                    event =>
+                                        setEmail(
+                                            event.target.value
+                                        )
+                                }
+                                placeholder="Enter your email"
+                                autoComplete="username"
+                                disabled={
+                                    isSubmitting
+                                }
+                            />
+
+                        </label>
+
+
+                        <label
+                            className="login-field"
+                        >
+
+                            <span>
+                                Password
+                            </span>
+
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={
+                                    event =>
+                                        setPassword(
+                                            event.target.value
+                                        )
+                                }
+                                placeholder="Enter your password"
+                                autoComplete="current-password"
+                                disabled={
+                                    isSubmitting
+                                }
+                            />
+
+                        </label>
+
+
+                        {
+                            error
+                                ? (
+                                    <div
+                                        className="login-error"
+                                        role="alert"
+                                    >
+                                        {error}
+                                    </div>
+                                )
+                                : null
+                        }
+
+
+                        <button
+                            type="submit"
+                            className="login-submit"
+                            disabled={
+                                isSubmitting
+                            }
+                        >
+
+                            {
+                                isSubmitting
+                                    ? "Signing in..."
+                                    : "Sign in"
+                            }
+
+                        </button>
+
+                    </form>
+
+                    <div className="login-footer">
+
+        Don't have an account?
+
+        <button
+            type="button"
+            className="login-link-button"
+            onClick={onRegister}
+        >
+            Create account
+        </button>
+
+    </div>
 
                 </div>
 
-
-                <form
-                    className="login-form"
-                    onSubmit={
-                        handleSubmit
-                    }
-                >
-
-                    <label
-                        className="login-field"
-                    >
-
-                        <span>
-                            Email
-                        </span>
-
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={
-                                event =>
-                                    setEmail(
-                                        event.target.value
-                                    )
-                            }
-                            placeholder="Enter your email"
-                            autoComplete="username"
-                            disabled={
-                                isSubmitting
-                            }
-                        />
-
-                    </label>
-
-
-                    <label
-                        className="login-field"
-                    >
-
-                        <span>
-                            Password
-                        </span>
-
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={
-                                event =>
-                                    setPassword(
-                                        event.target.value
-                                    )
-                            }
-                            placeholder="Enter your password"
-                            autoComplete="current-password"
-                            disabled={
-                                isSubmitting
-                            }
-                        />
-
-                    </label>
-
-
-                    {
-                        error
-                            ? (
-                                <div
-                                    className="login-error"
-                                    role="alert"
-                                >
-                                    {error}
-                                </div>
-                            )
-                            : null
-                    }
-
-
-                    <button
-                        type="submit"
-                        className="login-submit"
-                        disabled={
-                            isSubmitting
-                        }
-                    >
-
-                        {
-                            isSubmitting
-                                ? "Signing in..."
-                                : "Sign in"
-                        }
-
-                    </button>
-
-                </form>
-
-                <div className="login-footer">
-
-    Don't have an account?
-
-    <button
-        type="button"
-        className="login-link-button"
-        onClick={onRegister}
-    >
-        Create account
-    </button>
-
-</div>
-
             </div>
 
-        </div>
+        )
 
-    )
+    }
 
-}
-
-export default LoginScreen
+    export default LoginScreen
