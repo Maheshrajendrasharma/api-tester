@@ -1,51 +1,33 @@
-name: Build API Tester Agent
+appId: com.apitester.agent
+productName: API Tester Agent
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
+directories:
+  output: release-agent
 
-permissions:
-  contents: write
+files:
+  - electron/agent.js
+  - workspaceServer.js
+  - googleDriveService.js
+  - authService.js
+  - electron/services/**
+  - node_modules/**
+  - package.json
 
-jobs:
-  build-agent:
-    runs-on: windows-latest
+asar: true
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+win:
+  target:
+    - nsis
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: false
+  createStartMenuShortcut: false
+  runAfterFinish: false
 
-      - name: Install dependencies
-        run: npm ci
+extraMetadata:
+  main: electron/agent.js
 
-      - name: Build Agent
-        run: npm run dist:agent -- --publish never
-
-      - name: Verify Agent Installer
-        shell: pwsh
-        run: |
-          $file = "release-agent/API-Tester-Agent-Setup.exe"
-          if (!(Test-Path $file)) {
-            Write-Error "Agent installer was not found: $file"
-            exit 1
-          }
-
-          Write-Host "Agent installer found:"
-          Get-Item $file | Select-Object FullName, Length
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: agent-v${{ github.run_number }}
-          name: API Tester Agent v${{ github.run_number }}
-          files: release-agent/API-Tester-Agent-Setup.exe
-          generate_release_notes: true
-          token: ${{ github.token }}
+artifactName: API-Tester-Agent-Setup.exe

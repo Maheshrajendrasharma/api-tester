@@ -37,3 +37,4 @@ jobs:
           files: release-agent/API-Tester-Agent-Setup.exe
           generate_release_notes: true
           token: ${{ github.token }}
+          
