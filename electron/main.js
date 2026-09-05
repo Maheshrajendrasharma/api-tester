@@ -1,12 +1,13 @@
         import path from "node:path";
-        import {
-            app,
-            BrowserWindow,
-            ipcMain,
-            Menu,
-            dialog
-        } from "electron";
-
+import {
+    app,
+    BrowserWindow,
+    ipcMain,
+    Menu,
+    dialog,
+    Tray,
+    nativeImage
+} from "electron";
 
         import { fileURLToPath } from "node:url";
         import { readFile, writeFile } from "node:fs/promises";
@@ -25,8 +26,56 @@
         // =====================================================
         // MAIN WINDOW
         // =====================================================
-        let mainWindow = null;
-        let allowClose = false;
+let mainWindow = null;
+
+const isAgentMode = process.argv.includes(
+        "--agent"
+    );
+
+async function startAgentServer() {
+
+    try {
+
+        if (
+            typeof process.loadEnvFile ===
+            "function"
+        ) {
+
+            process.loadEnvFile(
+                path.join(
+                    __dirname,
+                    "..",
+                    ".env.local"
+                )
+            );
+
+        }
+
+        await import(
+            "../workspaceServer.js"
+        );
+
+        console.log(
+            "API Tester Agent server started."
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "API Tester Agent server failed:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+    let agentTray = null;
+
+
+            let allowClose = false;
 
         // =====================================================
         // API REQUEST
@@ -221,7 +270,7 @@
                     window.destroy();
                 }
             }
-        );
+        );  
 
 
 
@@ -314,48 +363,101 @@
         // APP READY
         // =====================================================
 
-        app.whenReady().then(() => {
+app.whenReady().then(
+    async () => {
 
-            buildMenu();
-
-            createWindow();
-
-
-            app.on(
-                "activate",
-                () => {
-
-                    if (
-                        BrowserWindow
-                            .getAllWindows()
-                            .length === 0
-                    ) {
-
-                        createWindow();
-
-                    }
-
-                }
-            );
-
-        });
+        console.log(
+            "ELECTRON APP READY"
+        );
 
 
-        // =====================================================
-        // ALL WINDOWS CLOSED
-        // =====================================================
+if (
+    isAgentMode
+) {
+
+    console.log(
+        "API TESTER AGENT MODE"
+    );
+
+    await startAgentServer();
+
+    console.log(
+        "API TESTER AGENT IS RUNNING"
+    );
+
+    if (
+    isAgentMode &&
+    app.isPackaged &&
+    process.platform === "win32"
+) {
+
+    app.setLoginItemSettings({
+        openAtLogin: true,
+        path: process.execPath,
+        args: [
+            "--agent"
+        ]
+    });
+
+    console.log(
+        "API TESTER AGENT AUTO-START ENABLED"
+    );
+
+}
+
+    await new Promise(
+        () => {}
+    );
+
+}
+
+
+        buildMenu();
+
+        createWindow();
+
 
         app.on(
-            "window-all-closed",
+            "activate",
             () => {
 
                 if (
-                    process.platform !== "darwin"
+                    BrowserWindow
+                        .getAllWindows()
+                        .length === 0
                 ) {
 
-                    app.quit();
+                    createWindow();
 
                 }
 
             }
         );
+
+    }
+);
+
+        // =====================================================
+        // ALL WINDOWS CLOSED
+        // =====================================================
+
+app.on(
+    "window-all-closed",
+    () => {
+
+        if (
+            isAgentMode
+        ) {
+            return;
+        }
+
+        if (
+            process.platform !== "darwin"
+        ) {
+
+            app.quit();
+
+        }
+
+    }
+);

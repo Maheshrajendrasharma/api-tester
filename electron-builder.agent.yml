@@ -1,0 +1,33 @@
+appId: com.apitester.agent
+productName: API Tester Agent
+
+directories:
+  output: release-agent-test
+
+files:
+  - electron/agent.js
+  - workspaceServer.js
+  - googleDriveService.js
+  - authService.js
+  - electron/services/**
+  - node_modules/**
+  - package.json
+
+asar: true
+
+win:
+  target:
+    - nsis
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: false
+  createStartMenuShortcut: false
+  runAfterFinish: false
+
+extraMetadata:
+  main: electron/agent.js
+
+artifactName: API-Tester-Agent-Setup.exe

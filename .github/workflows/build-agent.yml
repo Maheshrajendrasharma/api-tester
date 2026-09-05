@@ -1,0 +1,37 @@
+name: Build API Tester Agent
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-agent:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Agent
+        run: npm run dist:agent
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: agent-v${{ github.run_number }}
+          name: API Tester Agent v${{ github.run_number }}
+          files: release-agent/API-Tester-Agent-Setup.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

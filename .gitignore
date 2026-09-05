@@ -29,3 +29,7 @@ google-token.json
 google-web-credentials.json
 
 credentials.json.json
+
+# Electron build output
+release-agent/
+release-agent-test/

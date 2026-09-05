@@ -10,7 +10,9 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "electron": "electron .",
-    "workspace-server": "node --env-file=.env.local workspaceServer.js"
+    "agent": "electron . --agent",
+    "dist:desktop": "npm run build && electron-builder --win",
+    "dist:agent": "electron-builder --config electron-builder.agent.yml"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
@@ -26,11 +28,41 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
+  "build": {
+    "appId": "com.apitester.app",
+    "productName": "API Tester",
+    "directories": {
+      "output": "release"
+    },  
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "workspaceServer.js",
+      "googleDriveService.js",
+      "authService.js",
+      "src/services/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
     "oxlint": "^1.75.0",
     "vite": "^8.2.0",
     "xlsx": "^0.18.5"

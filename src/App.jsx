@@ -50,6 +50,7 @@ import {
     } from './services/runtimeService'
 
 import LoginScreen from './components/LoginScreen'
+import HomePage from './components/HomePage'
 
 import RegisterScreen from './components/RegisterScreen'
 
@@ -60,8 +61,11 @@ import RegisterScreen from './components/RegisterScreen'
     const [authenticatedUser, setAuthenticatedUser] =
     useState(null)
 
-    const [showRegisterScreen, setShowRegisterScreen] =
+const [showRegisterScreen, setShowRegisterScreen] =
     useState(false)
+
+const [showHomePage, setShowHomePage] =
+    useState(true)
 
     const [isAuthChecking, setIsAuthChecking] =
         useState(true)
@@ -3561,9 +3565,29 @@ async function handleDisconnectGoogleDrive() {
         return off
     }, [collectionState, environments, activeEnvironment])
 
+
+    if (showHomePage) {
+    return (
+        <HomePage
+            onContinueOnline={() => {
+                setShowHomePage(false)
+            }}
+        />
+    )
+}
+
         if (
         isAuthChecking
     ) {
+if (showHomePage) {
+    return (
+        <HomePage
+            onContinueOnline={() => {
+                setShowHomePage(false)
+            }}
+        />
+    )
+}
 
         return (
             <div className="login-screen">
@@ -3586,20 +3610,27 @@ if (
     !authenticatedUser
 ) {
 
-    if (showRegisterScreen) {
+
+
+    if (
+        showRegisterScreen
+    ) {
 
         return (
             <RegisterScreen
                 onRegistered={() => {
-                    setShowRegisterScreen(false)
+                    setShowRegisterScreen(
+                        false
+                    )
                 }}
 
                 onBackToLogin={() => {
-                    setShowRegisterScreen(false)
+                    setShowRegisterScreen(
+                        false
+                    )
                 }}
             />
         )
-
     }
 
 
@@ -3610,13 +3641,13 @@ if (
             }
 
             onRegister={() => {
-                setShowRegisterScreen(true)
+                setShowRegisterScreen(
+                    true
+                )
             }}
         />
     )
-
 }
-
 
     return (
         <>

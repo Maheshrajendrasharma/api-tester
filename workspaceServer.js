@@ -1930,25 +1930,32 @@ if (
     request.method ===
     "POST"
 ) {
-    const origin =
-        request.headers?.origin
+const origin =
+    request.headers?.origin
 
-    if (
-        origin !==
-        "http://localhost:5173"
-    ) {
-        sendJson(
-            response,
-            403,
-            {
-                error:
-                    "Forbidden origin."
-            }
-        )
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://api-tester-jade.vercel.app"
+]
 
-        return
-    }
+if (
+    origin &&
+    !allowedOrigins.includes(
+        origin
+    )
+) {
 
+    sendJson(
+        response,
+        403,
+        {
+            error:
+                "Forbidden origin."
+        }
+    )
+
+    return
+}
     const userId =
         await getAuthenticatedUser(
             request
