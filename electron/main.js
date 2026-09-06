@@ -37,6 +37,7 @@ const electronUserDataPath = path.join(
 
 app.setPath("userData", electronUserDataPath);
 
+
 console.log(
     "[ELECTRON] Persistent user data:",
     electronUserDataPath
@@ -50,6 +51,18 @@ console.log(
     const isAgentMode = process.argv.includes(
             "--agent"
         );
+
+if (!isAgentMode) {
+    process.env.API_TESTER_DATA_DIRECTORY =
+        electronUserDataPath;
+
+    console.log(
+        "[GOOGLE] Electron data directory:",
+        process.env.API_TESTER_DATA_DIRECTORY
+    );
+}
+
+
 let googleDriveService = null;
 let googleOAuthServer = null;
 let googleOAuthWindow = null;
@@ -57,15 +70,29 @@ let googleOAuthWindow = null;
 
 
 async function loadGoogleDriveService() {
-    if (googleDriveService) {
-        return googleDriveService;
-    }
+  if (googleDriveService) return googleDriveService;
 
-    googleDriveService = await import(
-        "../googleDriveService.js"
+  if (!isAgentMode) {
+    process.env.API_TESTER_GOOGLE_CREDENTIALS_PATH =
+      path.join(__dirname, "..", "credentials.json");
+
+    process.env.API_TESTER_GOOGLE_REDIRECT_URI =
+      "http://localhost:3002/oauth2callback";
+
+    console.log(
+      "[GOOGLE] Electron mode: using desktop credentials.json"
     );
 
-    return googleDriveService;
+    console.log(
+      "[GOOGLE] Electron OAuth redirect:",
+      process.env.API_TESTER_GOOGLE_REDIRECT_URI
+    );
+  }
+
+  googleDriveService =
+    await import("../googleDriveService.js");
+
+  return googleDriveService;
 }
 
 
@@ -81,7 +108,7 @@ async function startGoogleOAuthCallbackServer() {
             try {
                 const callbackUrl = new URL(
                     request.url || "/",
-                    "http://localhost:3001"
+                    "http://localhost:3002"
                 );
 
                 if (
@@ -188,11 +215,11 @@ if (mainWindow) {
             );
 
             googleOAuthServer.listen(
-                3001,
+                3002,
                 "127.0.0.1",
                 () => {
                     console.log(
-                        "[GOOGLE OAUTH] Electron callback server listening on port 3001."
+                        "[GOOGLE OAUTH] Electron callback server listening on port 3002."
                     );
 
                     resolve();

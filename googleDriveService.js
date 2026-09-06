@@ -104,6 +104,7 @@ function createUserSupabaseClient(
 
 
 const REDIRECT_URI =
+    process.env.API_TESTER_GOOGLE_REDIRECT_URI ||
     "http://localhost:3001/oauth2callback";
 
 
