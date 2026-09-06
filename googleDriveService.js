@@ -5,6 +5,9 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import { google } from "googleapis";
+import { createClient } from "@supabase/supabase-js";
+
+
 import { Readable } from "node:stream";
 
 
@@ -26,13 +29,14 @@ const PROJECT_ROOT =
 
 
 const CREDENTIALS_PATH =
+    process.env.API_TESTER_GOOGLE_CREDENTIALS_PATH ||
     path.join(
         PROJECT_ROOT,
         "google-web-credentials.json"
     );
 
-
 const DATA_DIRECTORY =
+    process.env.API_TESTER_DATA_DIRECTORY ||
     path.join(
         PROJECT_ROOT,
         ".api-tester-data"
@@ -69,6 +73,36 @@ const SCOPES = [
 ];
 
 
+const SUPABASE_URL =
+    process.env.VITE_SUPABASE_URL;
+
+const SUPABASE_PUBLISHABLE_KEY =
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+function createUserSupabaseClient(
+    accessToken
+) {
+
+    return createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            },
+            global: {
+                headers: {
+                    Authorization:
+                        `Bearer ${accessToken}`
+                }
+            }
+        }
+    );
+
+}
+
+
 const REDIRECT_URI =
     "http://localhost:3001/oauth2callback";
 
@@ -76,8 +110,8 @@ const REDIRECT_URI =
 let oauthClient = null;
 
 
-let pendingOAuthState = null;
-
+const pendingOAuthStates =
+    new Map();
 
 
 /*
@@ -216,8 +250,37 @@ async function loadSavedToken() {
 
 async function saveToken(tokens) {
 
+    console.log(
+        "[GOOGLE DEBUG] DATA_DIRECTORY:",
+        DATA_DIRECTORY
+    );
+
+    console.log(
+        "[GOOGLE DEBUG] TOKEN_FILE:",
+        TOKEN_FILE
+    );
+
+    console.log(
+        "[GOOGLE DEBUG] DATA_DIRECTORY EXISTS:",
+        await fs
+            .access(DATA_DIRECTORY)
+            .then(() => true)
+            .catch(() => false)
+    );
+
+    console.log(
+        "[GOOGLE DEBUG] TOKEN_FILE EXISTS:",
+        await fs
+            .access(TOKEN_FILE)
+            .then(() => true)
+            .catch(() => false)
+    );
+
     await ensureDataDirectory();
 
+    console.log(
+        "[GOOGLE DEBUG] Directory ensured"
+    );
 
     await fs.writeFile(
         TOKEN_FILE,
@@ -229,8 +292,11 @@ async function saveToken(tokens) {
         "utf8"
     );
 
-}
+    console.log(
+        "[GOOGLE DEBUG] Token saved successfully"
+    );
 
+}
 
 
 async function loadDriveState() {
@@ -286,19 +352,37 @@ async function saveDriveState(
 }
 
 
-export async function getAuthorizationUrl() {
+export async function getAuthorizationUrl(
+    userId,
+    accessToken
+) {
+
+    if (!userId) {
+        throw new Error(
+            "User ID is required for Google OAuth."
+        );
+    }
+
+    if (!accessToken) {
+        throw new Error(
+            "Supabase access token is required for Google OAuth."
+        );
+    }
 
     const client =
         await getOAuthClient();
 
-
     const state =
         generateState();
 
-
-    pendingOAuthState =
-        state;
-
+    pendingOAuthStates.set(
+        state,
+        {
+            userId,
+            accessToken,
+            createdAt: Date.now()
+        }
+    );
 
     return client.generateAuthUrl({
 
@@ -314,12 +398,11 @@ export async function getAuthorizationUrl() {
         state,
 
         prompt:
-            "consent"
+            "select_account consent"
 
     });
 
 }
-
 
 export async function handleOAuthCallback(
     query

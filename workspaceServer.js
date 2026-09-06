@@ -63,6 +63,7 @@ const supabaseServer = createClient(
 
 
 const DATA_DIRECTORY =
+    process.env.API_TESTER_DATA_DIRECTORY ||
     path.join(
         __dirname,
         ".api-tester-data"
@@ -187,11 +188,18 @@ async function getAuthenticatedUser(request) {
 
 
 async function getSupabaseAuthenticatedUser(request) {
-  const authorization = request.headers?.authorization
+const authorization = request.headers?.authorization
 
-  if (!authorization) {
+console.log(
+    "[AUTH] Authorization header:",
+    authorization
+        ? `present (${authorization.substring(0, 20)}...)`
+        : "MISSING"
+)
+
+if (!authorization) {
     return null
-  }
+}
 
   const match = authorization.match(/^Bearer\s+(.+)$/i)
 
@@ -210,12 +218,61 @@ async function getSupabaseAuthenticatedUser(request) {
     error,
   } = await supabaseServer.auth.getUser(accessToken)
 
-  if (error || !user) {
+if (error || !user) {
+    console.error(
+        "[AUTH] Supabase token rejected:",
+        error?.message || "No user returned"
+    )
     return null
-  }
+}
 
   return user.id
 }
+
+
+async function getSupabaseAccessToken(request) {
+    const authorization =
+        request.headers?.authorization
+
+    if (!authorization) {
+        return null
+    }
+
+    const match =
+        authorization.match(
+            /^Bearer\s+(.+)$/i
+        )
+
+    if (!match) {
+        return null
+    }
+
+    const accessToken =
+        match[1].trim()
+
+    return accessToken || null
+}
+
+
+function createUserSupabaseClient(accessToken) {
+
+    return createClient(
+        supabaseUrl,
+        supabasePublishableKey,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            },
+            global: {
+                headers: {
+                    Authorization:
+                        `Bearer ${accessToken}`
+                }
+            }
+        }
+    )
+}   
 
 function getUserWorkspaceFile(userId) {
 
@@ -1414,26 +1471,64 @@ if (
                     "GET"
                 ) {
 
-                    const authUrl =
-                        await googleDriveService
-                            .getAuthorizationUrl()
+const userId =
+    await getSupabaseAuthenticatedUser(
+        request
+    )
+
+if (!userId) {
+
+    sendJson(
+        response,
+        401,
+        {
+            error:
+                "Authentication required."
+        }
+    )
+
+    return
+}
+
+const accessToken =
+    await getSupabaseAccessToken(
+        request
+    )
+
+if (!accessToken) {
+
+    sendJson(
+        response,
+        401,
+        {
+            error:
+                "Supabase access token required."
+        }
+    )
+
+    return
+}
+
+const authUrl =
+    await googleDriveService
+        .getAuthorizationUrl(
+            userId,
+            accessToken
+        )
 
 
-                    response.writeHead(
-                        302,
-                        {
-                            Location:
-                                authUrl
-                        }
-                    )
+    sendJson(
+        response,
+        200,
+        { authUrl: authUrl }
+    )
 
+    return
+}
 
-                    response.end()
-
-                    return
-
-                }
-
+                /*
+                 * =================================================
+                 * GOOGLE AUTH - CALLBACK
 
                 /*
                  * =================================================
@@ -1470,10 +1565,10 @@ if (
 
                     try {
 
-                        await googleDriveService
-                            .handleOAuthCallback(
-                                query
-                            )
+await googleDriveService
+    .handleOAuthCallback(
+        query
+    )
 
 
                         /*
@@ -1956,10 +2051,10 @@ if (
 
     return
 }
-    const userId =
-        await getAuthenticatedUser(
-            request
-        )
+const userId =
+    await getSupabaseAuthenticatedUser(
+        request
+    )
 
     if (!userId) {
         sendJson(
@@ -2153,29 +2248,68 @@ const userId =
                 )
 
             }
-            catch (
-                error
-            ) {
+catch (
+    error
+) {
 
-                console.error(
-                    "[WORKSPACE SERVER] Error:",
-                    error
-                )
+    console.error(
+        "========================================"
+    )
 
+    console.error(
+        "[WORKSPACE SERVER] ERROR"
+    )
 
+    console.error(
+        "Name:",
+        error?.name
+    )
 
+    console.error(
+        "Message:",
+        error?.message
+    )
 
+    console.error(
+        "Code:",
+        error?.code
+    )
 
-                sendJson(
-                    response,
-                    500,
-                    {
-                        error:
-                            error.message
-                    }
-                )
+    console.error(
+        "Path:",
+        error?.path
+    )
 
-            }
+    console.error(
+        "Syscall:",
+        error?.syscall
+    )
+
+    console.error(
+        "Cause:",
+        error?.cause
+    )
+
+    console.error(
+        "Stack:",
+        error?.stack
+    )
+
+    console.error(
+        "========================================"
+    )
+
+    sendJson(
+        response,
+        500,
+        {
+            error:
+                error?.cause?.message ||
+                error?.message ||
+                "Internal server error"
+        }
+    )
+}
 
         }
     )

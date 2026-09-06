@@ -41,83 +41,118 @@ async function startAgent() {
 
             let envPath;
 
-            if (app.isPackaged) {
+                if (app.isPackaged) {
 
-                const userDataDirectory =
-                    app.getPath(
-                        "userData"
+                    const userDataDirectory =
+                        app.getPath(
+                            "userData"
+                        );
+
+                    fs.mkdirSync(
+                        userDataDirectory,
+                        {
+                            recursive: true
+                        }
                     );
 
-                fs.mkdirSync(
-                    userDataDirectory,
-                    {
-                        recursive: true
-                    }
+                    envPath =
+                        path.join(
+                            userDataDirectory,
+                            ".env.local"
+                        );
+
+                }
+                else {
+
+                    envPath =
+                        path.join(
+                            __dirname,
+                            "..",
+                            ".env.local"
+                        );
+
+                }
+
+
+                console.log(
+                    "API TESTER AGENT ENV:",
+                    envPath
                 );
 
-                envPath =
-                    path.join(
-                        userDataDirectory,
-                        ".env.local"
+
+                if (
+                    fs.existsSync(
+                        envPath
+                    )
+                ) {
+
+                    process.loadEnvFile(
+                        envPath
                     );
 
-            }
-            else {
+                }
+                else {
 
-                envPath =
-                    path.join(
-                        __dirname,
-                        "..",
-                        ".env.local"
+                    console.warn(
+                        "API TESTER AGENT: .env.local not found:",
+                        envPath
                     );
+
+                }
 
             }
 
 
             console.log(
-                "API TESTER AGENT ENV:",
-                envPath
+                "API TESTER AGENT STARTING"
             );
 
 
-            if (
-                fs.existsSync(
-                    envPath
-                )
-            ) {
 
-                process.loadEnvFile(
-                    envPath
-                );
+ if (app.isPackaged) {
+    const userDataPath = app.getPath("userData");
 
-            }
-            else {
+    /*
+     * IMPORTANT:
+     * Do NOT point API_TESTER_DATA_DIRECTORY at userDataPath
+     * directly. Electron/Chromium owns that directory root
+     * for its own network stack (Cache, Cookies, "Network
+     * Persistent State", etc.), created lazily the first time
+     * something in this process actually calls fetch(). Our
+     * app's own files (tokens, workspaces/, credentials) living
+     * in that same root is what produces ENOTDIR the first
+     * time /api/proxy/request runs. Use a dedicated subfolder
+     * that Chromium's network service has no reason to touch.
+     */
+    const agentDataPath = path.join(userDataPath, "agent-data");
 
-                console.warn(
-                    "API TESTER AGENT: .env.local not found:",
-                    envPath
-                );
+    fs.mkdirSync(agentDataPath, { recursive: true });
 
-            }
+    process.env.API_TESTER_DATA_DIRECTORY = agentDataPath;
 
-        }
-
-
-        console.log(
-            "API TESTER AGENT STARTING"
-        );
-
-
-
-        if (app.isPackaged) {
-
-    process.env.API_TESTER_DATA_DIRECTORY =
+    process.env.API_TESTER_GOOGLE_CREDENTIALS_PATH =
         path.join(
-            app.getPath("userData"),
-            ".api-tester-data"
+            agentDataPath,
+            "google-web-credentials.json"
         );
 
-        }
+    console.log(
+        "API TESTER USER DATA:",
+        userDataPath
+    );
+
+    console.log(
+        "API TESTER DATA DIRECTORY:",
+        process.env.API_TESTER_DATA_DIRECTORY
+    );
+
+    console.log(
+        "API TESTER GOOGLE CREDENTIALS:",
+        process.env.API_TESTER_GOOGLE_CREDENTIALS_PATH
+    );
+}
+
+        
 
         await import(
             "../workspaceServer.js"
@@ -141,6 +176,25 @@ async function startAgent() {
     }
 
 }
+
+const agentLogFile = path.join(
+    app.getPath("userData"),
+    "agent-error.log"
+);
+
+process.on("uncaughtException", (error) => {
+    fs.appendFileSync(
+        agentLogFile,
+        `\n[uncaughtException]\n${error.stack || error}\n`
+    );
+});
+
+process.on("unhandledRejection", (error) => {
+    fs.appendFileSync(
+        agentLogFile,
+        `\n[unhandledRejection]\n${error?.stack || error}\n`
+    );
+});
 
 // =====================================================
 // READY

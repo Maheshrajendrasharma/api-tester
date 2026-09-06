@@ -2917,51 +2917,9 @@ async function handleExportAllEnvironments() {
     }
 
 
-async function handleConnectGoogleDrive() {
 
-    try {
 
-        window.location.href =
-            "http://localhost:3001/api/google/auth/start"
 
-    }
-    catch (error) {
-
-        console.error(
-            "[GOOGLE DRIVE] Failed to start authentication:",
-            error
-        )
-
-        setDialogState({
-            open: true,
-            type: "confirm",
-            title: "Google Drive connection failed",
-            message:
-                error?.message ||
-                "Unable to start Google Drive authentication.",
-            initialValue: "",
-            options: [],
-            confirmLabel: "OK",
-            cancelLabel: "",
-            onConfirm: () =>
-                setDialogState(
-                    current => ({
-                        ...current,
-                        open: false
-                    })
-                ),
-            onCancel: () =>
-                setDialogState(
-                    current => ({
-                        ...current,
-                        open: false
-                    })
-                )
-        })
-
-    }
-
-}
 
 
 
@@ -4016,6 +3974,6 @@ if (savedSnapshot) {
 />
         </>
         )
+    
     }
-
     export default App
