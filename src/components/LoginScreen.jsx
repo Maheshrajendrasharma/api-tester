@@ -146,13 +146,23 @@
 
             <div className="login-screen">
 
-                <div className="login-card">
+<div className="login-card">
 
-                    <div className="login-header">
+    <button
+        type="button"
+        className="login-home-link"
+        onClick={() => {
+            window.location.href = "/"
+        }}
+    >
+        ← Back to Home
+    </button>
 
-                        <div className="login-logo">
-                            API Tester
-                        </div>
+    <div className="login-header">
+
+        <div className="login-logo">
+            API Tester
+        </div>
 
                         <div className="login-title">
                             Sign in

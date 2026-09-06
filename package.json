@@ -49,13 +49,15 @@
         "nsis"
       ]
     },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
+"nsis": {
+  "oneClick": false,
+  "perMachine": false,
+  "allowToChangeInstallationDirectory": true,
+  "createDesktopShortcut": true,
+  "createStartMenuShortcut": true,
+  "deleteAppDataOnUninstall": false,
+  "include": "installer/installer.nsh"
+}
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

@@ -1,5 +1,9 @@
 import { supabase } from "../lib/supabase"
 
+const isElectron =
+    typeof window !== "undefined" &&
+    Boolean(window.apiTester)
+
 
 
 
@@ -321,23 +325,22 @@ async function saveWorkspaceState(state) {
 
 async function getGoogleDriveAuthStatus() {
 
+    if (isElectron) {
+        return window.apiTester.googleAuthStatus()
+    }
+
     const response =
         await fetch(
             GOOGLE_AUTH_STATUS_URL
         )
 
-
     if (!response.ok) {
-
         throw new Error(
             "Failed to check Google Drive authentication status"
         )
-
     }
 
-
     return response.json()
-
 }
 
 
@@ -350,6 +353,10 @@ export async function getGoogleDriveStatus() {
 
 export async function disconnectGoogleDrive() {
 
+    if (isElectron) {
+        return window.apiTester.googleSignOut()
+    }
+
     const response =
         await fetch(
             "http://localhost:3001/api/google/auth/logout",
@@ -359,42 +366,32 @@ export async function disconnectGoogleDrive() {
             }
         )
 
-
     if (!response.ok) {
 
         let message =
             "Failed to disconnect Google Drive"
-
 
         try {
 
             const error =
                 await response.json()
 
-
             if (error?.error) {
-
                 message =
                     error.error
-
             }
 
         }
         catch {
         }
 
-
         throw new Error(
             message
         )
-
     }
 
-
     return response.json()
-
 }
-
 
 async function uploadWorkspaceToGoogleDrive(
     state
@@ -411,12 +408,11 @@ async function uploadWorkspaceToGoogleDrive(
      * local saving should still work normally.
      */
 
-    if (
+       if (
         !authStatus?.authenticated
     ) {
 
         return {
-
             synced:
                 false,
 
@@ -425,35 +421,46 @@ async function uploadWorkspaceToGoogleDrive(
 
             reason:
                 "Google Drive is not connected."
-
         }
-
     }
 
+    if (isElectron) {
+
+        const result =
+            await window.apiTester
+                .googleUploadWorkspace(
+                    state
+                )
+
+        return {
+            synced:
+                true,
+
+            skipped:
+                false,
+
+            ...result
+        }
+    }
 
     const response =
         await fetch(
             GOOGLE_DRIVE_UPLOAD_URL,
             {
-
                 method:
                     "POST",
 
                 headers: {
-
                     "Content-Type":
                         "application/json"
-
                 },
 
                 body:
                     JSON.stringify(
                         state
                     )
-
             }
         )
-
 
     if (!response.ok) {
 
@@ -520,6 +527,11 @@ async function downloadWorkspaceFromGoogleDrive() {
             "Google Drive is not connected."
         )
 
+    }
+
+        if (isElectron) {
+        return window.apiTester
+            .googleDownloadWorkspace()
     }
 
 

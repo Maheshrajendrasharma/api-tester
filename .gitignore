@@ -33,3 +33,8 @@ credentials.json.json
 # Electron build output
 release-agent/
 release-agent-test/
+
+
+# Electron desktop release output
+release/*
+!release/*.exe

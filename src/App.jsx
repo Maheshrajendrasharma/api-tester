@@ -68,8 +68,24 @@ const [authenticatedUser, setAuthenticatedUser] =
 const [showRegisterScreen, setShowRegisterScreen] =
     useState(false)
 
+const isDesktopApp =
+    window.location.protocol === "file:" ||
+    Boolean(window.apiTester)
+
+console.log(
+    "[ROUTING]",
+    {
+        protocol: window.location.protocol,
+        pathname: window.location.pathname,
+        isDesktopApp,
+    }
+)
+
 const isAppRoute =
-    window.location.pathname === "/app"
+    window.location.pathname === "/app" ||
+    isDesktopApp
+
+
 
 const [isAuthChecking, setIsAuthChecking] =
     useState(true)
@@ -683,6 +699,46 @@ useEffect(() => {
 
     }
 
+}, [])
+
+
+useEffect(() => {
+    if (!window.apiTester?.onGoogleDriveConnected) {
+        return
+    }
+
+    const removeListener =
+        window.apiTester.onGoogleDriveConnected(
+            async () => {
+                try {
+                    console.log(
+                        "[GOOGLE DRIVE] Electron connection completed."
+                    )
+
+                    const status =
+                        await getGoogleDriveStatus()
+
+                    setGoogleDriveStatus(status)
+
+                    console.log(
+                        "[GOOGLE DRIVE] Status updated:",
+                        status
+                    )
+                }
+                catch (error) {
+                    console.error(
+                        "[GOOGLE DRIVE] Failed to refresh status after connection:",
+                        error
+                    )
+                }
+            }
+        )
+
+    return () => {
+        if (removeListener) {
+            removeListener()
+        }
+    }
 }, [])
 
 
@@ -2952,34 +3008,61 @@ async function handleConnectGoogleDrive() {
             throw error
         }
 
-        const accessToken = session?.access_token
+        const accessToken =
+            session?.access_token
 
         if (!accessToken) {
-            console.error("[GOOGLE DRIVE] No Supabase session available.")
-            return
-        }
-
-        const response = await fetch(
-            "http://localhost:3001/api/google/auth/start",
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            }
-        )
-
-        const data = await response.json().catch(() => ({}))
-
-        if (!response.ok) {
             console.error(
-                "[GOOGLE DRIVE] Failed to start authorization:",
-                data?.error || response.statusText
+                "[GOOGLE DRIVE] No Supabase session available."
             )
             return
         }
 
-        const authUrl = data?.authUrl || data?.url
+        // Electron Desktop
+        if (
+            window.apiTester?.googleSignIn
+        ) {
+            console.log(
+                "[GOOGLE DRIVE] Starting Electron Google authorization..."
+            )
+
+            await window.apiTester.googleSignIn(
+                accessToken
+            )
+
+            return
+        }
+
+        // Chrome / Vite
+        const response =
+            await fetch(
+                "http://localhost:3001/api/google/auth/start",
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization:
+                            `Bearer ${accessToken}`
+                    }
+                }
+            )
+
+        const data =
+            await response
+                .json()
+                .catch(() => ({}))
+
+        if (!response.ok) {
+            console.error(
+                "[GOOGLE DRIVE] Failed to start authorization:",
+                data?.error ||
+                response.statusText
+            )
+            return
+        }
+
+        const authUrl =
+            data?.authUrl ||
+            data?.url
 
         if (!authUrl) {
             console.error(
@@ -2988,15 +3071,17 @@ async function handleConnectGoogleDrive() {
             return
         }
 
-        window.location.href = authUrl
-    } catch (error) {
+        window.location.href =
+            authUrl
+
+    }
+    catch (error) {
         console.error(
             "[GOOGLE DRIVE] Failed to start Google authorization:",
             error
         )
     }
 }
-
 
 
 
