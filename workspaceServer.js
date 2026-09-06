@@ -1584,8 +1584,8 @@ await googleDriveService
                             302,
                             {
 
-                                Location:
-                                    "http://localhost:5173/?googleDrive=connected"
+                 Location:
+    "http://localhost:5173/app?googleDrive=connected"
 
                             }
                         )

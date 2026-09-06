@@ -58,17 +58,17 @@ import RegisterScreen from './components/RegisterScreen'
     function App() {
 
 
-    const [authenticatedUser, setAuthenticatedUser] =
+const [authenticatedUser, setAuthenticatedUser] =
     useState(null)
 
 const [showRegisterScreen, setShowRegisterScreen] =
     useState(false)
 
-const [showHomePage, setShowHomePage] =
-    useState(true)
+const isAppRoute =
+    window.location.pathname === "/app"
 
-    const [isAuthChecking, setIsAuthChecking] =
-        useState(true)
+const [isAuthChecking, setIsAuthChecking] =
+    useState(true)
 
         useEffect(() => {
 
@@ -705,6 +705,14 @@ useEffect(() => {
 
     }
 
+if (!authenticatedUser?.id) {
+    return
+}
+
+if (!isWorkspacesLoaded) {
+    return
+}
+
 
     async function handleGoogleDriveConnected() {
 
@@ -1117,6 +1125,7 @@ catch (error) {
     handleGoogleDriveConnected()
 
 }, [
+    authenticatedUser?.id,
     isWorkspacesLoaded
 ])
 
@@ -3589,44 +3598,29 @@ async function handleDisconnectGoogleDrive() {
     }, [collectionState, environments, activeEnvironment])
 
 
-    if (showHomePage) {
+if (!isAppRoute) {
     return (
         <HomePage
             onContinueOnline={() => {
-                setShowHomePage(false)
+                window.location.href = "/app"
             }}
         />
     )
 }
 
-        if (
-        isAuthChecking
-    ) {
-if (showHomePage) {
+if (
+    isAuthChecking
+) {
     return (
-        <HomePage
-            onContinueOnline={() => {
-                setShowHomePage(false)
-            }}
-        />
-    )
-}
-
-        return (
-            <div className="login-screen">
-
-                <div className="login-card">
-
-                    <div className="login-title">
-                        Loading...
-                    </div>
-
+        <div className="login-screen">
+            <div className="login-card">
+                <div className="login-title">
+                    Loading...
                 </div>
-
             </div>
-        )
-
-    }
+        </div>
+    )
+}
 
 
 if (
