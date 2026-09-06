@@ -251,7 +251,7 @@
         transform 0.2s ease,
         border-color 0.2s ease;
 }
-
+g charge case, which d p n ng charge case, which d p n normal small J P I start some bark to computer market photo local evil samplein local case sample shit chuck equitably spiral photo day bnnal spicy no might go doing cassal no physic or charp econo stuke no might photos no joint photo me shot n lena joint photo ca photo lena ormet photo jps jpg file ca formet camet filet coif charda photo bana le photo left side nor individual photo nordaughto d d cone li messa upload me us reference to bill smart
 
 .product-card:hover {
     transform:
@@ -769,4 +769,84 @@
         flex-direction: column;
     }
 
+}
+
+.privacy-policy-link {
+    border: 0;
+    padding: 0;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.32);
+
+    font: inherit;
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+.privacy-policy-link:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.home-footer-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.privacy-policy-link {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.32);
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.privacy-policy-link:hover {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: underline;
+}
+
+.home-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.home-footer-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.home-footer-links button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.45);
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.home-footer-links button:hover {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .home-footer {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .home-footer-links {
+        gap: 16px;
+    }
 }

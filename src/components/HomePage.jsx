@@ -251,7 +251,7 @@ export default function HomePage({
 
 
                         <h2>
-                            API Tester Desktop
+                            Desktop API Tester
                         </h2>
 
                         <p>
@@ -361,17 +361,29 @@ export default function HomePage({
             </main>
 
 
-            <footer className="home-footer">
+<footer className="home-footer">
+    <span>API Tester</span>
 
-                <span>
-                    API Tester
-                </span>
+    <div className="home-footer-links">
+        <button
+            onClick={() => {
+                window.location.href = "/privacy-policy"
+            }}
+        >
+            Privacy Policy
+        </button>
 
-                <span>
-                    Built for developers & QA teams
-                </span>
+        <button
+            onClick={() => {
+                window.location.href = "/terms-of-service"
+            }}
+        >
+            Terms of Service
+        </button>
+    </div>
 
-            </footer>
+    <span>Built for developers & QA teams</span>
+</footer>
 
         </div>
     )

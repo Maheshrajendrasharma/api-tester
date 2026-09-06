@@ -20,6 +20,10 @@ import { useEffect, useRef, useState } from 'react'
     } from './services/environmentService'
     import RunnerScreen from "./components/RunnerScreen";
 
+
+import PrivacyPolicy from './components/PrivacyPolicy'
+import TermsOfService from './components/TermsOfService'
+
 import './styles/login.css'
 
 import { supabase } from './lib/supabase'
@@ -3596,6 +3600,17 @@ async function handleDisconnectGoogleDrive() {
 
         return off
     }, [collectionState, environments, activeEnvironment])
+
+
+if (window.location.pathname === "/privacy-policy") {
+    return (
+        <PrivacyPolicy />
+    )
+}
+
+if (window.location.pathname === "/terms-of-service") {
+    return <TermsOfService />
+}
 
 
 if (!isAppRoute) {
