@@ -4,7 +4,7 @@ import '../styles/home.css'
 const AGENT_DOWNLOAD_URL ='https://github.com/Maheshrajendrasharma/api-tester/releases/latest/download/API-Tester-Agent-Setup.exe'
 
 const DESKTOP_DOWNLOAD_URL =
-    'https://raw.githubusercontent.com/Maheshrajendrasharma/api-tester/master/release/API%20Tester%20Setup%200.0.0.exe'
+    'https://media.githubusercontent.com/media/Maheshrajendrasharma/api-tester/master/release/API%20Tester%20Setup%200.0.0.exe'
 
 export default function HomePage({
     onContinueOnline,
