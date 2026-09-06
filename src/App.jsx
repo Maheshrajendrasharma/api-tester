@@ -2917,7 +2917,61 @@ async function handleExportAllEnvironments() {
     }
 
 
+async function handleConnectGoogleDrive() {
+    try {
+        const {
+            data: { session },
+            error
+        } = await supabase.auth.getSession()
 
+        if (error) {
+            throw error
+        }
+
+        const accessToken = session?.access_token
+
+        if (!accessToken) {
+            console.error("[GOOGLE DRIVE] No Supabase session available.")
+            return
+        }
+
+        const response = await fetch(
+            "http://localhost:3001/api/google/auth/start",
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }
+        )
+
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+            console.error(
+                "[GOOGLE DRIVE] Failed to start authorization:",
+                data?.error || response.statusText
+            )
+            return
+        }
+
+        const authUrl = data?.authUrl || data?.url
+
+        if (!authUrl) {
+            console.error(
+                "[GOOGLE DRIVE] No authorization URL returned."
+            )
+            return
+        }
+
+        window.location.href = authUrl
+    } catch (error) {
+        console.error(
+            "[GOOGLE DRIVE] Failed to start Google authorization:",
+            error
+        )
+    }
+}
 
 
 
