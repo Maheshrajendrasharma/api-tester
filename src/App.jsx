@@ -282,6 +282,8 @@ const [googleDriveStatus, setGoogleDriveStatus] =
 const [googleDriveSyncing, setGoogleDriveSyncing] =
     useState(false)
 
+const googleDriveConnectionHandledRef = useRef(false)
+
 
 
 const [saveStatus, setSaveStatus] =
@@ -706,6 +708,13 @@ useEffect(() => {
 
     async function handleGoogleDriveConnected() {
 
+
+        if (googleDriveConnectionHandledRef.current) {
+    return
+}
+
+googleDriveConnectionHandledRef.current = true
+
         try {
 
 console.log(
@@ -1078,14 +1087,16 @@ if (
             })
 
         }
-        catch (error) {
+catch (error) {
 
-            console.error(
-                "[GOOGLE DRIVE] Connection/sync failed:",
-                error
-            )
+    googleDriveConnectionHandledRef.current = false
 
-        }
+    console.error(
+        "[GOOGLE DRIVE] Connection/sync failed:",
+        error
+    )
+
+}
         finally {
 
             /*

@@ -110,8 +110,8 @@ const REDIRECT_URI =
 let oauthClient = null;
 
 
-const pendingOAuthStates =
-    new Map();
+
+const pendingOAuthStates = new Map();
 
 
 /*
@@ -424,17 +424,21 @@ export async function handleOAuthCallback(
     }
 
 
-    if (!state || state !== pendingOAuthState) {
+const oauthStateData =
+    state
+        ? pendingOAuthStates.get(state)
+        : null
 
-        throw new Error(
-            "Invalid OAuth state."
-        );
+if (!oauthStateData) {
+    throw new Error(
+        "Invalid OAuth state."
+    )
+}
 
-    }
+pendingOAuthStates.delete(state)
 
 
-    pendingOAuthState =
-        null;
+
 
 
     if (!code) {
@@ -1264,8 +1268,7 @@ export async function signOut() {
         null;
 
 
-    pendingOAuthState =
-        null;
+    pendingOAuthStates.clear();
 
 
     return true;

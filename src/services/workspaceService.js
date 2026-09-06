@@ -8,11 +8,14 @@ import { supabase } from "../lib/supabase"
     "http://localhost:3001/api/google/auth/status"
 
 
+
+
+
 const GOOGLE_DRIVE_UPLOAD_URL =
     "http://localhost:3001/api/google/drive/upload"
 
-
-
+const GOOGLE_DRIVE_DOWNLOAD_URL =
+    "http://localhost:3001/api/google/drive/download"
 
 
 
